@@ -46,8 +46,8 @@ export default function LoginPage() {
           </Button>
 
           <div className="text-center ">
-            <Link href="#" className="description-small hover:underline">
-              Skip
+            <Link href="/signup" className="description-small hover:underline">
+              Don't have an account?{" "}
             </Link>
           </div>
         </form>
