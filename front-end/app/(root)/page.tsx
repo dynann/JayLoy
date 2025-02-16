@@ -1,9 +1,9 @@
 "use client"
 
+import NavBar from "@/layouts/NavBar"
 import { Icon } from "@iconify/react"
 import { JSX } from "react"
 
-// Type for transaction data
 type Transaction = {
   category: string
   amount: number
@@ -31,31 +31,46 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-emerald-500 text-white p-4 space-y-4">
-        <h1 className="text-xl font-semibold">Money Tracker</h1>
-        <div className="flex justify-between items-center">
-          <div className="space-y-1">
-            <div className="text-sm opacity-90">Expenses</div>
-            <div className="text-lg font-medium">{expenses.toFixed(2)}$</div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-sm opacity-90">Income</div>
-            <div className="text-lg font-medium">{income.toFixed(2)}$</div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm">09/1/2025</div>
-          </div>
+  {/* Header */}
+  <div className="bg-emerald-500 text-white p-4 w-full shadow-lg">
+    <h1 className="sub-header text-center">Money Tracker</h1>
+    
+    <div className="flex items-center justify-center mt-3 gap-x-10">
+      {/* Expenses */}
+      <div className="space-y-1">
+        <div className="description-big-medium">Expenses:</div>
+        <div className="description-big-medium">{expenses.toFixed(2)}$</div>
+      </div>
+
+      {/* Groupe: Income + Vertical Line + Date */}
+      <div className="flex items-center gap-x-6">
+        {/* Income */}
+        <div className="space-y-1 text-center">
+          <div className="description-big-medium">Income:</div>
+          <div className="description-big-medium">{income.toFixed(2)}$</div>
+        </div>
+
+        {/* Vertical Line */}
+        <div className="w-[2px] h-10 bg-black"></div>
+
+        {/* Date */}
+        <div className="text-right">
+          <div className="description-big-medium">09/1/2025</div>
         </div>
       </div>
+    </div>
+  </div>
+
+
+      {/* This will be a component later but just leave it here for now, until api is ready */}
 
       {/* Content */}
       <div className="p-4">
         {transactions.length === 0 ? (
           // Empty state
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+          <div className="flex flex-col items-center justify-center py-20 text-gray">
             <Icon icon="mdi:file-search-outline" width="3em" height="3em" className="h-16 w-16 mb-4"/>
-            <p className="text-lg">No records</p>
+            <p className="description-big-medium">No records</p>
           </div>
         ) : (
           // Transactions list
@@ -64,16 +79,20 @@ export default function HomePage() {
               <div key={index} className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-[2rem] pr-[2rem]">
                 <div className="flex items-center space-x-5">
                   <div className={`${transaction.color} p-3 rounded-full`}>{transaction.icon}</div>
-                  <span className="font-medium">{transaction.category}</span>
+                  <span className="description-medium">{transaction.category}</span>
                 </div>
-                <span className={`font-medium ${transaction.amount < 0 ? "text-red-500" : "text-emerald-500"}`}>
+                <span className={`description-medium ${transaction.amount < 0 ? "!text-red" : "!text-green"}`}>
                   {transaction.amount < 0 ? "" : "+"}
                   {transaction.amount.toFixed(2)}
                 </span>
+
               </div>
             ))}
           </div>
         )}
+      </div>
+      <div >
+        <NavBar />
       </div>
     </div>
   )
