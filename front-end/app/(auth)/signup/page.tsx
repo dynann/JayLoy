@@ -21,8 +21,16 @@ export default function SignUpPage() {
           <PasswordInput placeholder="Password" />
           <PasswordInput placeholder="Confirm-Password" />
 
-          <div className="text-center">
+          {/* <div className="text-center">
             <Link href="#" className="hover:underline description-small">Skip</Link>
+          </div> */}
+          <div className="relative description-small">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full px-2 border-t"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground"></span>
+            </div>
           </div>
 
           <div className="text-center description-small">
