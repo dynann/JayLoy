@@ -49,7 +49,7 @@ export default function SignUpPage() {
           </Button>
 
           <div className="text-center ">
-            <Link href="#" className="description-small hover:underline">
+            <Link href="/login" className="description-small hover:underline">
               I already have an account
             </Link>
           </div>
