@@ -1,5 +1,5 @@
 import Image from "next/image";
-import PiggyBank from "/public/images/piggy-bank.png";
+import PiggyBank from "@/public/images/piggy-bank.png";
 import { TextInput } from "@/components/customeInput";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
