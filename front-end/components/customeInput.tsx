@@ -1,19 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, InputHTMLAttributes } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-export function TextInput({ type, placeholder }: { type: string; placeholder: string }) {
-  return <Input type={type} placeholder={placeholder} className="input description-small" />;
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  placeholder: string;
 }
 
-export function PasswordInput({ placeholder }: { placeholder: string }) {
+export function TextInput({ type, placeholder, value, onChange }: InputProps) {
+  return <Input type={type} placeholder={placeholder} value={value} onChange={onChange} className="input description-small" />;
+}
+
+export function PasswordInput({ placeholder, value, onChange }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="relative">
-      <Input type={showPassword ? "text" : "password"} placeholder={placeholder} className="input description-small" />
+      <Input type={showPassword ? "text" : "password"} placeholder={placeholder} value={value} onChange={onChange} className="input description-small" />
       <button
         type="button"
         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
