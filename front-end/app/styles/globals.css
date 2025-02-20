@@ -11,6 +11,15 @@ body {
 
 @layer base {
   :root {
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0px 1000px var(--background) inset !important;
+      box-shadow: 0 0 0px 1000px var(--background) inset !important;
+      -webkit-text-fill-color: black !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
     --font-poppins: 'Poppins', sans-serif;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -86,18 +95,6 @@ body {
 
   .sub-header {
     @apply font-poppins text-[24px] font-bold text-black;
-  }
-
-  .description-big-bold {
-    @apply font-poppins text-[20px] font-bold text-black;
-  }
-
-  .description-big-medium {
-    @apply font-poppins text-[20px] font-medium text-black;
-  }
-
-  .description-bold {
-    @apply font-poppins text-[16px] font-bold text-black;
   }
 
   .description-medium {
