@@ -30,6 +30,7 @@ export default {
   			cyan: '#32ADE6',
   			gray: '#909090',
 			lightorange: '#FFD3B6',
+			tertiary: '#FDF7F4',
 
 
 			foreground: 'hsl(var(--foreground))',
