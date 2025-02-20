@@ -57,23 +57,12 @@ export default function LoginPage() {
 
           {error && <p className="text-center description-medium !text-red">{error}!!!!</p> }
           {error && <p className="text-center description-medium !text-red">Wrong Email or Password</p> }
-        <form className="space-y-4">
-          <TextInput type="email" placeholder="Username" />
-          <PasswordInput placeholder="Password" />
 
           <div className="text-center">
             <Link href="#" className="hover:underline description-small flex justify-end">Forget password</Link>
           </div>
 
           <Button type="submit" className="green-button !text-white">Log In</Button>
-          {/* <div className="text-center description-small">
-            By creating your account, you're agreeing to our{" "}
-            <Link href="#" className="underline hover:text-primary">Terms and Conditions</Link>{" "}
-            and{" "}
-            <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>.
-          </div> */}
-
-          <Button className="green-button !text-white" variant="outline">Log In</Button>
 
           <div className="relative description-small">
             <div className="absolute inset-0 flex items-center">
