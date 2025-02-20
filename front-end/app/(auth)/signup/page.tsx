@@ -1,11 +1,55 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PasswordInput, TextInput } from "@/components/customeInput";
 
-
 export default function SignUpPage() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Handle password mismatch
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      console.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Sign Up successful", data);
+        router.push("/login");
+      } else {
+        // Handle error
+        const errorData = await res.json();
+        setError(errorData.message || "Sign Up failed");
+        // We can comment this line, because its purpose was for us to see the error message in the console
+        console.error("Sign Up failed", errorData);
+      }
+    } catch (err) {
+      setError("Failed to fetch");
+      console.error("Failed to fetch", err);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
@@ -14,16 +58,15 @@ export default function SignUpPage() {
           <p className="description-medium mt-2">Spend wisely, waste less, save more</p>
         </div>
 
-        <form className="space-y-4">
-          <TextInput type="text" placeholder="Username" />
-          <TextInput type="email" placeholder="E-mail" />
+        <form className="space-y-4" onSubmit={handleSignUp}>
+          <TextInput type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+          <TextInput type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
 
-          <PasswordInput placeholder="Password" />
-          <PasswordInput placeholder="Confirm-Password" />
+          <PasswordInput placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <PasswordInput placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
 
-          {/* <div className="text-center">
-            <Link href="#" className="hover:underline description-small">Skip</Link>
-          </div> */}
+          {error && <p className="text-center description-medium !text-red">{error}!!!!</p>}
+
           <div className="relative description-small">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full px-2 border-t"></div>
@@ -40,7 +83,7 @@ export default function SignUpPage() {
             <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>.
           </div>
 
-          <Button className="green-button !text-white">Sign In</Button>
+          <Button type="submit" className="green-button !text-white">Sign Up</Button>
 
           <div className="relative description-small">
             <div className="absolute inset-0 flex items-center">
