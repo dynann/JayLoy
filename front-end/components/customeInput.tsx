@@ -47,7 +47,7 @@ export function PasswordInput({ placeholder, value, onChange }: InputProps) {
   );
 }
 
-
+// input box for transaction/add page
 export function TransactionInput({
   type,
   placeholder,
@@ -86,3 +86,5 @@ export function TransactionInput({
     </div>
   );
 }
+
+
