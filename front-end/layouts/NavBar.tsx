@@ -35,6 +35,7 @@ const NavBar: React.FC = () => {
           <div className="flex items-center justify-center">
             <button
               type="button"
+              onClick={() => router.push("/transaction")}
               className="inline-flex items-center justify-center w-10 h-10 font-medium bg-variant rounded-full hover:bg-primary group focus:ring-4 focus:ring-variant focus:outline-none dark:focus:ring-variant"
             >
               <Icon icon="gg:add" width="24" height="24" />
