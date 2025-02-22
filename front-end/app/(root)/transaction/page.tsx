@@ -3,12 +3,13 @@ import { TransactionInput } from "@/components/customeInput";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import React, { useState } from "react";
+import PopupModal from "./components/popupModal";
 
 function Transaction() {
   const containerClasses =
     "min-h-screen flex flex-col items-center justify-center px-4 gap-4";
   const [transactionType, setTransactionType] = useState(""); //  "Expense" or "Income"
-  const [amount, setAmount] = useState("0.00"); // " " value
+  const [amount, setAmount] = useState(""); // " " value
   const [date, setDate] = useState(new Date());
   // Get the current date in yyyy-mm-dd format for the input field
   const formattedDate = date.toISOString().split("T")[0];
@@ -18,7 +19,7 @@ function Transaction() {
   ) => {
     setTransactionType(event.target.value);
   };
-  // handle value - + 
+  // handle value - +
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = event.target.value;
 
@@ -36,20 +37,46 @@ function Transaction() {
   return (
     <div className={containerClasses}>
       {/* tabbar in layout applied  */}
-      <div className=" w-full bg-background p-0">
+      <div className=" w-full bg-background p-0 relative z-0">
         <div className="mx-auto max-w-md px-6 py-12 bg-background border-0 shadow-lg sm:rounded-3xl">
           <h1 className="text-2xl   mb-8">Add record </h1>
           <form id="form">
-            <TransactionInput
-              type="text"
-              placeholder="Choose Category"
-              desc="Category is required"
-            />
+            <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
+              <legend className="description-small text-black  ">
+                {" "}
+                Category{" "}
+              </legend>
+              <div className="shrink-0">
+                <PopupModal />
+              </div>
 
+                {/* <div className="relative z-0 w-full mb-5">
+              <select
+                name="select"
+                value=""
+                // onClick="this.setAttribute('value', this.value);"
+                className="pt-3 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none z-1 focus:outline-none focus:ring-0 focus:border-black border-gray-200"
+              >
+                <option value="" selected disabled hidden></option>
+                <option value="1">Option 1</option>
+                <option value="2">Option 2</option>
+                <option value="3">Option 3</option>
+                <option value="4">Option 4</option>
+                <option value="5">Option 5</option>
+              </select>
+              <label className="absolute duration-300 top-3 -z-1 origin-0 text-gray">
+                Select an option
+              </label>
+              <span className="text-sm text-red-600 hidden" id="error">
+                Option has to be selected
+              </span>
+            </div> */}
+            </div>
             {/* radio button for expense and and income */}
             <fieldset className="relative z-0 w-full p-px mb-5">
               <legend className="description-small text-black ">
-                Choose type of transaction{" "} </legend>
+                Choose type of transaction{" "}
+              </legend>
               <div className="block pt-3 pb-2 space-x-4">
                 <label className="text-red">
                   <input
@@ -86,7 +113,7 @@ function Transaction() {
               </div>
               <TransactionInput
                 type="number"
-                placeholder="Amount"
+                placeholder="0.00"
                 desc="Amount is required"
                 value={amount}
                 onChange={handleAmountChange}
