@@ -40,6 +40,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - git pull --rebase origin main
 - npx prisma migrate dev
 - localhost:3000/docs#
-- git stash || git stash pop
+- git stash || git stash pop # keep and release your stash back 
+- git branch -D branch_name # delete the branch
+
 
  

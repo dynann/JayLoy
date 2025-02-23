@@ -110,7 +110,7 @@ body {
   }
 
   .smalltext {
-    @apply font-poppins text-[12px] font-regular text-black;
+    @apply font-poppins text-[12px] font-normal text-black;
   }
 
   .smalltext-semibold {
@@ -118,7 +118,7 @@ body {
   }
 
   .extra-smalltext {
-    @apply font-poppins text-[8px] font-regular text-black;
+    @apply font-poppins text-[8px] font-normal text-black;
   }
 
 
