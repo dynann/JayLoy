@@ -4,8 +4,15 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import React, { useState } from "react";
 import PopupModal from "./components/popupModal";
+import { useRouter } from "next/navigation";
 
-function Transaction() {
+export default function Transaction() {
+  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent page refresh
+    router.push("/");
+  };
+
   const containerClasses =
     "min-h-screen flex flex-col items-center justify-center px-4 gap-4";
   const [transactionType, setTransactionType] = useState(""); //  "Expense" or "Income"
@@ -40,7 +47,7 @@ function Transaction() {
       <div className=" w-full bg-background p-0 relative z-0">
         <div className="mx-auto max-w-md px-6 py-12 bg-background border-0 shadow-lg sm:rounded-3xl">
           <h1 className="text-2xl   mb-8">Add record </h1>
-          <form id="form">
+          <form id="form" onSubmit={handleSubmit}>
             <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
               <legend className="description-small text-black  ">
                 {" "}
@@ -49,28 +56,6 @@ function Transaction() {
               <div className="shrink-0">
                 <PopupModal />
               </div>
-
-                {/* <div className="relative z-0 w-full mb-5">
-              <select
-                name="select"
-                value=""
-                // onClick="this.setAttribute('value', this.value);"
-                className="pt-3 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none z-1 focus:outline-none focus:ring-0 focus:border-black border-gray-200"
-              >
-                <option value="" selected disabled hidden></option>
-                <option value="1">Option 1</option>
-                <option value="2">Option 2</option>
-                <option value="3">Option 3</option>
-                <option value="4">Option 4</option>
-                <option value="5">Option 5</option>
-              </select>
-              <label className="absolute duration-300 top-3 -z-1 origin-0 text-gray">
-                Select an option
-              </label>
-              <span className="text-sm text-red-600 hidden" id="error">
-                Option has to be selected
-              </span>
-            </div> */}
             </div>
             {/* radio button for expense and and income */}
             <fieldset className="relative z-0 w-full p-px mb-5">
@@ -93,7 +78,7 @@ function Transaction() {
                   <input
                     type="radio"
                     name="transactionType"
-                    value="income"
+                    value="Income"
                     onChange={handleTransactionTypeChange}
                     className="mr-2  accent-primary text-primary border-3 border-primary focus:border-primary focus:ring-primary"
                   />
@@ -131,7 +116,9 @@ function Transaction() {
               placeholder="Note"
               desc="Note is required"
             />
-            <Button type="submit" className="green-button !text-white">
+            <Button
+              type="submit"
+              className="green-button !text-white" >
               Add Record
             </Button>
           </form>
@@ -140,5 +127,3 @@ function Transaction() {
     </div>
   );
 }
-
-export default Transaction;
