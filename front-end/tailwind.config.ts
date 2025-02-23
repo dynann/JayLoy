@@ -30,6 +30,7 @@ export default {
   			cyan: '#32ADE6',
   			gray: '#909090',
 			lightorange: '#FFD3B6',
+			tertiary: '#FDF7F4',
 
 
 			foreground: 'hsl(var(--foreground))',
@@ -98,6 +99,11 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+		//   images: {
+		// 	loader: 'imgix',
+		// 	path: './public/images',
+
+		//   },
   		
   	}
   },
