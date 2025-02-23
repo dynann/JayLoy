@@ -11,7 +11,6 @@ type Transaction = {
   color: string;
 };
 
-
 const CATEGORY_MAP: { [key: number]: { name: string; icon: JSX.Element; color: string } } = {
   1: {
     name: "Food",
@@ -55,7 +54,6 @@ const CATEGORY_MAP: { [key: number]: { name: string; icon: JSX.Element; color: s
   },
 };
 
-
 let isRefreshing = false;
 let refreshQueue: ((token: string) => void)[] = [];
 
@@ -67,73 +65,105 @@ export default function HomePage() {
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
-    document.cookie = "refreshToken=; Max-Age=0; path=/;";
+    localStorage.removeItem("refreshToken");
     window.location.href = "/login";
   };
 
-  const refreshToken = async (): Promise<string> => {
+  const isTokenExpired = (token: string): boolean => {
     try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(jsonPayload);
+      return Date.now() >= (payload.exp * 1000);
+    } catch {
+      return true;
+    }
+  };
+
+  const refreshToken = async (): Promise<string> => {
+    if (isRefreshing) {
+      return new Promise((resolve) => {
+        refreshQueue.push(resolve);
+      });
+    }
+
+    isRefreshing = true;
+    try {
+      const storedRefreshToken = localStorage.getItem("refreshToken");
+      if (!storedRefreshToken) {
+        throw new Error("No refresh token available");
+      }
+
       const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ refreshToken: document.cookie }),
-        credentials: "include",
+        body: JSON.stringify({ refreshToken: storedRefreshToken }),
       });
 
-      if (!refreshResponse.ok) throw new Error("Refresh failed");
-      
-      const { accessToken } = await refreshResponse.json();
-      localStorage.setItem("accessToken", accessToken);
-      return accessToken;
+      if (!refreshResponse.ok) {
+        throw new Error("Refresh failed");
+      }
+
+      const data = await refreshResponse.json();
+      localStorage.setItem("accessToken", data.accessToken);
+      // In case the backend also sends a new refresh token
+      if (data.refreshToken) {
+        localStorage.setItem("refreshToken", data.refreshToken);
+      }
+
+      refreshQueue.forEach(resolve => resolve(data.accessToken));
+      refreshQueue = [];
+
+      return data.accessToken;
     } catch (error) {
       handleLogout();
       throw error;
+    } finally {
+      isRefreshing = false;
     }
   };
 
+  const getValidToken = async (): Promise<string> => {
+    const currentToken = localStorage.getItem("accessToken");
+    if (!currentToken) {
+      throw new Error("No access token available");
+    }
+
+    if (isTokenExpired(currentToken)) {
+      console.log("Token expired, refreshing...");
+      return refreshToken();
+    }
+
+    return currentToken;
+  };
+
   const fetchWithToken = async (url: string): Promise<Response> => {
-    let token = localStorage.getItem("accessToken") || "";
-    
     try {
-      let response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
+      const token = await getValidToken();
+      
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
-  
-      // Handle token refresh if unauthorized
+
       if (response.status === 401) {
-        if (!isRefreshing) {
-          isRefreshing = true;
-          try {
-            const newToken = await refreshToken();
-            // Retry original request with new token
-            response = await fetch(url, {
-              headers: { Authorization: `Bearer ${newToken}` },
-              credentials: "include",
-            });
-            // Process queued requests
-            refreshQueue.forEach(cb => cb(newToken));
-            refreshQueue = [];
-          } finally {
-            isRefreshing = false;
-          }
-        } else {
-          // Queue the request while refreshing
-          return new Promise<Response>((resolve) => {
-            refreshQueue.push((newToken: string) => {
-              resolve(
-                fetch(url, {
-                  headers: { Authorization: `Bearer ${newToken}` },
-                  credentials: "include",
-                }) as Promise<Response>
-              );
-            });
-          });
-        }
+        // Try one more refresh if we get 401
+        const newToken = await refreshToken();
+        return fetch(url, {
+          headers: {
+            Authorization: `Bearer ${newToken}`,
+            "Content-Type": "application/json",
+          },
+        });
       }
-  
+
       return response;
     } catch (error) {
       if (error instanceof Error) setError(error.message);
@@ -201,7 +231,7 @@ export default function HomePage() {
     );
   }
 
-  // content
+  // Main page content
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-emerald-500 text-white p-4 w-full shadow-lg">
