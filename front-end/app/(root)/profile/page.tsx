@@ -5,7 +5,7 @@ import SVG from "react-inlinesvg";
 import ProfileImage from "@/public/images/plant.webp";
 import { Icon } from "@iconify/react";
 
-function page({ image, title }: { image: any; title: any }) {
+function page() {
   const containerClasses =
     "min-h-screen flex flex-col items-center justify-center px-4 gap-4";
 

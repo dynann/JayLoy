@@ -26,16 +26,17 @@ export default function LoginPage() {
 
       if (res.ok) {
         const data = await res.json();
-        console.log("Login successful", data);
+        // Store both tokens
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
+        
+        // Add a timestamp for when the tokens were stored
+        localStorage.setItem("tokenTimestamp", Date.now().toString());
+        
         router.push("/");
       } else {
-        // Handle error
         const errorData = await res.json();
         setError(errorData.message || "Login failed");
-        // We can comment this line, because its purpose was for us to see the error message in the console
-        console.error("Login failed", errorData);
       }
     } catch (err) {
       setError("Failed to fetch");
