@@ -5,21 +5,41 @@ import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import React, { useState } from "react";
 import PopupModal from "./components/popupModal";
 import { useRouter } from "next/navigation";
+import { error } from "console";
+import { Erica_One } from "next/font/google";
 
 export default function Transaction() {
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent page refresh
-    router.push("/");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({  "amount": Number(amount),
+                                "type": transactionType.toUpperCase(),
+                                "description": description,
+                                "date": date,
+                                "categoryID": category}),
+      }).catch((error) => alert(error));
+      router.push("/");
+    }
+    catch (err){
+      alert("Failed to create new transaction!")
+    }
   };
 
   const containerClasses =
     "min-h-screen flex flex-col items-center justify-center px-4 gap-4";
   const [transactionType, setTransactionType] = useState(""); //  "Expense" or "Income"
   const [amount, setAmount] = useState(""); // " " value
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   // Get the current date in yyyy-mm-dd format for the input field
-  const formattedDate = date.toISOString().split("T")[0];
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(1);
   //handle transactiontype
   const handleTransactionTypeChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -54,7 +74,7 @@ export default function Transaction() {
                 Category{" "}
               </legend>
               <div className="shrink-0">
-                <PopupModal />
+                <PopupModal category={category} setCategory={setCategory}/>
               </div>
             </div>
             {/* radio button for expense and and income */}
@@ -109,12 +129,15 @@ export default function Transaction() {
               type="date"
               placeholder="Date"
               desc="Date is required"
-              value={formattedDate}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
             />
             <TransactionInput
               type="text"
               placeholder="Note"
               desc="Note is required"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
             <Button
               type="submit"

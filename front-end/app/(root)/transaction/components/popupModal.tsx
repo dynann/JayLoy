@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories";
 
-function PopupModal() {
+function PopupModal({ category: number, setCategory }: { category: number; setCategory: (n: number) => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Food");
   const [selectedValue, setSelectedValue] = useState<number>(1);
@@ -72,6 +72,7 @@ function PopupModal() {
                     onClick={() => {
                       setSelectedCategory(category.name);
                       setSelectedValue(category.id);
+                      setCategory(category.id);
                       setIsOpen(false); // Close modal after selection
                     }}
                   >
