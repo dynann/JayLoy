@@ -29,7 +29,7 @@ export default function LoginPage() {
         // Store both tokens
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
-        
+    
         // Add a timestamp for when the tokens were stored
         localStorage.setItem("tokenTimestamp", Date.now().toString());
         
