@@ -104,5 +104,7 @@ export default function HomePage() {
       {/* Navigation Bar */}
       <NavBar />
     </div>
+
+    
   );
 }

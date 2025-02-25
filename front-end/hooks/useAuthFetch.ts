@@ -1,33 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
+
+// Moved outside to prevent recreation on every render
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64).split('').map(c => 
+        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      ).join('')
+    );
+    const payload = JSON.parse(jsonPayload);
+    return Date.now() >= (payload.exp * 1000);
+  } catch {
+    return true;
+  }
+};
 
 export const useAuthFetch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  let isRefreshing = false;
-  let refreshQueue: ((token: string) => void)[] = [];
+  
+  const isRefreshing = useRef(false);
+  const refreshQueue = useRef<((token: string) => void)[]>([]);
 
-  const isTokenExpired = (token: string): boolean => {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      const payload = JSON.parse(jsonPayload);
-      return Date.now() >= (payload.exp * 1000);
-    } catch {
-      return true;
-    }
-  };
-
-  const refreshToken = async (): Promise<string> => {
-    if (isRefreshing) {
+  const refreshToken = useCallback(async (): Promise<string> => {
+    if (isRefreshing.current) {
       return new Promise((resolve) => {
-        refreshQueue.push(resolve);
+        refreshQueue.current.push(resolve);
       });
     }
 
-    isRefreshing = true;
+    isRefreshing.current = true;
     try {
       const storedRefreshToken = localStorage.getItem("refreshToken");
       if (!storedRefreshToken) throw new Error("No refresh token available");
@@ -44,8 +48,8 @@ export const useAuthFetch = () => {
       localStorage.setItem("accessToken", data.accessToken);
       if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
 
-      refreshQueue.forEach(resolve => resolve(data.accessToken));
-      refreshQueue = [];
+      refreshQueue.current.forEach(resolve => resolve(data.accessToken));
+      refreshQueue.current = [];
       return data.accessToken;
     } catch (error) {
       localStorage.removeItem("accessToken");
@@ -53,12 +57,13 @@ export const useAuthFetch = () => {
       window.location.href = "/login";
       throw error;
     } finally {
-      isRefreshing = false;
+      isRefreshing.current = false;
     }
-  };
+  }, []);
 
-  const fetchWithToken = async (url: string): Promise<Response> => {
+  const fetchWithToken = useCallback(async (url: string): Promise<Response> => {
     try {
+      setLoading(true);
       let token = localStorage.getItem("accessToken");
       if (!token) throw new Error("No access token available");
 
@@ -79,8 +84,10 @@ export const useAuthFetch = () => {
     } catch (error) {
       setError(error instanceof Error ? error.message : "Request failed");
       throw error;
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [refreshToken]);
 
   return { fetchWithToken, loading, setLoading, error, setError };
 };
