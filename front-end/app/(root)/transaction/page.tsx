@@ -5,6 +5,8 @@ import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import React, { useState } from "react";
 import PopupModal from "./components/popupModal";
 import { useRouter } from "next/navigation";
+import { error } from "console";
+import { Erica_One } from "next/font/google";
 
 export default function Transaction() {
   const router = useRouter();
@@ -22,7 +24,7 @@ export default function Transaction() {
                                 "description": description,
                                 "date": date,
                                 "categoryID": category}),
-      });
+      }).catch((error) => alert(error));
       router.push("/");
     }
     catch (err){

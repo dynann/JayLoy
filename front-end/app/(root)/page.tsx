@@ -2,56 +2,14 @@
 
 import NavBar from "@/layouts/NavBar";
 import { Icon } from "@iconify/react";
-import { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { TRANSACTION_CATEGORIES } from "@/app/constants/categories";
 
 type Transaction = {
   category: string;
   amount: number;
-  icon: JSX.Element;
+  icon: React.ReactNode;
   color: string;
-};
-
-const CATEGORY_MAP: { [key: number]: { name: string; icon: JSX.Element; color: string } } = {
-  1: {
-    name: "Food",
-    icon: <Icon icon="fluent:food-48-regular" width="3em" height="3em" className="text-white" />,
-    color: "bg-red",
-  },
-  2: {
-    name: "Transport",
-    icon: <Icon icon="solar:bus-bold" width="3em" height="3em" className="text-white" />,
-    color: "bg-purple",
-  },
-  3: {
-    name: "Medicine",
-    icon: <Icon icon="cuida:medicine-outline" width="3em" height="3em" className="text-white" />,
-    color: "bg-green",
-  },
-  4: {
-    name: "Groceries",
-    icon: <Icon icon="material-symbols:grocery" width="3em" className="text-white" />,
-    color: "bg-orange",
-  },
-  5: {
-    name: "Savings",
-    icon: <Icon icon="hugeicons:money-saving-jar" width="3em" className="text-white" />,
-    color: "bg-cyan",
-  },
-  6: {
-    name: "Rent",
-    icon: <Icon icon="mdi:house-clock-outline" width="3em" height="3em" className="text-white" />,
-    color: "bg-blue",
-  },
-  7: {
-    name: "Gifts",
-    icon: <Icon icon="famicons:gift-outline" width="3em" height="3em" className="text-white" />,
-    color: "bg-purple",
-  },
-  8: {
-    name: "Entertainment",
-    icon: <Icon icon="ion:ticket-outline" width="3em" height="3em" className="text-white" />,
-    color: "bg-pink",
-  },
 };
 
 let isRefreshing = false;
@@ -186,7 +144,7 @@ export default function HomePage() {
 
         const data = await response.json();
         const formattedTransactions = data.map((tx: any) => {
-          const categoryInfo = CATEGORY_MAP[tx.categoryID] || {
+          const categoryInfo = TRANSACTION_CATEGORIES[tx.categoryID] || {
             name: "Other",
             icon: <Icon icon="mdi:help-circle" width="3em" height="3em" className="text-white" />,
             color: "bg-gray",
