@@ -10,7 +10,7 @@ type Transaction = {
   value: number;
 };
 
-function PopupModal() {
+function PopupModal({ category: number, setCategory }: { category: number; setCategory: (n: number) => void }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const transactions: Transaction[] = [
@@ -248,6 +248,7 @@ function PopupModal() {
                     onClick={() => {
                       setSelectedCategory(transaction.category);
                       setSelectedValue(transaction.value);
+                      setCategory(transaction.value);
                       setIsOpen(false); // Close modal after selection
                     }}
                     //   onClick={() => setSelectedCategory(transaction.category)}
