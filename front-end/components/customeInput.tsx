@@ -63,7 +63,7 @@ export function TransactionInput({
 }) {
   const [internalValue, setInternalValue] = useState<string | number>("");
   return (
-    <div className="relative z-0 w-full mb-5">
+    <div className="relative z-0 w-full m-2">
       <input
         type={type}
         // name={name}

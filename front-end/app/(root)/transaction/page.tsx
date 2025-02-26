@@ -3,7 +3,7 @@ import { TransactionInput } from "@/components/customeInput";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import React, { useState } from "react";
-import PopupModal from "./components/popupModal";
+import ExpenseModal, { IncomeModal } from "./components/popupModal";
 import { useRouter } from "next/navigation";
 import { error } from "console";
 import { Erica_One } from "next/font/google";
@@ -31,6 +31,12 @@ export default function Transaction() {
       alert("Failed to create new transaction!")
     }
   };
+  
+  const categoryType = () => {
+    return transactionType === "Expense"  
+            ? (<ExpenseModal category={category} setCategory={setCategory}/>)
+            : (<IncomeModal category={category} setCategory={setCategory}/>)
+  }
 
   const containerClasses =
     "min-h-screen flex flex-col items-center justify-center px-4 gap-4";
@@ -53,12 +59,11 @@ export default function Transaction() {
     // - number if "Expense" is selected
     if (transactionType === "Expense" && value !== "") {
       if (!value.startsWith("-")) {
-        value = `-${value}`; // the value starts with "-"
+        value = `-${value}`; // the value starts with "-" 
       }
     } else if (transactionType === "Income" && value.startsWith("-")) {
-      value = value.replace("-", ""); // Remove "-" for income
+      value = value.replace(`${value}`, ""); // Remove "-" for income
     }
-
     setAmount(value);
   };
   return (
@@ -74,7 +79,7 @@ export default function Transaction() {
                 Category{" "}
               </legend>
               <div className="shrink-0">
-                <PopupModal category={category} setCategory={setCategory}/>
+                 {categoryType()}
               </div>
             </div>
             {/* radio button for expense and and income */}
@@ -99,6 +104,7 @@ export default function Transaction() {
                     type="radio"
                     name="transactionType"
                     value="Income"
+                    onClick= {()=>{setAmount("")}}
                     onChange={handleTransactionTypeChange}
                     className="mr-2  accent-primary text-primary border-3 border-primary focus:border-primary focus:ring-primary"
                   />
@@ -133,9 +139,9 @@ export default function Transaction() {
               onChange={(e) => setDate(e.target.value)}
             />
             <TransactionInput
-              type="text"
-              placeholder="Note"
-              desc="Note is required"
+              type="number"
+              placeholder="Description"
+              desc="Description is required"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
