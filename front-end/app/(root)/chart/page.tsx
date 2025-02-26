@@ -8,6 +8,7 @@ import NavBar from "@/layouts/NavBar"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { LoadingState } from "@/components/LoadingState"
 import { ErrorState } from "@/components/ErrorState"
+import dayjs from "dayjs"
 
 type ChartData = {
   categoryID: string
@@ -31,14 +32,18 @@ const colorMap: { [key: string]: string } = {
 export default function ChartPage() {
   const { fetchWithToken, loading, error } = useAuthFetch()
   const [activeView, setActiveView] = useState<"income" | "expense">("expense")
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedMonth, setSelectedMonth] = useState(dayjs().month() + 1)
+  const [selectedYear, setSelectedYear] = useState(dayjs().year())
   const [transactions, setTransactions] = useState<any[]>([])
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
+        // Format the month query using dayjs
+        const monthParam = dayjs(`${selectedYear}-${selectedMonth}-01`).format('YYYY-MM')
+        
         const response = await fetchWithToken(
-          `${process.env.NEXT_PUBLIC_API_URL}/transactions/by-month/${selectedMonth}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/transactions?month=${monthParam}`,
         )
         const data = await response.json()
         const transactionsData = Array.isArray(data) ? data : data.transactions || []
@@ -49,7 +54,7 @@ export default function ChartPage() {
       }
     }
     fetchTransactions()
-  }, [selectedMonth, fetchWithToken])
+  }, [selectedMonth, selectedYear, fetchWithToken])
 
   const processData = useCallback((): ChartData[] => {
     const filtered = transactions.filter((t) => {
@@ -81,6 +86,8 @@ export default function ChartPage() {
   }, [transactions, activeView])
 
   const currentData = processData()
+  
+  // using dayjs
   const months = Array.from({ length: 12 }, (_, i) => i + 1)
 
   const getCategoryColor = useCallback((colorClass = "bg-gray") => {
@@ -124,7 +131,7 @@ export default function ChartPage() {
               }`}
               onClick={() => setSelectedMonth(month)}
             >
-              {new Date(2000, month - 1).toLocaleString("default", { month: "long" })}
+              {dayjs().month(month - 1).format('MMMM')}
             </button>
           ))}
         </div>
@@ -230,4 +237,3 @@ export default function ChartPage() {
     </div>
   )
 }
-

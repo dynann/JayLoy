@@ -7,19 +7,16 @@ import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import NavBar from "@/layouts/NavBar";
 import { Icon } from "@iconify/react";
+import dayjs from "dayjs";
 
 export default function HomePage() {
   const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [currentDate, setCurrentDate] = useState("");
 
-  // Get today's date in YYYY-MM-DD format
+  // today's date in YYYY-MM-DD format using dayjs
   const getFormattedDate = () => {
-    const today = new Date();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    const year = today.getFullYear();
-    return `${year}-${month}-${day}`;
+    return dayjs().format("YYYY-MM-DD");
   };
 
   useEffect(() => {
@@ -29,7 +26,7 @@ export default function HomePage() {
         setCurrentDate(formattedDate);
 
         const response = await fetchWithToken(
-          `${process.env.NEXT_PUBLIC_API_URL}/transactions/by-date/${formattedDate}`
+          `${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${formattedDate}`
         );
         const data = await response.json();
         const transactionsData = Array.isArray(data)
@@ -104,7 +101,5 @@ export default function HomePage() {
       {/* Navigation Bar */}
       <NavBar />
     </div>
-
-    
   );
 }

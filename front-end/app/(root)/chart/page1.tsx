@@ -1,72 +1,113 @@
 "use client"
 
-import { JSX, useState } from "react"
-import { FileSearch, Utensils, Bus, ShoppingBasket, Home, Wifi, Camera, Briefcase } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { useAuthFetch } from "@/hooks/useAuthFetch"
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
+import { Icon } from "@iconify/react"
+import NavBar from "@/layouts/NavBar"
+import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
+import { LoadingState } from "@/components/LoadingState"
+import { ErrorState } from "@/components/ErrorState"
 
-type CategoryData = {
-  name: string
+type ChartData = {
+  categoryID: string
   value: number
   amount: number
-  color: string
-  icon: JSX.Element
+}
+
+const colorMap: { [key: string]: string } = {
+  red: "#DD0A0A",
+  purple: "#9747FF",
+  green: "#34C759",
+  orange: "#FFAE4C",
+  cyan: "#32ADE6",
+  blue: "#304FFE",
+  pink: "#FF2D55",
+  primary: "#3EB075",
+  brown: "#A2845E",
+  gray: "#909090",
 }
 
 export default function ChartPage() {
+  const { fetchWithToken, loading, error } = useAuthFetch()
   const [activeView, setActiveView] = useState<"income" | "expense">("expense")
-  const [selectedMonth, setSelectedMonth] = useState("This Month")
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [transactions, setTransactions] = useState<any[]>([])
 
-  const months = ["February", "March", "April", "This Month"]
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetchWithToken(
+          `${process.env.NEXT_PUBLIC_API_URL}/transactions/by-month/${selectedMonth}`,
+        )
+        const data = await response.json()
+        const transactionsData = Array.isArray(data) ? data : data.transactions || []
+        setTransactions(transactionsData)
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error)
+        setTransactions([])
+      }
+    }
+    fetchTransactions()
+  }, [selectedMonth, fetchWithToken])
 
-  const expenseData: CategoryData[] = [
-    { name: "Food", value: 30, amount: -45.0, color: "#FF0000", icon: <Utensils className="h-6 w-6 text-white" /> },
-    {
-      name: "Transportation",
-      value: 25,
-      amount: -45.0,
-      color: "#8A2BE2",
-      icon: <Bus className="h-6 w-6 text-white" />,
-    },
-    {
-      name: "Groceries",
-      value: 15,
-      amount: -45.0,
-      color: "#FFA500",
-      icon: <ShoppingBasket className="h-6 w-6 text-white" />,
-    },
-    { name: "Rent", value: 20, amount: -45.0, color: "#4169E1", icon: <Home className="h-6 w-6 text-white" /> },
-    { name: "Internet", value: 10, amount: -15.0, color: "#3CB371", icon: <Wifi className="h-6 w-6 text-white" /> },
-  ]
+  const processData = useCallback((): ChartData[] => {
+    const filtered = transactions.filter((t) => {
+      const amt = t.type === "EXPENSE" ? -Math.abs(Number.parseFloat(t.amount)) : Math.abs(Number.parseFloat(t.amount))
+      return activeView === "income" ? amt > 0 : amt < 0
+    })
 
-  const incomeData: CategoryData[] = [
-    { name: "Salary", value: 75, amount: 1000.0, color: "#D2B48C", icon: <Briefcase className="h-6 w-6 text-white" /> },
-    { name: "Freelance", value: 25, amount: 330.0, color: "#40E0D0", icon: <Camera className="h-6 w-6 text-white" /> },
-  ]
+    const grouped = filtered.reduce(
+      (acc: Record<number, ChartData>, t: any) => {
+        const key = Number(t.categoryID)
+        if (!acc[key]) {
+          acc[key] = { categoryID: String(key), value: 0, amount: 0 }
+        }
+        const amt =
+          t.type === "EXPENSE" ? -Math.abs(Number.parseFloat(t.amount)) : Math.abs(Number.parseFloat(t.amount))
+        acc[key].value += Math.abs(amt)
+        acc[key].amount += amt
+        return acc
+      },
+      {} as Record<number, ChartData>,
+    )
 
-  const currentData = activeView === "income" ? incomeData : expenseData
+    const total = Object.values(grouped).reduce((sum, item) => sum + item.value, 0)
 
-  // Check if data
-  const hasData = selectedMonth === "This Month"
+    return Object.values(grouped).map((item) => ({
+      ...item,
+      value: total > 0 ? Number(((item.value / total) * 100).toFixed(1)) : 0,
+    }))
+  }, [transactions, activeView])
+
+  const currentData = processData()
+  const months = Array.from({ length: 12 }, (_, i) => i + 1)
+
+  const getCategoryColor = useCallback((colorClass = "bg-gray") => {
+    const color = colorClass.replace("bg-", "")
+    return colorMap[color] || colorMap.gray
+  }, [])
+
+  if (loading) return <LoadingState />
+  if (error) return <ErrorState message={error} />
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Title */}
-      <div className="bg-emerald-500 px-4 pb-6">
-        <h1 className="text-xl font-semibold text-center text-white py-4">Money Manager</h1>
+    <div className="min-h-screen bg-background">
+      <div className="bg-primary px-4 pb-6">
+        <h1 className="text-xl font-semibold text-center text-white py-4">Financial Analysis</h1>
 
-        {/* Income/Expense button */}
         <div className="flex justify-center gap-3 mb-6">
           <button
-            className={`px-8 py-1.5 rounded-full text-sm border ${
-              activeView === "income" ? "bg-white text-emerald-600 " : "text-black border-black"
+            className={`px-8 py-1.5 rounded-full text-sm ${
+              activeView === "income" ? "bg-white !text-primary" : "text-white border border-white"
             }`}
             onClick={() => setActiveView("income")}
           >
             Income
           </button>
           <button
-            className={`px-8 py-1.5 rounded-full text-sm border ${
-              activeView === "expense" ?  "bg-white text-red" : "text-black border-black"
+            className={`px-8 py-1.5 rounded-full text-sm ${
+              activeView === "expense" ? "bg-white !text-red" : "text-white border border-white"
             }`}
             onClick={() => setActiveView("expense")}
           >
@@ -74,7 +115,6 @@ export default function ChartPage() {
           </button>
         </div>
 
-        {/* Month Selector */}
         <div className="flex overflow-x-auto hide-scrollbar gap-6 px-2 justify-center">
           {months.map((month) => (
             <button
@@ -84,18 +124,21 @@ export default function ChartPage() {
               }`}
               onClick={() => setSelectedMonth(month)}
             >
-              {month}
+              {new Date(2000, month - 1).toLocaleString("default", { month: "long" })}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-2">
-        {hasData ? (
-          <>
-            {/* Chart */}
-            <div className="h-[200px] mb-4">
+      <div className="p-4">
+        {currentData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray">
+            <Icon icon="mdi:file-search-outline" className="h-16 w-16 mb-4" />
+            <p className="text-lg">No records this month</p>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto">
+            <div className="h-[220px] mb-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -108,9 +151,10 @@ export default function ChartPage() {
                     strokeWidth={0}
                     dataKey="value"
                   >
-                    {currentData.map((entry, index) => (
-                      <Cell key={index} fill={entry.color} />
-                    ))}
+                    {currentData.map((entry, index) => {
+                      const category = TRANSACTION_CATEGORIES[Number(entry.categoryID)]
+                      return <Cell key={index} fill={getCategoryColor(category?.color)} />
+                    })}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
@@ -118,83 +162,61 @@ export default function ChartPage() {
 
             {/* Legend */}
             <div className="grid grid-cols-1 gap-y-4 mb-8 ml-12">
-            {currentData.map((item) => (
-              <div
-                key={item.name}
-                className="flex items-center justify-center w-full"
-              >
-                {/* Dots and Names */}
-                <div className="flex w-1/2 justify-end items-center gap-2">
-                  {/* dot container */}
-                  <div className="w-4 flex justify-center">
-                    <div
-                      className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                  </div>
+              {currentData.map((item) => {
+                const category = TRANSACTION_CATEGORIES[Number(item.categoryID)]
+                const colorClass = category?.color || "bg-gray"
+                return (
+                  <div key={item.categoryID} className="flex items-center justify-center w-full">
+                    {/* Dots and Names */}
+                    <div className="flex w-1/2 justify-end items-center gap-2">
+                      {/* dot container */}
+                      <div className="w-4 flex justify-center">
+                        <div className={`w-2.5 h-2.5 rounded-full ${colorClass}`} />
+                      </div>
 
-                  {/* name container */}
-                  <div className="w-32 text-left">
-                    <span className="text-sm">{item.name}</span>
-                  </div>
-                </div>
-
-                {/* Value */}
-                <div className="w-1/2 flex justify-start pl-8">
-                  <span className="text-sm">{item.value}.00%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-            {/* List */}
-            <div className="space-y-3">
-              <h2 className="font-medium px-1">{activeView === "income" ? "Income" : "Expense"} Lists:</h2>
-              {currentData.map((item) => (
-                <div key={item.name} className="bg-white rounded-2xl p-3 flex items-center gap-3">
-                  <div className="rounded-full p-3" style={{ backgroundColor: item.color }}>
-                    {item.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium">{item.name}</span>
-                      <span className="text-sm">{item.value}.00%</span>
+                      {/* name container */}
+                      <div className="w-32 text-left">
+                        <span className="text-sm">{category?.name || "Other"}</span>
+                      </div>
                     </div>
-                    <div className="relative h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="absolute left-0 top-0 h-full rounded-full"
-                        style={{
-                          width: `${item.value}%`,
-                          backgroundColor: activeView === "income" ? "#10B981" : "#FF0000",
-                        }}
-                      />
-                    </div>
-                    <div className="mt-1 text-right">
-                      <span
-                        className="text-sm"
-                        style={{
-                          color: activeView === "income" ? "#10B981" : "#FF0000",
-                        }}
-                      >
-                        {activeView === "income" ? "+" : ""}
-                        {Math.abs(item.amount).toFixed(2)}
-                      </span>
+
+                    {/* Value */}
+                    <div className="w-1/2 flex justify-start pl-8">
+                      <span className="text-sm">{item.value}%</span>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
-          </>
-        ) : (
-          // Empty State
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-            <FileSearch className="h-16 w-16 mb-4" strokeWidth={1} />
-            <p className="text-lg">No records</p>
+
+            <h2 className="font-medium px-1 mb-3">{activeView === "income" ? "Income" : "Expense"} Lists:</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {currentData.map((item) => {
+                const category = TRANSACTION_CATEGORIES[Number(item.categoryID)]
+                const colorClass = category?.color || "bg-gray"
+                return (
+                  <div
+                    key={item.categoryID}
+                    className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-8 pr-8 w-full"
+                  >
+                    <div className="flex items-center space-x-5">
+                      <div className={`${colorClass} p-3 rounded-full`}>
+                        {category?.icon || <Icon icon="mdi:help-circle" className="w-[3em] h-[3em] text-white" />}
+                      </div>
+                      <span className="description-medium">{category?.name || "Other"}</span>
+                    </div>
+                    <span className={`description-medium ${activeView === "income" ? "!text-primary" : "!text-red"}`}>
+                      {activeView === "income" ? "+" : "-"}${Math.abs(item.amount).toFixed(2)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
 
-      {/* <style jsx>{`
+      <style jsx>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
@@ -202,7 +224,10 @@ export default function ChartPage() {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-      `}</style> */}
+      `}</style>
+
+      <NavBar />
     </div>
   )
 }
+
