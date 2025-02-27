@@ -45,7 +45,7 @@ export default function Transaction() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   // Get the current date in yyyy-mm-dd format for the input field
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(1);
+  const [category, setCategory] = useState(transactionType === "Expense" ? 1 : 9);
   //handle transactiontype
   const handleTransactionTypeChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -93,6 +93,7 @@ export default function Transaction() {
                     type="radio"
                     name="transactionType"
                     value="Expense"
+                    onClick= {()=>{setAmount("")}}
                     onChange={handleTransactionTypeChange}
                     className="mr-2 accent-red  text-red border-3  border-red  focus:border-red focus:ring-red"
                   />
@@ -139,7 +140,7 @@ export default function Transaction() {
               onChange={(e) => setDate(e.target.value)}
             />
             <TransactionInput
-              type="number"
+              type="text"
               placeholder="Description"
               desc="Description is required"
               value={description}
