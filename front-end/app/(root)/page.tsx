@@ -1,78 +1,91 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useAuthFetch } from "@/hooks/useAuthFetch";
-import { Header } from "@/components/Header";
-import { TransactionItem } from "@/components/TransactionItem";
-import { LoadingState } from "@/components/LoadingState";
-import { ErrorState } from "@/components/ErrorState";
-import NavBar from "@/layouts/NavBar";
-import { Icon } from "@iconify/react";
+"use client"
+
+import { useEffect, useState, useCallback } from "react"
+import { useAuthFetch } from "@/hooks/useAuthFetch"
+import { Header } from "@/components/Header"
+import { TransactionItem } from "@/components/TransactionItem"
+import { TransactionDetail } from "@/components/categoryTransaction-detail"
+import { LoadingState } from "@/components/LoadingState"
+import { ErrorState } from "@/components/ErrorState"
+import NavBar from "@/layouts/NavBar"
+import { Icon } from "@iconify/react"
+import dayjs from "dayjs"
 
 export default function HomePage() {
-  const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [currentDate, setCurrentDate] = useState("");
+  const { fetchWithToken, loading, setLoading, error } = useAuthFetch()
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [currentDate, setCurrentDate] = useState("")
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
 
-  // Get today's date in YYYY-MM-DD format
-  const getFormattedDate = () => {
-    const today = new Date();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    const year = today.getFullYear();
-    return `${year}-${month}-${day}`;
-  };
+  // today's date in YYYY-MM-DD format using dayjs
+  const getFormattedDate = useCallback(() => {
+    return dayjs().format("YYYY-MM-DD")
+  }, [])
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const formattedDate = getFormattedDate();
-        setCurrentDate(formattedDate);
+        const formattedDate = getFormattedDate()
+        setCurrentDate(formattedDate)
 
-        const response = await fetchWithToken(
-          `${process.env.NEXT_PUBLIC_API_URL}/transactions/by-date/${formattedDate}`
-        );
-        const data = await response.json();
-        const transactionsData = Array.isArray(data)
-          ? data
-          : data.transactions || [];
-        setTransactions(transactionsData);
+        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${formattedDate}`)
+        const data = await response.json()
+        const transactionsData = Array.isArray(data) ? data : data.transactions || []
+        setTransactions(transactionsData)
       } catch (err) {
-        console.error("Error fetching transactions:", err);
+        console.error("Error fetching transactions:", err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    // Only fetch once when the component mounts
-    fetchTransactions();
-  }, []); // Empty dependency array ensures it only runs once
+    fetchTransactions()
+  }, [fetchWithToken, getFormattedDate, setLoading])
 
   // Calculate total income and expense
   const { totalIncome, totalExpense } = transactions.reduce(
     (totals, transaction) => {
-      const amount = parseFloat(transaction.amount);
+      const amount = Number.parseFloat(transaction.amount)
       if (transaction.type === "EXPENSE") {
-        totals.totalExpense += amount;
+        totals.totalExpense += amount
       } else {
-        totals.totalIncome += amount;
+        totals.totalIncome += amount
       }
-      return totals;
+      return totals
     },
-    { totalIncome: 0, totalExpense: 0 }
-  );
+    { totalIncome: 0, totalExpense: 0 },
+  )
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState message={error} />;
+  const handleEdit = async () => {
+    // edit functionality
+    console.log("Edit transaction:", selectedTransaction)
+  }
+
+  const handleDelete = async () => {
+    try {
+      await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${selectedTransaction.id}`, {
+        method: "DELETE",
+      })
+
+      // Refresh transactions after delete
+      const formattedDate = getFormattedDate()
+      const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${formattedDate}`)
+      const data = await response.json()
+      const transactionsData = Array.isArray(data) ? data : data.transactions || []
+      setTransactions(transactionsData)
+      setSelectedTransaction(null)
+    } catch (err) {
+      console.error("Error deleting transaction:", err)
+    }
+  }
+
+  if (loading) return <LoadingState />
+  if (error) return <ErrorState message={error} />
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <Header
-        title="Money Tracker"
-        income={totalIncome}
-        expense={totalExpense}
-        date={currentDate}
-      />
+      <Header title="Money Tracker" income={totalIncome} expense={totalExpense} date={currentDate} />
 
       {/* Transaction List */}
       <div className="p-4">
@@ -84,16 +97,11 @@ export default function HomePage() {
         ) : (
           <div className="max-w-4xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {transactions.map((transaction, index) => (
+              {transactions.map((transaction) => (
                 <TransactionItem
-                  key={index}
-                  transaction={{
-                    ...transaction,
-                    formattedAmount:
-                      transaction.type === "EXPENSE"
-                        ? `- ${transaction.amount}`
-                        : `+ ${transaction.amount}`,
-                  }}
+                  key={transaction.id}
+                  transaction={transaction}
+                  onClick={() => setSelectedTransaction(transaction)}
                 />
               ))}
             </div>
@@ -101,8 +109,19 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Transaction Detail Modal */}
+      {selectedTransaction && (
+        <TransactionDetail
+          transaction={selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      )}
+
       {/* Navigation Bar */}
       <NavBar />
     </div>
-  );
+  )
 }
+

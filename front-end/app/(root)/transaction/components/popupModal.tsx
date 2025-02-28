@@ -1,51 +1,54 @@
 import React, { useState } from "react";
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories";
 
-function PopupModal({ category: number, setCategory }: { category: number; setCategory: (n: number) => void }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("Food");
-  const [selectedValue, setSelectedValue] = useState<number>(1);
+interface CategoryModalProps {
+  category: number;
+  setCategory: (n: number) => void;
+  type: "Expense" | "Income";
+}
 
-  // Convert the object to an array for easier mapping
+const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type }) => {
   const categoriesArray = Object.values(TRANSACTION_CATEGORIES);
+  const isExpense = type === "Expense";
+  
+  // Filter categories based on type
+  const filteredCategories = categoriesArray.filter((category) =>
+    isExpense ? category.id >= 0 && category.id <= 9 : category.id >= 10 && category.id <= 12
+  );
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(
+    isExpense ? "Food" : "Salary"
+  );
+  const [selectedColor, setSelectedColor] = useState(
+    isExpense ? "bg-red" : "bg-brown"
+  );
 
   return (
     <div>
-      {/* Button to open modal */}
+      {/* Button to Open Modal */}
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="text-gray bg-white hover:bg-gray border border-gray focus:ring-4 focus:outline-none focus:ring-gray font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray- dark:bg-gray dark:border-gray dark:text-white dark:hover:bg-gray"
+        className={`text-white ${selectedColor} hover:bg-white hover:text-black shadow-sm focus:ring-1 focus:outline-none focus:ring-gray rounded-lg px-5 py-2.5 text-center inline-flex items-center`}
       >
         {selectedCategory}
       </button>
 
       {/* Modal */}
       {isOpen && (
-        <div
-          tabIndex={-1}
-          aria-hidden="true"
-          className="fixed inset-0 z-70 flex items-center justify-center w-full h-full bg-black bg-opacity-50"
-        >
-          <div className="relative z-80 p-4 w-full max-w-md bg-white rounded-lg shadow-sm dark:bg-gray">
+        <div className="fixed inset-0 z-70 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
+          <div className="relative z-80 p-4 w-full max-w-md bg-white rounded-lg shadow-sm">
+            
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b rounded-t dark:border-gray border-gray">
-              <h3 className="description-medium dark:text-white">
-                Choose a category
-              </h3>
-              {/* Close Button */}
+            <div className="flex items-center justify-between p-4 border-b rounded-t">
+              <h3 className="description-medium">Choose a category</h3>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="text-gray bg-transparent hover:bg-gray hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray- dark:hover:text-white"
+                className="text-gray bg-transparent hover:bg-gray hover:text-gray-900 rounded-lg text-sm h-8 w-8 inline-flex justify-center items-center"
               >
-                <svg
-                  className="w-3 h-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 14 14"
-                >
+                <svg className="w-3 h-3" viewBox="0 0 14 14" fill="none">
                   <path
                     stroke="currentColor"
                     strokeLinecap="round"
@@ -54,36 +57,32 @@ function PopupModal({ category: number, setCategory }: { category: number; setCa
                     d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
                   />
                 </svg>
-                <span className="sr-only">Close</span>
               </button>
             </div>
 
             {/* Modal Body */}
             <div className="p-4">
-              <p className="smalltext font-normal text-gray dark:text-gray-400">
-                Choose your wallet category, you'd like to spend
+              <p className="smalltext font-normal text-gray">
+                Choose a category for your {isExpense ? "Expense" : "Income"} transaction.
               </p>
 
-              <div className="grid grid-cols-3 content-center">
-                {categoriesArray.map((category) => (
+              {/* Category Options */}
+              <div className="grid grid-cols-3 content-center gap-4">
+                {filteredCategories.map((category) => (
                   <div
-                    className=""
                     key={category.id}
                     onClick={() => {
                       setSelectedCategory(category.name);
-                      setSelectedValue(category.id);
+                      setSelectedColor(category.color);
                       setCategory(category.id);
                       setIsOpen(false); // Close modal after selection
                     }}
+                    className="flex flex-col items-center justify-center cursor-pointer py-3 text-gray"
                   >
-                    <div className="flex flex-col items-center justify-center py-3 text-gray">
-                      <div className={`${category.color} p-3 rounded-lg text-primary`}>
-                        {category.icon}
-                      </div>
-                      <span className="text-center text-sm text-gray">
-                        {category.name}
-                      </span>
+                    <div className={`${category.color} p-3 rounded-lg`}>
+                      {category.icon}
                     </div>
+                    <span className="text-sm">{category.name}</span>
                   </div>
                 ))}
               </div>
@@ -93,6 +92,16 @@ function PopupModal({ category: number, setCategory }: { category: number; setCa
       )}
     </div>
   );
-}
+};
 
-export default PopupModal;
+// Exporting Expense and Income Modals
+const ExpenseModal: React.FC<{ category: number; setCategory: (n: number) => void }> = (props) => (
+  <PopupModal {...props} type="Expense" />
+);
+
+const IncomeModal: React.FC<{ category: number; setCategory: (n: number) => void }> = (props) => (
+  <PopupModal {...props} type="Income" />
+);
+
+export default ExpenseModal;
+export { IncomeModal };
