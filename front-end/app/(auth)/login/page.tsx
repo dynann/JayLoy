@@ -14,9 +14,9 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    console.log({email, password});
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const res = await fetch(`https://parking-is-academic-milton.trycloudflare.com/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
