@@ -2,6 +2,8 @@ import React from "react";
 
 interface TabbarProps {
   text: string;
+  href: string
+  onClick?: () => void
 }
 
 export default function Tabbar({ text }: TabbarProps) {
@@ -17,7 +19,7 @@ export function TabWithCancelButton({ text , href}: { text: any; href: any }) {
   return (
     <div className="fixed z-50 w-full bg-white h-12 shadow-sm flex items-center justify-between px-4">
   {/* Left side: Cancel button */}
-  <a href={href} className="text-black">Cancel</a>
+  <a href={href} className="!text-primary">Cancel</a>
 
   {/* Center: Text */}
   <p className="absolute left-1/2 transform -translate-x-1/2 text-center description-bold ">

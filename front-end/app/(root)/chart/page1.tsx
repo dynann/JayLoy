@@ -8,7 +8,6 @@ import NavBar from "@/layouts/NavBar"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { LoadingState } from "@/components/LoadingState"
 import { ErrorState } from "@/components/ErrorState"
-import { CategoryTransactions } from "@/components/category-transactions"
 
 type ChartData = {
   categoryID: string
@@ -34,16 +33,13 @@ export default function ChartPage() {
   const [activeView, setActiveView] = useState<"income" | "expense">("expense")
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
   const [transactions, setTransactions] = useState<any[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        // Format the month query using the selected year and month
-        const monthParam = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`
-
-        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?month=${monthParam}`)
+        const response = await fetchWithToken(
+          `${process.env.NEXT_PUBLIC_API_URL}/transactions/by-month/${selectedMonth}`,
+        )
         const data = await response.json()
         const transactionsData = Array.isArray(data) ? data : data.transactions || []
         setTransactions(transactionsData)
@@ -53,7 +49,7 @@ export default function ChartPage() {
       }
     }
     fetchTransactions()
-  }, [selectedMonth, fetchWithToken, selectedYear])
+  }, [selectedMonth, fetchWithToken])
 
   const processData = useCallback((): ChartData[] => {
     const filtered = transactions.filter((t) => {
@@ -201,8 +197,7 @@ export default function ChartPage() {
                 return (
                   <div
                     key={item.categoryID}
-                    className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-8 pr-8 w-full cursor-pointer hover:opacity-80"
-                    onClick={() => setSelectedCategory(Number(item.categoryID))}
+                    className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-8 pr-8 w-full"
                   >
                     <div className="flex items-center space-x-5">
                       <div className={`${colorClass} p-3 rounded-full`}>
@@ -220,16 +215,6 @@ export default function ChartPage() {
           </div>
         )}
       </div>
-
-      {selectedCategory !== null && (
-        <CategoryTransactions
-          categoryId={selectedCategory}
-          transactions={transactions}
-          onClose={() => setSelectedCategory(null)}
-          month={selectedMonth}
-          year={selectedYear}
-        />
-      )}
 
       <style jsx>{`
         .hide-scrollbar::-webkit-scrollbar {

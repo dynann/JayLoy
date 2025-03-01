@@ -1,42 +1,110 @@
-"use client"
-
-import { FileSearch } from "lucide-react"
+"use client";
+import { useEffect, useState } from "react";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { Header } from "@/components/Header";
+import { TransactionItem } from "@/components/TransactionItem";
+import { LoadingState } from "@/components/LoadingState";
+import { ErrorState } from "@/components/ErrorState";
+import NavBar from "@/layouts/NavBar";
+import { Icon } from "@iconify/react";
 
 export default function HomePage() {
-  // Initialize with zero values since there are no transactions
-  const expenses = -65.0
-  const income = 15.0
+  const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [currentDate, setCurrentDate] = useState("");
+
+  // Get today's date in YYYY-MM-DD format
+  const getFormattedDate = () => {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    const year = today.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const formattedDate = getFormattedDate();
+        setCurrentDate(formattedDate);
+
+        const response = await fetchWithToken(
+          `${process.env.NEXT_PUBLIC_API_URL}/transactions/by-date/${formattedDate}`
+        );
+        const data = await response.json();
+        const transactionsData = Array.isArray(data)
+          ? data
+          : data.transactions || [];
+        setTransactions(transactionsData);
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Only fetch once when the component mounts
+    fetchTransactions();
+  }, []); // Empty dependency array ensures it only runs once
+
+  // Calculate total income and expense
+  const { totalIncome, totalExpense } = transactions.reduce(
+    (totals, transaction) => {
+      const amount = parseFloat(transaction.amount);
+      if (transaction.type === "EXPENSE") {
+        totals.totalExpense += amount;
+      } else {
+        totals.totalIncome += amount;
+      }
+      return totals;
+    },
+    { totalIncome: 0, totalExpense: 0 }
+  );
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState message={error} />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-emerald-500 text-white p-4 space-y-4">
-        <h1 className="text-xl font-semibold">Money Tracker</h1>
-        <div className="flex justify-between items-center">
-          <div className="space-y-1">
-            <div className="text-sm opacity-90">Expenses</div>
-            <div className="text-lg font-medium">{expenses.toFixed(2)}$</div>
+      <Header
+        title="Money Tracker"
+        income={totalIncome}
+        expense={totalExpense}
+        date={currentDate}
+      />
+
+      {/* Transaction List */}
+      <div className="p-4">
+        {transactions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+            <Icon icon="mdi:file-search-outline" className="h-16 w-16 mb-4" />
+            <p className="description-big-medium">No records today</p>
           </div>
-          <div className="space-y-1">
-            <div className="text-sm opacity-90">Income</div>
-            <div className="text-lg font-medium">{income.toFixed(2)}$</div>
+        ) : (
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {transactions.map((transaction, index) => (
+                <TransactionItem
+                  key={index}
+                  transaction={{
+                    ...transaction,
+                    formattedAmount:
+                      transaction.type === "EXPENSE"
+                        ? `- ${transaction.amount}`
+                        : `+ ${transaction.amount}`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
-          <div className="text-right">
-            <div className="text-sm">09/1/2025</div>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Empty State Content */}
-      <div className="flex-1 p-4">
-        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-          <div className="mb-4">
-            <FileSearch className="h-16 w-16" strokeWidth={1} />
-          </div>
-          <p className="text-lg">No records</p>
-        </div>
-      </div>
+      {/* Navigation Bar */}
+      <NavBar />
     </div>
-  )
-}
 
+    
+  );
+}
