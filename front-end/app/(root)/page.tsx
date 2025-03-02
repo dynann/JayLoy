@@ -1,86 +1,100 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useCallback } from "react"
-import { useAuthFetch } from "@/hooks/useAuthFetch"
-import { Header } from "@/components/Header"
-import { TransactionItem } from "@/components/TransactionItem"
-import { TransactionDetail } from "@/components/categoryTransaction-detail"
-import { LoadingState } from "@/components/LoadingState"
-import { ErrorState } from "@/components/ErrorState"
-import NavBar from "@/layouts/NavBar"
-import { Icon } from "@iconify/react"
-import dayjs from "dayjs"
+import { useEffect, useState, useCallback } from "react";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { Header } from "@/components/Header";
+import { TransactionItem } from "@/components/TransactionItem";
+import { TransactionDetail } from "@/components/categoryTransaction-detail";
+import { LoadingState } from "@/components/LoadingState";
+import { ErrorState } from "@/components/ErrorState";
+import NavBar from "@/layouts/NavBar";
+import { Icon } from "@iconify/react";
+import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-  const { fetchWithToken, loading, setLoading, error } = useAuthFetch()
-  const [transactions, setTransactions] = useState<any[]>([])
-  const [currentDate, setCurrentDate] = useState("")
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
+  const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [currentDate, setCurrentDate] = useState("");
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   // today's date in YYYY-MM-DD format using dayjs
   const getFormattedDate = useCallback(() => {
-    return dayjs().format("YYYY-MM-DD")
-  }, [])
+    return dayjs().format("YYYY-MM-DD");
+  }, []);
+
+  const fetchTransactions = useCallback(async () => {
+    try {
+      const formattedDate = getFormattedDate();
+      setCurrentDate(formattedDate);
+
+      const response = await fetchWithToken(
+        `${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${formattedDate}`
+      );
+      const data = await response.json();
+      const transactionsData = Array.isArray(data) ? data : data.transactions || [];
+      setTransactions(transactionsData);
+    } catch (err) {
+      console.error("Error fetching transactions:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchWithToken, getFormattedDate, setLoading]);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const formattedDate = getFormattedDate()
-        setCurrentDate(formattedDate)
-
-        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${formattedDate}`)
-        const data = await response.json()
-        const transactionsData = Array.isArray(data) ? data : data.transactions || []
-        setTransactions(transactionsData)
-      } catch (err) {
-        console.error("Error fetching transactions:", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchTransactions()
-  }, [fetchWithToken, getFormattedDate, setLoading])
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   // Calculate total income and expense
   const { totalIncome, totalExpense } = transactions.reduce(
     (totals, transaction) => {
-      const amount = Number.parseFloat(transaction.amount)
+      const amount = Number.parseFloat(transaction.amount);
       if (transaction.type === "EXPENSE") {
-        totals.totalExpense += amount
+        totals.totalExpense += amount;
       } else {
-        totals.totalIncome += amount
+        totals.totalIncome += amount;
       }
-      return totals
+      return totals;
     },
-    { totalIncome: 0, totalExpense: 0 },
-  )
-
-  const handleEdit = async () => {
-    // edit functionality
-    console.log("Edit transaction:", selectedTransaction)
-  }
+    { totalIncome: 0, totalExpense: 0 }
+  );
 
   const handleDelete = async () => {
+    if (!selectedTransaction || isDeleting) return;
+
     try {
-      await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions/${selectedTransaction.id}`, {
-        method: "DELETE",
-      })
+      setIsDeleting(true);
 
-      // Refresh transactions after delete
-      const formattedDate = getFormattedDate()
-      const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${formattedDate}`)
-      const data = await response.json()
-      const transactionsData = Array.isArray(data) ? data : data.transactions || []
-      setTransactions(transactionsData)
-      setSelectedTransaction(null)
-    } catch (err) {
-      console.error("Error deleting transaction:", err)
+      const response = await fetchWithToken(
+        `${process.env.NEXT_PUBLIC_API_URL}/transactions/${selectedTransaction.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      // Check if the request was successful (status code 2xx)
+      // if (response.status >= 200 && response.status < 300) {
+      //   // Refresh the entire page
+      //   router.refresh();
+      // } 
     }
-  }
+    //   else {
+    //     throw new Error(`Server returned ${response.status}`);
+    //   }
+    // } catch (err) {
+    //   console.error("Error deleting transaction:", err);
+    //   alert("Failed to delete transaction");
+    // } 
+      finally {
+      setIsDeleting(false);
+      setSelectedTransaction(null);
+    }
+  };
 
-  if (loading) return <LoadingState />
-  if (error) return <ErrorState message={error} />
+  if (loading) return <LoadingState />;
+  // if (error) return <ErrorState message={error} />;
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,7 +128,10 @@ export default function HomePage() {
         <TransactionDetail
           transaction={selectedTransaction}
           onClose={() => setSelectedTransaction(null)}
-          onEdit={handleEdit}
+          onEdit={() => {
+            localStorage.setItem("editingTransaction", JSON.stringify(selectedTransaction));
+            router.push(`/transaction?edit=true`);
+          }}
           onDelete={handleDelete}
         />
       )}
@@ -122,6 +139,5 @@ export default function HomePage() {
       {/* Navigation Bar */}
       <NavBar />
     </div>
-  )
+  );
 }
-

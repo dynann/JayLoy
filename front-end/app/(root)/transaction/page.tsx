@@ -24,6 +24,8 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
   const [date, setDate] = useState(getLocalDate())
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState(1)
+  const [transactionTypeError, setTransactionTypeError] = useState("")
+  const [amountError, setAmountError] = useState("")
 
   // Helper function to get the current date in local time zone
   function getLocalDate() {
@@ -66,15 +68,35 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Reset errors
+    setTransactionTypeError("")
+    setAmountError("")
+
+    // Validate transaction type
+    if (!transactionType) {
+      setTransactionTypeError("Please select a transaction type.")
+      return
+    }
+
+    // Validate amount
+    let trimmedAmount = amount.trim()
+    if (!trimmedAmount || trimmedAmount === "-") {
+      setAmountError("Please enter a valid amount.")
+      return
+    }
+
     try {
       // Get the stored transaction data for the ID when editing
-      const storedTransaction = isEdit ? JSON.parse(localStorage.getItem("editingTransaction") || "{}") : null
+      const storedTransaction = isEdit
+        ? JSON.parse(localStorage.getItem("editingTransaction") || "{}")
+        : null
 
       const endpoint = isEdit
         ? `${process.env.NEXT_PUBLIC_API_URL}/transactions/${storedTransaction.id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`
 
-      const method = isEdit ? "PUT" : "POST"
+      const method = isEdit ? "PATCH" : "POST"
 
       const res = await fetch(endpoint, {
         method,
@@ -83,7 +105,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
-          amount: Number(amount),
+          amount: Number(trimmedAmount),
           type: transactionType.toUpperCase(),
           description,
           date,
@@ -109,19 +131,26 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
 
   const handleTransactionTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTransactionType(event.target.value)
+    setTransactionTypeError("") // Reset transaction type error when type is selected
   }
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let value = event.target.value
 
-    if (transactionType === "Expense" && value !== "") {
-      if (!value.startsWith("-")) {
+    // Allow only numbers and optional negative sign
+    if (/^-?\d*\.?\d*$/.test(value)) {
+      // - for expenses 
+      if (transactionType === "Expense" && !value.startsWith("-")) {
         value = `-${value}`
       }
-    } else if (transactionType === "Income" && value.startsWith("-")) {
-      value = value.replace(`${value}`, "")
+      // no - for income
+      else if (transactionType === "Income" && value.startsWith("-")) {
+        value = value.replace("-", "")
+      }
+
+      setAmount(value)
+      setAmountError("") // Reset amount error when user starts typing
     }
-    setAmount(value)
   }
 
   return (
@@ -164,6 +193,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
                   Income
                 </label>
               </div>
+              {transactionTypeError && <p className="text-red text-sm">{transactionTypeError}</p>}
             </fieldset>
 
             <div className="relative z-0 w-full mb-5 flex items-center gap-2">
@@ -171,13 +201,16 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
               <div className="shrink-0">
                 <DropdownMenuDemo />
               </div>
-              <TransactionInput
-                type="number"
-                placeholder="0.00"
-                desc="Amount is required"
-                value={amount}
-                onChange={handleAmountChange}
-              />
+              <div className="flex flex-col w-full">
+                <TransactionInput
+                  type="text"
+                  placeholder="0.00"
+                  desc="Amount is required"
+                  value={amount}
+                  onChange={handleAmountChange}
+                />
+                {amountError && <p className="text-red text-sm mt-1">{amountError}</p>}
+              </div>
             </div>
 
             <legend className="description-small text-black">Date</legend>
@@ -206,4 +239,3 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     </div>
   )
 }
-
