@@ -48,7 +48,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     if (transactionType === "Expense") {
       setCategory(1)
     } else if (transactionType === "Income") {
-      setCategory(9)
+      setCategory(10)
     }
   }, [transactionType])
 

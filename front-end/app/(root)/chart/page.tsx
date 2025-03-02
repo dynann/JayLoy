@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect, useCallback } from "react"
 import { useAuthFetch } from "@/hooks/useAuthFetch"
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
@@ -9,7 +8,6 @@ import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { LoadingState } from "@/components/LoadingState"
 import { ErrorState } from "@/components/ErrorState"
 import { CategoryTransactions } from "@/components/category-transactions"
-
 type ChartData = {
   categoryID: string
   value: number
