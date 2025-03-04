@@ -1,20 +1,33 @@
+"use client";
 import React from "react";
-
+import { signOut } from "next-auth/react"; 
 import Image from "next/image";
 import SVG from "react-inlinesvg";
 import ProfileImage from "@/public/images/plant.webp";
 import { Icon } from "@iconify/react";
+import router, { useRouter } from "next/navigation";
+import { logout } from "@/app/(auth)/actions";
 
 function page() {
-  const containerClasses =
-    "min-h-screen flex flex-col items-center justify-center px-4 gap-4";
+  const containerClasses ="min-h-screen flex flex-col items-center justify-center px-4 gap-4";
 
+  const router = useRouter();
+  const handleLogout = async () => {
+    await logout();
+    // Clear localStorage 
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("tokenTimestamp");
+    }
+    router.push("/login");
+  };
   const lists = [
     { title: "Edit Profile", icon: <Icon icon="iconamoon:profile-fill" width="24" height="24" />},
     { title: "My Data", icon: <Icon icon="bxs:data" width="24" height="24" /> },
     { title: "Setting", icon: <Icon icon="lets-icons:setting-fill" width="24" height="24" /> },
     { title: "Terms and Conditions", icon: <Icon icon="famicons:document-text" width="24" height="24" />},
-    { title: "Log out", icon: <Icon icon="majesticons:logout" width="24" height="24" /> },
+    { title: "Log out", icon: <Icon icon="famicons:document-text" width="24" height="24" /> },
   ];
 
   return (
@@ -33,14 +46,17 @@ function page() {
         <div>
           {lists.map((item, index) => (
             <ul className=" ">
-              <li key={index} className="pb-3 sm:pb-4 ">
-                <div className="flex  items-center w-full space-x-4 rtl:space-x-reverse">
+              <li key={index} className="pb-3 sm:pb-1 " >
+                <div className="flex  items-center w-full space-x-4 rtl:space-x-reverse"
+                 onClick= {item.title === "Log out"? handleLogout : undefined} >
                   {/* icon  */}
-                  <div className="flex flex-col items-center justify-center py-3 text-gray">
-                     <div className={` bg-tertiary p-3 rounded-lg text-primary `}>{item.icon}</div>
+                  <div className="flex flex-col items-center justify-center py-2 text-gray">
+                     <div className={`bg-tertiary p-3 rounded-lg text-primary shadow-sm`}>{item.icon}</div>
                   </div>
                   <div className="flex-1  min-w-0">
-                    <p className=" description-regular text-left text-black truncate dark:text-white">
+                    <p className=" description-regular text-left text-black truncate dark:text-white"
+                    // onClick= {item.title === "Log out"? handleLogout : undefined}
+                    >
                       {item.title}{" "}
                     </p>
                   </div>
