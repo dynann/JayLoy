@@ -1,6 +1,5 @@
-// import { BarChart } from "@/components/ui/chart";
-'use client';
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,19 +10,57 @@ import {
   PieCharts,
 } from "@/components/ui/card";
 import {
-  // BarChart,
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Label, LabelList, Pie, PieChart, ResponsiveContainer, XAxis } from "recharts";
-type ChartData = {
-  categoryID: string
-  value: number
-  amount: number
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  LabelList,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
+
+// Define TypeScript interfaces
+interface Transaction {
+  id: number;
+  amount: string; // API might return string numbers
+  type: "INCOME" | "EXPENSE";
+  category?: string;
+  date: string;
 }
+
+interface PieData {
+  name: string;
+  value: number;
+  color: string;
+}
+const chartConfig = {
+  Expense: {
+    label: "Expense",
+    color: "#3EB075", // primary color
+  },
+} satisfies ChartConfig;
+const pieChartConfig = {
+  expense: {
+    label: "Expense",
+    color: "hsl(var(--chart-1))",
+  },
+  income: {
+    label: "Income",
+    color: "hsl(var(--chart-2))",
+  },
+} satisfies ChartConfig;
+
+// Bar chart data
 const chartData = [
   { month: "January", Expense: 100 },
   { month: "February", Expense: 80 },
@@ -31,71 +68,74 @@ const chartData = [
   { month: "April", Expense: 73 },
   { month: "May", Expense: 89 },
   { month: "June", Expense: 110 },
-  { month: "Jul", Expense: 100 },
-  { month: "Aug", Expense: 100 },
-  { month: "Sep", Expense: 100 },
-  { month: "Oct", Expense: 50 },
-  { month: "Nov", Expense: 40 },
-  { month: "Dec", Expense: 50 },
+  { month: "July", Expense: 100 },
+  { month: "August", Expense: 100 },
+  { month: "September", Expense: 100 },
+  { month: "October", Expense: 50 },
+  { month: "November", Expense: 40 },
+  { month: "December", Expense: 50 },
 ];
-const currentData: any[] | undefined  = [
-  // pie: { Label : "Income" || "Expense"|| "Remain", }
-]
 
-// bar chat setting 
-const chartConfig = {
-  Expense: {
-    label: "Expense",
-    color: "#3EB075",
-  },
-  
-} satisfies ChartConfig;
+const Page: React.FC = () => {
+  const { fetchWithToken } = useAuthFetch();
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-const pieChartData = [
-  { browser: "Expense", visitors: 50, fill: "var(--color-chrome)" },
-  { browser: "Income", visitors: 100, fill: "var(--color-safari)" },
-  // { browser: "Remain", visitors: 50, fill: "var(--color-firefox)" },
-   ,
-];
-const pieChartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig
-function page({value}: {value:string}) {
-  
-  // const currentData = processData()
-  const months = Array.from({ length: 12 }, (_, i) => i + 1)
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetchWithToken(
+          `${process.env.NEXT_PUBLIC_API_URL}/transactions?year=${selectedYear}`
+        );
+        const data = await response.json();
+        console.log("Fetched transactions:", data);
+
+        setTransactions(Array.isArray(data) ? data : data.transactions || []);
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+        setTransactions([]);
+      }
+    };
+    fetchTransactions();
+  }, [fetchWithToken, selectedYear]);
+
+  // Categorize transactions
+  const incomeTransactions = transactions.filter((t) => t.type === "INCOME");
+  const expenseTransactions = transactions.filter((t) => t.type === "EXPENSE");
+
+  // Calculate totals
+  const totalIncome = incomeTransactions.reduce(
+    (sum, t) => sum + parseFloat(t.amount),
+    0
+  );
+  const totalExpense = expenseTransactions.reduce(
+    (sum, t) => sum - parseFloat(t.amount), // - cos it  should  be take out
+    0
+  );
+  const remainingBalance = totalIncome - totalExpense;
+
+  // Prepare pie chart data
+  const pieData: PieData[] = [
+    { name: "Expense", value: totalExpense, color: "hsl(var(--chart-2))" },
+    {
+      name: "Remaining",
+      value: remainingBalance,
+      color: "hsl(var(--chart-1))",
+    },
+  ];
+
   return (
-    <div className="space-y-2 flex flex-col items-center px-4">
-      Page
-      <div className="space-y-2  min-w-full m-16 flex flex-col justify-center">
-       
-
-        {/* <BarChart/> */}
-
+    <div className="space-y-4 min-h-screen  flex flex-col items-center px-4">
+      <div className="space-y-2 min-w-full p-4 flex flex-col justify-items-center container">
+        {/* Bar Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Monthly Budget Limit</CardTitle>
-            <CardDescription>Limit Budget: 100 USD per month </CardDescription>
+            <CardDescription>Limit Budget: 100 USD per month</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig}>
-              <BarChart
-                accessibilityLayer
-                data={chartData}
-                margin={{
-                  top: 10,
-                }}
-              >
+              <BarChart data={chartData} margin={{ top: 10 }}>
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="month"
@@ -108,8 +148,7 @@ function page({value}: {value:string}) {
                   cursor={true}
                   content={<ChartTooltipContent hideLabel />}
                 />
-                <Bar dataKey="Expense" fill="var(--color-Expense)" radius={8}>
-                  {/* bar label  */}
+                <Bar dataKey="Expense" fill="#3EB075" radius={8}>
                   <LabelList
                     position="top"
                     offset={12}
@@ -125,26 +164,53 @@ function page({value}: {value:string}) {
               Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
             </div>
             <div className="leading-none text-muted-foreground">
-              Showing total visitors for the last 6 months
+              Showing total expenses for the last 6 months
             </div>
           </CardFooter>
         </Card>
 
-        <PieCharts
-         title= "Yearly Report"
-
-         description = "hello" 
-         data ={pieChartData}
-        //  description = "hello" 
-        //  description = "hello" 
-
-         pieChartConfig = {pieChartConfig}
-
-        />
-
+        {/* Pie Chart for Expense vs Remaining */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Yearly Expense Report</CardTitle>
+            <CardDescription>Total Income vs Expenses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={85}
+                  dataKey="value"
+                  label={({ name, value }) =>
+                    `${name}: $${value.toLocaleString()}`
+                  }
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                   
+                </Pie>
+                
+              </PieChart>
+              {/* <CardFooter className="flex-col items-start gap-2 text-sm">
+                    <div className="flex gap-2 font-medium leading-none">
+                      Trending up by 5.2% this month{" "}
+                      <TrendingUp className="h-4 w-4" />
+                    </div>
+                    <div className="leading-none text-muted-foreground">
+                      Showing total expenses for the last 6 months
+                    </div>
+                  </CardFooter> */}
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-}
+};
 
-export default page;
+export default Page;

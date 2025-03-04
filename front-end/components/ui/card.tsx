@@ -142,7 +142,7 @@ export function PieCharts({
   data: any;
 }): React.JSX.Element {
   const totalVisitors = React.useMemo(() => {
-    return data.reduce((acc, curr) => acc + curr.visitors, 0);
+    return data.reduce((acc: any, curr: { visitors: any; }) => acc + curr.visitors, 0);
   }, []);
 
   return (

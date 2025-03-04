@@ -159,11 +159,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
         <div className="mx-auto max-w-md px-6 py-12 bg-background border-0 shadow-lg sm:rounded-3xl">
           <h1 className="text-2xl mb-8">{isEdit ? "Edit record" : "Add record"}</h1>
           <form id="form" onSubmit={handleSubmit}>
-            <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
-              <legend className="description-small text-black">Category</legend>
-              <div className="shrink-0">{categoryType()}</div>
-            </div>
-
+            {/* radio  */}
             <fieldset className="relative z-0 w-full p-px mb-5">
               <legend className="description-small text-black">Choose type of transaction</legend>
               <div className="block pt-3 pb-2 space-x-4">
@@ -195,6 +191,11 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
               </div>
               {transactionTypeError && <p className="text-red text-sm">{transactionTypeError}</p>}
             </fieldset>
+               {/* category */}
+               <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
+              <legend className="description-small text-black">Category</legend>
+              <div className="shrink-0">{categoryType()}</div>
+            </div>
 
             <div className="relative z-0 w-full mb-5 flex items-center gap-2">
               <legend className="description-small text-black">Amount</legend>

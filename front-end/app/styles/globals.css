@@ -139,3 +139,30 @@ body {
   }
 
 }
+
+.container {
+  display: flex;
+  flex-direction: column; /* Mobile-first approach */
+}
+
+/* For medium and larger screens */
+@media (min-width : 768px) {
+  .container {
+    flex-direction: row;
+    gap: 1rem; /* Switch to row layout for tablets and larger screens */
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    flex-direction: row;
+    gap: 1rem; /* Row layout for laptops and larger screens */
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    flex-direction: row; 
+    gap: 1rem;
+  }
+}
