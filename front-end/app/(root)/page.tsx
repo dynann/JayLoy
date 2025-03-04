@@ -75,26 +75,27 @@ export default function HomePage() {
       );
 
       // Check if the request was successful (status code 2xx)
-      // if (response.status >= 200 && response.status < 300) {
-      //   // Refresh the entire page
-      //   router.refresh();
-      // } 
-    }
-    //   else {
-    //     throw new Error(`Server returned ${response.status}`);
-    //   }
-    // } catch (err) {
-    //   console.error("Error deleting transaction:", err);
-    //   alert("Failed to delete transaction");
-    // } 
-      finally {
+      if (response.status >= 200 && response.status < 300) {
+        // Update local state by filtering out the deleted transaction
+        setTransactions((prevTransactions) =>
+          prevTransactions.filter((transaction) => transaction.id !== selectedTransaction.id),
+        )
+
+        // Close the modal
+        setSelectedTransaction(null);
+      } else {
+        throw new Error(`Server returned ${response.status}`);
+      }
+    } catch (err) {
+      console.error("Error deleting transaction:", err);
+      alert("Failed to delete transaction");
+    } finally {
       setIsDeleting(false);
-      setSelectedTransaction(null);
     }
   };
 
   if (loading) return <LoadingState />;
-  // if (error) return <ErrorState message={error} />;
+  if (error) return <ErrorState message={error} />;
 
   return (
     <div className="min-h-screen bg-background">
