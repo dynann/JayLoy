@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu"
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
-import ExpenseModal, { IncomeModal } from "./components/popupModal"
+import ExpenseModal, { DisabledButton, IncomeModal }  from "./components/popupModal";
 import { useRouter, useSearchParams } from "next/navigation"
 import dayjs from "dayjs"
 
@@ -86,6 +86,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
       return
     }
 
+    const positiveAmount = Math.abs(parseFloat(trimmedAmount));
     try {
       // Get the stored transaction data for the ID when editing
       const storedTransaction = isEdit
@@ -105,7 +106,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
-          amount: Number(trimmedAmount),
+          amount:positiveAmount,
           type: transactionType.toUpperCase(),
           description,
           date,
@@ -114,6 +115,8 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
       })
 
       if (!res.ok) throw new Error("Failed to save transaction")
+        console.log({amount});
+      console.log({ positiveAmount });
 
       router.push("/")
     } catch (err) {
@@ -122,11 +125,15 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
   }
 
   const categoryType = () => {
-    return transactionType === "Expense" ? (
-      <ExpenseModal category={category} setCategory={setCategory} />
-    ) : (
-      <IncomeModal category={category} setCategory={setCategory} />
-    )
+    if (!transactionType ){
+      return <DisabledButton label="Category" className={"bg-gray"} onClick={undefined}/>
+    } else if ( transactionType === "Income"){
+      return  <IncomeModal category={category} setCategory={setCategory} />
+    }else if ( transactionType === "Expense"){
+      return <ExpenseModal category={category} setCategory={setCategory} />
+    }else{
+      return "error"
+    }
   }
 
   const handleTransactionTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {

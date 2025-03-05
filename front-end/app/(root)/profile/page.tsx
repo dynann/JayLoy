@@ -1,18 +1,57 @@
 "use client";
-import React from "react";
-import { signOut } from "next-auth/react"; 
+import React, { useEffect, useState } from "react";
+import { signOut, useSession } from "next-auth/react"; 
 import Image from "next/image";
 import SVG from "react-inlinesvg";
 import ProfileImage from "@/public/images/plant.webp";
 import { Icon } from "@iconify/react";
 import router, { useRouter } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
-function page() {
+ 
+ 
+
+ function page() {
   const containerClasses ="min-h-screen flex flex-col items-center justify-center px-4 gap-4";
-
   const router = useRouter();
-  const handleLogout = async () => {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+
+  const display = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    
+    try {
+      const userId = localStorage.getItem("userId"); 
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log({username, email})
+        setUsername(data.username);
+        setEmail(data.enail);
+      }  else {
+        setError("Failed to fetch user data");
+      }
+    } catch (err) {
+      setError("Failed to fetch");
+      console.error("Failed to fetch", err);
+    }
+  };
+
+ 
+
+
+  const handleLogout = async () => {  //not done yet, call api and use instead
     await logout();
     // Clear localStorage 
     if (typeof window !== "undefined") {
@@ -29,7 +68,6 @@ function page() {
     { title: "Terms and Conditions", icon: <Icon icon="famicons:document-text" width="24" height="24" />},
     { title: "Log out", icon: <Icon icon="famicons:document-text" width="24" height="24" /> },
   ];
-
   return (
     <div className={containerClasses}>
       {/* tabbar already applied in layout.tsx  */}
@@ -39,8 +77,8 @@ function page() {
           src={ProfileImage}
           alt="Neil image"
         />
-        <p className="description-regular text-center">លុយ​ លុយ</p>
-        <p className="description-regular text-center">luyhluy@deepseek.com</p>
+        <p className="description-regular text-center">{username || "Loading..."}</p>
+        <p className="description-regular text-center">{email || "Loading..."}</p>
 
         {/* the setting list  */}
         <div>
