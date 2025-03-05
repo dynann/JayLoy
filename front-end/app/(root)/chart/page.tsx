@@ -16,6 +16,13 @@ type ChartData = {
   amount: number
 }
 
+type MonthData = {
+  month: number
+  year: number
+  label: string
+  fullLabel: string
+}
+
 const colorMap: { [key: string]: string } = {
   red: "#DD0A0A",
   purple: "#9747FF",
@@ -36,12 +43,84 @@ export default function ChartPage() {
   const [transactions, setTransactions] = useState<any[]>([])
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [showAllLegend, setShowAllLegend] = useState(false)
+  const [visibleMonthsStart, setVisibleMonthsStart] = useState(0)
+  const [allMonths, setAllMonths] = useState<MonthData[]>([])
 
-  // Get current month (1-12)
+  // Get current month and year
   const currentMonth = new Date().getMonth() + 1
+  const currentYear = new Date().getFullYear()
 
-  // Create array of months from January to current month only
-  const availableMonths = Array.from({ length: currentMonth }, (_, i) => i + 1)
+  // Create array of all available months (going back 24 months from current)
+  useEffect(() => {
+    const months: MonthData[] = []
+
+    // Generate 24 months of history (2 years)
+    for (let i = 0; i < 24; i++) {
+      // Calculate month and year by going backwards from current month
+      const date = new Date(currentYear, currentMonth - 1 - i)
+      const month = date.getMonth() + 1
+      const year = date.getFullYear()
+
+      months.push({
+        month,
+        year,
+        label: date.toLocaleString("default", { month: "long" }),
+        fullLabel: `${date.toLocaleString("default", { month: "short" })}-${year}`,
+      })
+    }
+
+    // Reverse the array so oldest months come first
+    months.reverse()
+    setAllMonths(months)
+
+    // Initialize to show current month and 2 previous months
+    setVisibleMonthsStart(Math.max(0, months.length - 3))
+  }, [currentMonth, currentYear])
+
+  // Get the currently visible months (3)
+  const visibleMonths = allMonths.slice(visibleMonthsStart, visibleMonthsStart + 3)
+
+  // Handle pagination
+  const handlePrevMonths = () => {
+    if (visibleMonthsStart > 0) {
+      setVisibleMonthsStart(visibleMonthsStart - 1)
+    }
+  }
+
+  const handleNextMonths = () => {
+    if (visibleMonthsStart + 3 < allMonths.length) {
+      setVisibleMonthsStart(visibleMonthsStart + 1)
+    }
+  }
+
+  // Handle month selection
+  const handleMonthSelect = (monthData: MonthData) => {
+    setSelectedMonth(monthData.month)
+    setSelectedYear(monthData.year)
+
+    // Find the position of the selected month in the available months array
+    const selectedMonthPosition = allMonths.findIndex((m) => m.month === monthData.month && m.year === monthData.year)
+
+    // If clicking on the leftmost visible month (first in the visible array)
+    if (selectedMonthPosition === visibleMonthsStart) {
+      // Show two months before the selected month
+      const newStartPosition = Math.max(0, selectedMonthPosition - 2)
+      setVisibleMonthsStart(newStartPosition)
+    }
+    // If clicking on any other month, center the view around it
+    else {
+      // Calculate the start position to show the selected month and two previous months
+      let newStartPosition = Math.max(0, selectedMonthPosition - 2)
+
+      // Ensure we don't exceed the available months
+      if (newStartPosition + 3 > allMonths.length) {
+        newStartPosition = Math.max(0, allMonths.length - 3)
+      }
+
+      setVisibleMonthsStart(newStartPosition)
+    }
+  }
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -92,6 +171,16 @@ export default function ChartPage() {
 
   const currentData = processData()
 
+  // Calculate total amount for the selected transaction type
+  const totalAmount = currentData.reduce((sum, item) => sum + Math.abs(item.amount), 0)
+
+  // Sort data by value (percentage) for legend display
+  const sortedData = [...currentData].sort((a, b) => b.value - a.value)
+
+  // Get top 3 for legend display
+  const topLegendItems = sortedData.slice(0, 3)
+  const legendItems = showAllLegend ? sortedData : topLegendItems
+
   const getCategoryColor = useCallback((colorClass = "bg-gray") => {
     const color = colorClass.replace("bg-", "")
     return colorMap[color] || colorMap.gray
@@ -124,18 +213,39 @@ export default function ChartPage() {
           </button>
         </div>
 
-        <div className="flex overflow-x-auto hide-scrollbar gap-6 px-2 justify-center">
-          {availableMonths.map((month) => (
-            <button
-              key={month}
-              className={`whitespace-nowrap pb-1 ${
-                selectedMonth === month ? "text-white font-medium border-b-2 border-white" : "text-white/70"
-              }`}
-              onClick={() => setSelectedMonth(month)}
-            >
-              {new Date(2000, month - 1).toLocaleString("default", { month: "long" })}
-            </button>
-          ))}
+        {/* Month Pagination */}
+        <div className="flex items-center justify-center gap-2 px-2">
+          <button
+            onClick={handlePrevMonths}
+            disabled={visibleMonthsStart === 0}
+            className={`p-2 rounded-full ${visibleMonthsStart === 0 ? "text-white/40" : "text-white hover:bg-white/10"}`}
+          >
+            <Icon icon="lucide:chevron-left" className="w-5 h-5" />
+          </button>
+
+          <div className="flex gap-4">
+            {visibleMonths.map((monthData, index) => (
+              <button
+                key={`${monthData.year}-${monthData.month}`}
+                className={`whitespace-nowrap pb-1 px-2 ${
+                  selectedMonth === monthData.month && selectedYear === monthData.year
+                    ? "text-white font-medium border-b-2 border-white"
+                    : "text-white/70"
+                }`}
+                onClick={() => handleMonthSelect(monthData)}
+              >
+                {monthData.fullLabel}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={handleNextMonths}
+            disabled={visibleMonthsStart + 3 >= allMonths.length}
+            className={`p-2 rounded-full ${visibleMonthsStart + 3 >= allMonths.length ? "text-white/40" : "text-white hover:bg-white/10"}`}
+          >
+            <Icon icon="lucide:chevron-right" className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
@@ -147,7 +257,12 @@ export default function ChartPage() {
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
-            <div className="h-[220px] mb-4">
+            {/* Chart Title */}
+            <h2 className="text-2xl font-bold text-center mb-4">
+              {activeView === "income" ? "Income" : "Expense"} Summary
+            </h2>
+
+            <div className="relative h-[220px] mb-8">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -167,11 +282,19 @@ export default function ChartPage() {
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
+
+              {/* Total Amount */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                <p className="text-sm text-gray-500 font-medium">Total</p>
+                <p className={`text-2xl font-bold ${activeView === "income" ? "text-primary" : "text-red"}`}>
+                  ${totalAmount.toFixed(2)}
+                </p>
+              </div>
             </div>
 
             {/* Legend */}
-            <div className="grid grid-cols-1 gap-y-4 mb-8 ml-12">
-              {currentData.map((item) => {
+            <div className="grid grid-cols-1 gap-y-4 mb-2 ml-12">
+              {legendItems.map((item) => {
                 const category = TRANSACTION_CATEGORIES[Number(item.categoryID)]
                 const colorClass = category?.color || "bg-gray"
                 return (
@@ -185,20 +308,34 @@ export default function ChartPage() {
 
                       {/* name container */}
                       <div className="w-32 text-left">
-                        <span className="text-sm">{category?.name || "Other"}</span>
+                        <span className="text-sm font-medium">{category?.name || "Other"}</span>
                       </div>
                     </div>
 
                     {/* Value */}
                     <div className="w-1/2 flex justify-start pl-8">
-                      <span className="text-sm">{item.value}%</span>
+                      <span className="text-sm font-medium">{item.value}%</span>
                     </div>
                   </div>
                 )
               })}
+
+              {/* See More Button */}
+              {currentData.length > 3 && (
+                <div className="text-center mt-2">
+                  <button
+                    onClick={() => setShowAllLegend(!showAllLegend)}
+                    className="text-primary text-sm font-medium hover:underline"
+                  >
+                    {showAllLegend ? "Show Less" : "See More"}
+                  </button>
+                </div>
+              )}
             </div>
 
-            <h2 className="font-medium px-1 mb-3">{activeView === "income" ? "Income" : "Expense"} Lists:</h2>
+            <h2 className="font-bold text-xl px-1 mb-4 mt-6">
+              {activeView === "income" ? "Income" : "Expense"} Lists:
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {currentData.map((item) => {
                 const category = TRANSACTION_CATEGORIES[Number(item.categoryID)]
@@ -206,7 +343,7 @@ export default function ChartPage() {
                 return (
                   <div
                     key={item.categoryID}
-                    className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-8 pr-8 w-full cursor-pointer hover:opacity-80"
+                    className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-8 pr-8 w-full cursor-pointer hover:opacity-80 transition-all"
                     onClick={() => setSelectedCategory(Number(item.categoryID))}
                   >
                     <div className="flex items-center space-x-5">
