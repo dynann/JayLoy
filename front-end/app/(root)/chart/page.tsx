@@ -37,6 +37,12 @@ export default function ChartPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
+  // Get current month (1-12)
+  const currentMonth = new Date().getMonth() + 1
+
+  // Create array of months from January to current month only
+  const availableMonths = Array.from({ length: currentMonth }, (_, i) => i + 1)
+
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -85,7 +91,6 @@ export default function ChartPage() {
   }, [transactions, activeView])
 
   const currentData = processData()
-  const months = Array.from({ length: 12 }, (_, i) => i + 1)
 
   const getCategoryColor = useCallback((colorClass = "bg-gray") => {
     const color = colorClass.replace("bg-", "")
@@ -120,7 +125,7 @@ export default function ChartPage() {
         </div>
 
         <div className="flex overflow-x-auto hide-scrollbar gap-6 px-2 justify-center">
-          {months.map((month) => (
+          {availableMonths.map((month) => (
             <button
               key={month}
               className={`whitespace-nowrap pb-1 ${
