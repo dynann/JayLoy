@@ -145,7 +145,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     let value = event.target.value
 
     // Allow only numbers and optional negative sign
-    if (/^-?\d*\.?\d*$/.test(value)) {
+    if (/^-?\d*\.?\d{0,2}$/.test(value)) {
       // - for expenses 
       if (transactionType === "Expense" && !value.startsWith("-")) {
         value = `-${value}`

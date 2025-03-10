@@ -13,7 +13,7 @@ export const TransactionItem = ({ transaction, onClick }: TransactionItemProps) 
     color: "bg-gray",
   }
 
-  const amount = Number.parseFloat(transaction.amount)
+  const amount = Number.parseFloat(transaction.amount) / 100
   const isExpense = transaction.type === "EXPENSE"
 
   return (
