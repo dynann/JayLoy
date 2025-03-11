@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
+import { TabWithCancelButton } from "@/layouts/Tabbar"
 import dayjs from "dayjs"
 
 interface Transaction {
@@ -60,23 +61,15 @@ export function CategoryTransactions({ categoryId, transactions, onClose, month,
   }, [transactions, categoryId, month, year])
 
   return (
-    <div className="fixed inset-0 bg-background z-50 shadow-sm">
+    <div className="fixed inset-0 bg-background z-50">
       {/* Header */}
-      <div className="border-b shadow-sm bg-white">
-        <div className="flex items-center justify-between px-4 py-4">
-          <button onClick={onClose} className="text-primary font-medium">
-            Back
-          </button>
-          <h1 className="text-base font-medium">Record Details</h1>
-          <div className="w-[32px]"></div>
-        </div>
-      </div>
+      <TabWithCancelButton text="Record Details" onClick={onClose} />
 
       {/* Transaction List Container */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-16">
         <div className="max-w-4xl mx-auto p-4">
           {/* Category Header - Now part of the first date group */}
-          <div className="flex items-center space-x-5 mb-6 px-8">
+          <div className="flex items-center space-x-5 mb-6 px-8 mt-2">
             <div className={`${category?.color || "bg-gray"} p-3 rounded-full`}>
               {category?.icon || <Icon icon="mdi:help-circle" className="w-[3em] h-[3em] text-white" />}
             </div>
@@ -110,7 +103,7 @@ export function CategoryTransactions({ categoryId, transactions, onClose, month,
                       className={`description-medium ${transaction.type === "EXPENSE" ? "!text-red" : "!text-primary"}`}
                     >
                       {transaction.type === "EXPENSE" ? "-" : "+"}
-                      {Math.abs(Number(transaction.amount)).toFixed(2)}
+                      {Math.abs(Number(transaction.amount) / 100).toFixed(2)}
                     </span>
                   </div>
                 ))}

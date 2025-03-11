@@ -44,7 +44,8 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
       if (storedTransaction) {
         const transaction = JSON.parse(storedTransaction)
         setTransactionType(transaction.type === "EXPENSE" ? "Expense" : "Income")
-        setAmount(Math.abs(transaction.amount).toString())
+        // Convert from cents to dollars for display
+        setAmount((Math.abs(transaction.amount) / 100).toString())
         // Format YYYY-MM-DD
         setDate(formatDate(transaction.date))
         setDescription(transaction.description || "")
@@ -80,24 +81,25 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     }
 
     // Validate amount
-    let trimmedAmount = amount.trim()
+    const trimmedAmount = amount.trim()
     if (!trimmedAmount || trimmedAmount === "-") {
       setAmountError("Please enter a valid amount.")
       return
     }
 
-    const positiveAmount = Math.abs(parseFloat(trimmedAmount));
+    const positiveAmount = Math.abs(Number.parseFloat(trimmedAmount));
     try {
       // Get the stored transaction data for the ID when editing
-      const storedTransaction = isEdit
-        ? JSON.parse(localStorage.getItem("editingTransaction") || "{}")
-        : null
+      const storedTransaction = isEdit ? JSON.parse(localStorage.getItem("editingTransaction") || "{}") : null
 
       const endpoint = isEdit
         ? `${process.env.NEXT_PUBLIC_API_URL}/transactions/${storedTransaction.id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`
 
       const method = isEdit ? "PATCH" : "POST"
+
+      // Convert dollars to cents for the backend
+      const amountInCents = Math.round(positiveAmount * 100)
 
       const res = await fetch(endpoint, {
         method,
@@ -106,7 +108,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
-          amount:positiveAmount,
+          amount: amountInCents,
           type: transactionType.toUpperCase(),
           description,
           date,
@@ -115,8 +117,6 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
       })
 
       if (!res.ok) throw new Error("Failed to save transaction")
-        console.log({amount});
-      console.log({ positiveAmount });
 
       router.push("/")
     } catch (err) {
@@ -125,13 +125,13 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
   }
 
   const categoryType = () => {
-    if (!transactionType ){
-      return <DisabledButton label="Category" className={"bg-gray"} onClick={undefined}/>
-    } else if ( transactionType === "Income"){
-      return  <IncomeModal category={category} setCategory={setCategory} />
-    }else if ( transactionType === "Expense"){
+    if (!transactionType) {
+      return <DisabledButton label="Category" className={"bg-gray"} onClick={undefined} />
+    } else if (transactionType === "Income") {
+      return <IncomeModal category={category} setCategory={setCategory} />
+    } else if (transactionType === "Expense") {
       return <ExpenseModal category={category} setCategory={setCategory} />
-    }else{
+    } else {
       return "error"
     }
   }
@@ -146,7 +146,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
 
     // Allow only numbers and optional negative sign
     if (/^-?\d*\.?\d{0,2}$/.test(value)) {
-      // - for expenses 
+      // - for expenses
       if (transactionType === "Expense" && !value.startsWith("-")) {
         value = `-${value}`
       }
@@ -198,8 +198,8 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
               </div>
               {transactionTypeError && <p className="text-red text-sm">{transactionTypeError}</p>}
             </fieldset>
-               {/* category */}
-               <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
+            {/* category */}
+            <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
               <legend className="description-small text-black">Category</legend>
               <div className="shrink-0">{categoryType()}</div>
             </div>
@@ -247,3 +247,4 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     </div>
   )
 }
+

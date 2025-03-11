@@ -50,7 +50,8 @@ export default function HomePage() {
   // Calculate total income and expense
   const { totalIncome, totalExpense } = transactions.reduce(
     (totals, transaction) => {
-      const amount = Number.parseFloat(transaction.amount);
+      // Convert from cents to dollars by dividing by 100
+      const amount = Number.parseFloat(transaction.amount) / 100
       if (transaction.type === "EXPENSE") {
         totals.totalExpense += amount;
       } else {
@@ -142,3 +143,4 @@ export default function HomePage() {
     </div>
   );
 }
+

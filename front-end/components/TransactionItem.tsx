@@ -1,3 +1,5 @@
+"use client"
+
 import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 
@@ -13,6 +15,7 @@ export const TransactionItem = ({ transaction, onClick }: TransactionItemProps) 
     color: "bg-gray",
   }
 
+  // Convert from cents to dollars by dividing by 100
   const amount = Number.parseFloat(transaction.amount) / 100
   const isExpense = transaction.type === "EXPENSE"
 

@@ -142,7 +142,11 @@ export default function ChartPage() {
 
   const processData = useCallback((): ChartData[] => {
     const filtered = transactions.filter((t) => {
-      const amt = t.type === "EXPENSE" ? -Math.abs(Number.parseFloat(t.amount)) : Math.abs(Number.parseFloat(t.amount))
+      // Convert from cents to dollars by dividing by 100
+      const amt =
+        t.type === "EXPENSE"
+          ? -Math.abs(Number.parseFloat(t.amount) / 100)
+          : Math.abs(Number.parseFloat(t.amount) / 100)
       return activeView === "income" ? amt > 0 : amt < 0
     })
 
@@ -152,8 +156,11 @@ export default function ChartPage() {
         if (!acc[key]) {
           acc[key] = { categoryID: String(key), value: 0, amount: 0 }
         }
+        // Convert from cents to dollars by dividing by 100
         const amt =
-          t.type === "EXPENSE" ? -Math.abs(Number.parseFloat(t.amount)) : Math.abs(Number.parseFloat(t.amount))
+          t.type === "EXPENSE"
+            ? -Math.abs(Number.parseFloat(t.amount) / 100)
+            : Math.abs(Number.parseFloat(t.amount) / 100)
         acc[key].value += Math.abs(amt)
         acc[key].amount += amt
         return acc
