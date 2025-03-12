@@ -38,20 +38,7 @@ import router, { useRouter, useSearchParams } from "next/navigation";
       console.error("Failed to fetch", err);
     }
   };
-
  
-   
-
-  // const handleLogout = async () => {  //not done yet, call api and use instead
-  //   await logout();
-  //   // Clear localStorage 
-  //   if (typeof window !== "undefined") {
-  //     localStorage.removeItem("accessToken");
-  //     localStorage.removeItem("refreshToken");
-  //     localStorage.removeItem("tokenTimestamp");
-  //   }
-  //   router.push("/login");
-  // };
   const lists = [
     { title: "Edit Profile", icon: <Icon icon="iconamoon:profile-fill" width="24" height="24" />},
     { title: "My Data", icon: <Icon icon="bxs:data" width="24" height="24" /> },
@@ -74,8 +61,8 @@ import router, { useRouter, useSearchParams } from "next/navigation";
         {/* the setting list  */}
         <div>
           {lists.map((item, index) => (
-            <ul className=" ">
-              <li key={index} className="m-2 sm:pb-1 " >
+            <ul key={index}>
+              <li className="m-2 sm:pb-1 " >
                 <div className="flex  items-center w-full space-x-4 rtl:space-x-reverse"
                  onClick= {item.title === "Log out"? handleLogout : undefined} >
                   {/* icon  */}
