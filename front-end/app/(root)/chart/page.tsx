@@ -49,7 +49,7 @@ export default function ChartPage() {
         // Format the month query using the selected year and month
         const monthParam = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`
 
-        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?month=${monthParam}`)
+        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/categories/summary?type=EXPENSE&page=1&limit=5&month=2025-10`)
         const data = await response.json()
         const transactionsData = Array.isArray(data) ? data : data.transactions || []
         setTransactions(transactionsData)
