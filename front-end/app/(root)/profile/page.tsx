@@ -13,8 +13,8 @@ import router, { useRouter, useSearchParams } from "next/navigation";
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogout = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogout = async (e?: React.FormEvent) => {  
+    e?.preventDefault();  
     try {
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
@@ -68,7 +68,7 @@ import router, { useRouter, useSearchParams } from "next/navigation";
                   if (item.title === "Edit Profile") {
                     router.push("/profile/profileDetails");
                   } else if (item.title === "Log out") {
-                    handleLogout
+                    handleLogout();
                   }
                   }} >
                   {/* icon  */}
