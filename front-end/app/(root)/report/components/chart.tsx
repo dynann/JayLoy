@@ -416,10 +416,10 @@ export default function BudgetBarChart (): React.JSX.Element {
           </CardContent>
           <CardFooter className="flex-col items-start gap-2 text-sm">
             <div className="flex gap-2 font-medium leading-none">
-              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+              You spend 10% less than Feburary.<TrendingUp className="h-4 w-4" />
             </div>
             <div className="leading-none text-muted-foreground">
-              Showing total expenses for the last 6 months
+              Your savings has been increased for the past 2 months.
             </div>
           </CardFooter>
         </Card>

@@ -62,15 +62,15 @@ const Page: React.FC = () => {
     const absNum = Math.abs(num);
     let formatted = "";
     if (absNum >= 1_000_000_000_000) {
-      formatted =  (absNum / 1_000_000_000_000).toFixed(1) + "T";
+      formatted =  (absNum / 1_000_000_000_000).toFixed(2) + "T";
     } else if (absNum >= 1_000_000_000) {
-      formatted =  (absNum / 1_000_000_000).toFixed(1) + "B";
+      formatted =  (absNum / 1_000_000_000).toFixed(2) + "B";
     } else if (absNum >= 1_000_000) {
-      formatted =  (absNum / 1_000_000).toFixed(1) + "M";
+      formatted =  (absNum / 1_000_000).toFixed(2) + "M";
     } else if (absNum >= 1_000) {
-      formatted =  (absNum / 1_000).toFixed(1) + "k";
+      formatted =  (absNum / 1_000).toFixed(2) + "k";
     } else {
-      formatted =  absNum.toFixed(1);
+      formatted =  absNum.toFixed(2);
     }
     return num < 0 ? `-$${formatted}` : `$${formatted}`;
   }
@@ -98,7 +98,7 @@ const Page: React.FC = () => {
   ];
   
   return (
-    <div className="space-y-4 min-h-screen   p-16 flex flex-col items-center px-4">
+    <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {/* card  */}
       <div className="w-full h-56 mt-16   rounded-xl relative text-white shadow-2xl transition-transform transform hover:scale-110">
         <Image
@@ -150,7 +150,7 @@ const Page: React.FC = () => {
                 <div key={index} className="w-full flex">
                   <div className="flex flex-col items-center w-full">
                     <h5 className="description-regular">{entry.name}</h5>
-                    <p className="sub-header" style={{ color: entry.color }} >
+                    <p className="description-medium" style={{ color: entry.color }} >
                       {entry.value}
                     </p>
                   </div>

@@ -49,7 +49,7 @@ import router, { useRouter, useSearchParams } from "next/navigation";
   return (
     <div className={containerClasses}>
       {/* tabbar already applied in layout.tsx  */}
-      <div className="space-y-2 flex flex-col items-center px-4">
+      <div className="space-y-2 flex flex-col items-center px-1 pb-2">
         <Image
           className="w-24 h-24 p-1 rounded-full ring-2 ring-primary dark:ring-gray"
           src={ProfileImage}
@@ -64,7 +64,13 @@ import router, { useRouter, useSearchParams } from "next/navigation";
             <ul key={index}>
               <li className="m-2 sm:pb-1 " >
                 <div className="flex  items-center w-full space-x-4 rtl:space-x-reverse"
-                 onClick= {item.title === "Log out"? handleLogout : undefined} >
+                 onClick={() => {
+                  if (item.title === "Edit Profile") {
+                    router.push("/profile/profileDetails");
+                  } else if (item.title === "Log out") {
+                    handleLogout
+                  }
+                  }} >
                   {/* icon  */}
                   <div className="flex flex-col items-center justify-center py-2 text-gray">
                      <div className={`bg-tertiary p-2 rounded-lg text-primary shadow-sm`}>{item.icon}</div>

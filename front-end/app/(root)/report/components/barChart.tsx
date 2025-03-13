@@ -42,7 +42,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
           y="50%"
           textAnchor="middle"
           dominantBaseline="middle"
-          className="header"
+          className="sub-header"
         >
           {numberConverter(remainingBalance)} {/* Placeholder for dynamic amount */}
         </text>
