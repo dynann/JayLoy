@@ -123,6 +123,27 @@ const Page: React.FC = () => {
     },
   ];
   
+  const chartDisplay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("refreshToken")}`,  //remove refreshToken in db
+        }
+      });
+      if (res.ok) {
+         console.log("chart displayed")
+      }  else {
+        setError("Failed to display chart");
+      }
+    } catch (err) {
+      setError("Failed to chart");
+      console.error("Failed to fetch", err);
+    }
+  };
+  
   return (
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {/* card  */}
@@ -192,3 +213,6 @@ const Page: React.FC = () => {
   );
 };
 export default Page;
+function setError(arg0: string) {
+  throw new Error("Function not implemented.");
+}
