@@ -12,6 +12,9 @@ import {
 import BudgetBarChart from "@/app/(root)/report/components/chart";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import PieChartComponent from "./components/barChart";
+import { get } from "http";
+import { headers } from "next/headers";
+import dayjs from "dayjs";
 interface Transaction {
   id: number;
   amount: string;
@@ -25,6 +28,31 @@ interface PieData {
   color: string;
 }
 const Page: React.FC = () => {
+  const fetchData = async (data: string, year: number) => {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/${data}?year=${year}`,{
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`, 
+      }
+    }
+    )
+  }
+  const fetchBalance = async () => {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`,{
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`, 
+      }
+    }
+    )
+  }
+  const currentYear = dayjs().year();
+  const yearlyReport = fetchData("yearlyreport", currentYear);
+  const totalExpenseEachMonth = fetchData("transaction/monthly/totalExpense", currentYear)
+  const balance = fetchBalance();
+  
   const { fetchWithToken } = useAuthFetch();
   const [selectedYear, setSelectedYear] = useState<number>(2025);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
