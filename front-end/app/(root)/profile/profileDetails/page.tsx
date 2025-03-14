@@ -1,10 +1,9 @@
-import React from "react";
+'use client';
+import React, { useState } from "react";
 import Tabbar from "@/layouts/Tabbar";
 import Image from "next/image";
 import ProfileImage from "@/public/images/plant.webp";
 import {
-  TextInput,
-  PasswordInput,
   TransparentInput,
 } from "@/components/customeInput";
 import email from "next-auth/providers/email";
@@ -12,6 +11,8 @@ import { Button } from "@/components/ui/button";
 function page() {
   const containerClasses =
     "min-h-screen flex flex-col items-center justify-center px-4 gap-2";
+    const [username, setUsername] = useState("sansetha");
+    const [email, setEmail] = useState("setha.user@gmail.com")
   return (
     <>
       <Tabbar text="Edit Profile" />
@@ -22,7 +23,6 @@ function page() {
             src={ProfileImage}
             alt="Profile image"
           />
-
           <label className="flex bg-transparent hover:underline text-black text-base px-5 py-3 outline-none rounded w-max cursor-pointer mx-auto font-[sans-serif]">
             {/* Upload
             <input type="file" id="uploadFile1" className="hidden" /> */}
@@ -59,8 +59,9 @@ function page() {
                   <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
                     <TransparentInput
                       type="text"
-                      value="sansetha"
                       className="text-right"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                     />
                   </div>
                 </div>
@@ -78,7 +79,8 @@ function page() {
                   <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
                     <TransparentInput
                       type="email"
-                      value="san.setha@gmail.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
                 </div>

@@ -62,8 +62,8 @@ import router, { useRouter, useSearchParams } from "next/navigation";
         <div>
           {lists.map((item, index) => (
             <ul key={index}>
-              <li className="m-2 sm:pb-1 " >
-                <div className="flex  items-center w-full space-x-4 rtl:space-x-reverse"
+              <li className="m-2 sm:pb-1  " >
+                <div className="flex  items-center w-full space-x-4 rtl:space-x-reverse  cursor-pointer hover:bg-white"
                  onClick={() => {
                   if (item.title === "Edit Profile") {
                     router.push("/profile/profileDetails");
@@ -76,11 +76,11 @@ import router, { useRouter, useSearchParams } from "next/navigation";
                      <div className={`bg-tertiary p-2 rounded-lg text-primary shadow-sm`}>{item.icon}</div>
                   </div>
                   <div className="flex-1  min-w-0">
-                    <p className=" description-regular text-left text-black truncate dark:text-white"
+                    <button className=" description-regular text-left text-black truncate dark:text-white"
                     // onClick= {item.title === "Log out"? handleLogout : undefined}
                     >
                       {item.title}{" "}
-                    </p>
+                    </button>
                   </div>
                   <div className="inline-flex items-end   text-gray dark:text-white">
                     <Icon icon="ion:chevron-forward" width="24" height="24" />
