@@ -1,99 +1,165 @@
-'use client';
-import React, { useState } from "react";
-import Tabbar from "@/layouts/Tabbar";
-import Image from "next/image";
-import ProfileImage from "@/public/images/plant.webp";
-import {
-  TransparentInput,
-} from "@/components/customeInput";
-import email from "next-auth/providers/email";
-import { Button } from "@/components/ui/button";
-function page() {
-  const containerClasses =
-    "min-h-screen flex flex-col items-center justify-center px-4 gap-2";
-    const [username, setUsername] = useState("sansetha");
-    const [email, setEmail] = useState("setha.user@gmail.com")
+"use client"
+import { useState, useEffect } from "react"
+import { TabWithCancelButton } from "@/layouts/Tabbar"
+import { TransparentInput } from "@/components/customeInput"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import { Icon } from "@iconify/react"
+import Image from "next/image"
+import ProfileImage from "@/public/images/plant.webp"
+
+function ProfileDetailsPage() {
+  const router = useRouter()
+  const containerClasses = "min-h-screen flex flex-col items-center pt-16 px-4 gap-4 bg-background"
+
+  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [userId, setUserId] = useState<number | null>(null)
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true)
+
+        // get the user ID from the token
+        const token = localStorage.getItem("accessToken")
+        if (!token) {
+          router.push("/login")
+          return
+        }
+
+        // Parse the JWT token to get the user ID
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]))
+        const id = tokenPayload.sub // 'sub' is typically where the user ID is stored
+        setUserId(id)
+
+        // fetch the user data using the ID
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.ok) {
+          const userData = await response.json()
+          setUsername(userData.username || "")
+          setEmail(userData.email || "")
+        } else {
+          setError("Failed to fetch user data")
+        }
+      } catch (err) {
+        setError("Failed to fetch user data")
+        console.error("Failed to fetch user data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [router])
+
+  const handleSaveChanges = async () => {
+    if (!userId) {
+      setError("User ID not found")
+      return
+    }
+
+    try {
+      setSaving(true)
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({
+          username,
+          email,
+        }),
+      })
+
+      if (response.ok) {
+        router.push("/profile")
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || "Failed to update profile")
+      }
+    } catch (err) {
+      setError("Failed to update profile")
+      console.error("Failed to update profile:", err)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <>
-      <Tabbar text="Edit Profile" />
-      <div className={containerClasses}>
-        <div className="space-y-2 flex flex-col items-center px-1 pb-2">
-          <Image
-            className="w-20 h-20 p-1 rounded-full ring-2 ring-primary dark:ring-gray"
-            src={ProfileImage}
-            alt="Profile image"
-          />
-          <label className="flex bg-transparent hover:underline text-black text-base px-5 py-3 outline-none rounded w-max cursor-pointer mx-auto font-[sans-serif]">
-            {/* Upload
-            <input type="file" id="uploadFile1" className="hidden" /> */}
-             <input type="file" className="hidden" />
-             Edit Picture
-          </label>
-        </div>
+      <TabWithCancelButton text="Edit" onClick={() => router.push("/profile")} />
 
-        <div className="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8 dark:bg-gray-800 dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h5 className="sub-header leading-none text-gray-900 dark:text-white">
-              Personal Informatioin
-            </h5>
-            {/* <a href="#" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">
-            View all
-        </a> */}
+      <div className={containerClasses}>
+        {loading ? (
+          <div className="flex items-center justify-center h-40">
+            <Icon icon="line-md:loading-twotone-loop" className="w-10 h-10 text-primary" />
           </div>
-          <div className="flow-root">
-            <ul
-              role="list"
-              className="divide-y divide-gray-200 dark:divide-gray-700"
-            >
-              <li className="py-3 sm:py-4">
-                <div className="flex items-center">
-                  <div className="shrink-0">
-                    {/* <Image className="w-8 h-8 rounded-full" src="/docs/images/people/profile-picture-1.jpg" alt="Neil image"/> */}
-                  </div>
-                  <div className="flex-1 min-w-0 ms-4">
-                    <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
-                      Username
-                    </p>
-                    {/* <TextInput type="username" placeholder="sansetha" value="sansetha" disabled={true}  /> */}
-                  </div>
-                  <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    <TransparentInput
-                      type="text"
-                      className="text-right"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                    />
+        ) : (
+          <>
+            <div className="flex flex-col items-center gap-2 mb-6">
+              <Image
+                className="w-20 h-20 p-1 rounded-full ring-2 ring-primary dark:ring-gray"
+                src={ProfileImage || "/placeholder.svg"}
+                alt="Profile image"
+              />
+              <span className="text-sm font-medium">Edit</span>
+            </div>
+
+            <div className="w-full max-w-md">
+              {error && <div className="mb-4 p-3 bg-red-50 text-red border border-red-100 rounded-lg">{error}</div>}
+
+              <div className="bg-white rounded-xl shadow-sm">
+                <div className="flex items-center p-4 border-b border-gray-100">
+                  <span className="text-sm text-gray-600 flex-1">Username</span>
+                  <div className="w-1/2">
+                    <TransparentInput type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
                   </div>
                 </div>
-              </li>
-              <li className="py-3 sm:py-4">
-                <div className="flex items-center ">
-                  <div className="shrink-0">
-                    {/* <Image className="w-8 h-8 rounded-full" src="/docs/images/people/profile-picture-3.jpg" alt="Bonnie image"/> */}
-                  </div>
-                  <div className="flex-1 min-w-0 ms-4">
-                    <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
-                      E-mail
-                    </p>
-                  </div>
-                  <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    <TransparentInput
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
+
+                <div className="flex items-center p-4 border-b border-gray-100">
+                  <span className="text-sm text-gray-600 flex-1">email</span>
+                  <div className="w-1/2">
+                    <TransparentInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                 </div>
-              </li>
-            </ul>
-          </div>
-          <Button type="submit" className="green-button !text-white">
-            Saves changes
-          </Button>
-        </div>
+
+                <div className="flex items-center p-4">
+                  <span className="text-sm text-gray-600 flex-1">Phone</span>
+                  <div className="w-1/2">
+                    <TransparentInput type="text" value="None" onChange={() => {}} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 px-4">
+                <Button
+                  type="button"
+                  className="w-full bg-primary hover:bg-primary/90 text-white rounded-full py-3"
+                  onClick={handleSaveChanges}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save changes"}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
-  );
+  )
 }
 
-export default page;
+export default ProfileDetailsPage
+
