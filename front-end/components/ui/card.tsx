@@ -89,5 +89,5 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/app/(root)/report/components/chart";
+} from "@/components/ui/chart";
  
