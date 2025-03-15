@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PasswordInput, TextInput } from "@/components/customeInput";
+import { getSession, signIn, useSession } from "next-auth/react";
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
@@ -13,7 +14,16 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-
+  const {data: session, status} = useSession() 
+  useEffect(() => {
+    if (session?.accessToken) {
+      // Store tokens in localStorage
+      localStorage.setItem("accessToken", session.accessToken);
+      localStorage.setItem("refreshToken", session.refreshToken);
+      localStorage.setItem("tokenTimestamp", Date.now().toString());
+      router.push("/");
+    }
+  }, [session, router]);
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -49,6 +59,45 @@ export default function SignUpPage() {
       console.error("Failed to fetch", err);
     }
   };
+  const handleGoogleLogin = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const result = await signIn("google", { redirect: false });
+      
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        // Get the session after successful login
+        const session = await getSession();
+        
+        if (session?.user) {
+          // Send user info to your backend
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: session.user.email,
+              name: session.user.name,
+              image: session.user.image,
+            }),
+          });
+  
+          if (response.ok) {
+            const { accessToken, refreshToken } = await response.json();
+            
+            // Store tokens
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+            localStorage.setItem("tokenTimestamp", Date.now().toString());
+            
+            router.push("/");
+          } else {
+            setError("Failed to get tokens from backend");
+          }
+        }
+      }
+    };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
@@ -77,7 +126,7 @@ export default function SignUpPage() {
           </div>
 
           <div className="text-center description-small">
-            By creating your account, you're agreeing to our{" "}
+            By creating your account, you&apos;re agreeing to our{" "}
             <Link href="#" className="underline hover:text-primary">Terms and Conditions</Link>{" "}
             and{" "}
             <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>.
@@ -94,7 +143,7 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          <Button variant="outline" className="w-full rounded-full">
+          <Button variant="outline" className="w-full rounded-full" onClick={handleGoogleLogin} >
             <img src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
             Continue with Google
           </Button>

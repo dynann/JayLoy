@@ -5,6 +5,7 @@ import Image from "next/image"
 import ProfileImage from "@/public/images/plant.webp"
 import { Icon } from "@iconify/react"
 import { useRouter } from "next/navigation"
+import { signOut } from "next-auth/react"
 
 function ProfilePage() {
   const containerClasses = "min-h-screen flex flex-col items-center justify-center px-4 gap-2 bg-background"
