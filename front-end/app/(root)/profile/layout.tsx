@@ -12,7 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className=" containClasses  bg-background">
       {/* <Tabbar text={"Profile Page"} /> */}
-      <Tabbar text="Profile"   />
+      <Tabbar text="Profile"/>
       {children}
       <NavBar />
     </div>

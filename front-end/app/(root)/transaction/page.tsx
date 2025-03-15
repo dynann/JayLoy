@@ -155,7 +155,6 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
       else if (transactionType === "Income" && value.startsWith("-")) {
         value = value.replace("-", "")
       }
-
       setAmount(value)
       setAmountError("") // Reset amount error when user starts typing
     }
@@ -164,8 +163,10 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-4">
       <div className="w-full bg-background p-0 relative z-0">
-        <div className="mx-auto max-w-md px-6 py-12 bg-background border-0 shadow-lg sm:rounded-3xl">
+        <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl shadow-lg sm:rounded-3xl">
+        {/* <div className="mx-auto max-w-md px-6 py-12 bg-background border-0 shadow-lg sm:rounded-3xl"> */}
           <h1 className="text-2xl mb-8">{isEdit ? "Edit record" : "Add record"}</h1>
+          {/* <p> Keep tracking to understand more about your spending.</p> */}
           <form id="form" onSubmit={handleSubmit}>
             {/* radio  */}
             <fieldset className="relative z-0 w-full p-px mb-5">
@@ -230,7 +231,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
               value={date} // YYYY-MM-DD format
               onChange={(e) => setDate(e.target.value)}
             />
-
+            <legend className="description-small text-black">Description</legend>
             <TransactionInput
               type="text"
               placeholder="Description"
