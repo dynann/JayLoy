@@ -96,6 +96,9 @@ body {
   .sub-header {
     @apply font-poppins text-[24px] font-bold text-black;
   }
+  .sub-header-white {
+    @apply font-poppins text-[24px] font-bold text-white;
+  }
 
   .description-medium {
     @apply font-poppins text-[16px] font-medium text-black;

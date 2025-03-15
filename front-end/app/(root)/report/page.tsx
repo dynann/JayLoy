@@ -34,21 +34,16 @@ const Page: React.FC = () => {
     total_remaining: number;
   } | null>(null);
 
-  const [totalBalance, setTotalBalance] = useState<{
-    id: number;
-    name: string;
-    balance: number;
-  } | null>(null);
-
+  const [totalBalance, setTotalBalance] = useState< 0| null>(null);
   const [error, setError] = useState<string | null>(null); // Added error state
-
+  const year = dayjs().year();
   const fetchYearlyReport = async (e?: React.FormEvent) => {
     e?.preventDefault();
     try {
-      const userID = 2;
-      const year = dayjs().year();
+      // const userID = 2;
+      
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyReport?userID=${userID}&year=${year}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`,
         {
           method: "GET",
           headers: {
@@ -77,11 +72,11 @@ const Page: React.FC = () => {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const userID = 2;
-        const year = dayjs().year();
+        const userID = 4;
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/accounts/${userID}?year=${year}`,
+          // `${process.env.NEXT_PUBLIC_API_URL}/accounts/${userID}?year=${year}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`,
           {
             method: "GET",
             headers: {
@@ -90,12 +85,10 @@ const Page: React.FC = () => {
             },
           }
         );
-
         if (!res.ok) throw new Error("Failed to fetch the balance");
-
-        const data = await res.json();
-        console.log("Fetched Balance:", data);
-        setTotalBalance(data);
+        const balanceData = await res.json();
+        console.log("Fetched Balance:", balanceData.amount);
+        setTotalBalance(balanceData.amount);
       } catch (error) {
         console.error(error);
         setError("Failed to fetch the balance");
@@ -104,6 +97,9 @@ const Page: React.FC = () => {
 
     fetchBalance();
   }, []);
+  useEffect(() => {
+  }, [totalBalance]);
+ 
 
   const currentYear = dayjs().year();
 
@@ -129,8 +125,9 @@ const Page: React.FC = () => {
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
   const total_income = reportData ? reportData.total_income / 100 : 0;
   const total_remaining = reportData ? reportData.total_remaining / 100 : 0;
-  const total_balance = totalBalance ? totalBalance.balance/100 : 0;
-
+  const total_balance = totalBalance? totalBalance /100 : 0 ;
+ console.log("balance1:" , (totalBalance? totalBalance / 100: 0));
+ console.log("totalBalance:", total_balance);
   const totalReport: PieData[] = reportData
     ? [
         { name: "Income", value: total_income, color: "hsl(var(--chart-3))" },
@@ -151,6 +148,7 @@ const Page: React.FC = () => {
           src={GreenCard}
           className="relative object-cover w-full h-full rounded-xl"
           alt="card"
+          priority={true}
         />
         <AccountCard
           username="username"
@@ -188,7 +186,6 @@ const Page: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-
         {/* Budget Bar Chart */}
         <BudgetBarChart />
       </div>

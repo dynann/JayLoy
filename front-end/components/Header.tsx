@@ -12,7 +12,7 @@ export const Header = ({
   date: string;
 }) => (
   <div className="bg-emerald-500 text-white p-4 w-full shadow-lg">
-    <h1 className="sub-header text-center">{title}</h1>
+    <h1 className="sub-header-white text-center">{title}</h1>
 
     <div className="flex items-center justify-center mt-3 gap-x-10">
       <div className="space-y-1">
