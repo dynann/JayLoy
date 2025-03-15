@@ -1,227 +1,262 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { useAuthFetch } from "@/hooks/useAuthFetch"
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
-import { Icon } from "@iconify/react"
-import NavBar from "@/layouts/NavBar"
-import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
-import { LoadingState } from "@/components/LoadingState"
-import { ErrorState } from "@/components/ErrorState"
-import { CategoryTransactions } from "@/components/category-transactions"
+import { useState, useEffect } from "react";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
+import NavBar from "@/layouts/NavBar";
+import { LoadingState } from "@/components/LoadingState";
+import { ErrorState } from "@/components/ErrorState";
+import { CategoryTransactions } from "@/components/category-transactions";
+import {
+  MonthSelector,
+  type MonthData,
+  useMonthSelector,
+} from "@/app/(root)/chart/components/month-selector";
+import { ChartViewToggle } from "@/app/(root)/chart/components/chart-view-toggle";
+import {
+  PieChartDisplay,
+  type ChartData,
+} from "@/app/(root)/chart/components/pie-chart";
+import { ChartLegend } from "@/app/(root)/chart/components/chart-legend";
+import { CategoryList } from "@/app/(root)/chart/components/category-list";
+import { EmptyState } from "@/app/(root)/chart/components/empty-state";
 
-type ChartData = {
-  categoryID: string
-  value: number
-  amount: number
-}
+type CategorySummary = {
+  categoryId: number;
+  name: string;
+  type: string;
+  amount: string;
+  percentage: number;
+};
 
-const colorMap: { [key: string]: string } = {
-  red: "#DD0A0A",
-  purple: "#9747FF",
-  green: "#34C759",
-  orange: "#FFAE4C",
-  cyan: "#32ADE6",
-  blue: "#304FFE",
-  pink: "#FF2D55",
-  primary: "#3EB075",
-  brown: "#A2845E",
-  gray: "#909090",
-}
+type SummaryResponse = {
+  data: CategorySummary[];
+  pagination: {
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    itemsPerPage: number;
+  };
+  totals: {
+    income: string;
+    expense: string;
+    net: string;
+  };
+};
 
 export default function ChartPage() {
-  const { fetchWithToken, loading, error } = useAuthFetch()
-  const [activeView, setActiveView] = useState<"income" | "expense">("expense")
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [transactions, setTransactions] = useState<any[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const {
+    fetchWithToken,
+    loading: fetchLoading,
+    error: fetchError,
+  } = useAuthFetch();
+  const [activeView, setActiveView] = useState<"income" | "expense">("expense");
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [categorySummary, setCategorySummary] =
+    useState<SummaryResponse | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [visibleMonthsStart, setVisibleMonthsStart] = useState(0);
+  const [allMonths, setAllMonths] = useState<MonthData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Get current month (1-12)
-  const currentMonth = new Date().getMonth() + 1
+  const { generateMonthsHistory } = useMonthSelector();
 
-  // Create array of months from January to current month only
-  const availableMonths = Array.from({ length: currentMonth }, (_, i) => i + 1)
+  // Create array of all available months (24 months in totals (2 years))
+  useEffect(() => {
+    const months = generateMonthsHistory(24);
+    setAllMonths(months);
 
+    // show only current month and previous 2 months by default
+    setVisibleMonthsStart(Math.max(0, months.length - 3));
+  }, [generateMonthsHistory]);
+
+  // Get the currently visible months (3)
+  const visibleMonths = allMonths.slice(
+    visibleMonthsStart,
+    visibleMonthsStart + 3
+  );
+
+  // Handle pagination
+  const handlePrevMonths = () => {
+    if (visibleMonthsStart > 0) {
+      setVisibleMonthsStart(visibleMonthsStart - 1);
+    }
+  };
+
+  const handleNextMonths = () => {
+    if (visibleMonthsStart + 3 < allMonths.length) {
+      setVisibleMonthsStart(visibleMonthsStart + 1);
+    }
+  };
+
+  // Handle month selection
+  const handleMonthSelect = (monthData: MonthData) => {
+    setSelectedMonth(monthData.month);
+    setSelectedYear(monthData.year);
+
+    // Find the position of the selected month in the available months array
+    const selectedMonthPosition = allMonths.findIndex(
+      (m) => m.month === monthData.month && m.year === monthData.year
+    );
+
+    // If clicking on the leftmost visible month (first in the visible array)
+    if (selectedMonthPosition === visibleMonthsStart) {
+      // Show two months before the selected month
+      const newStartPosition = Math.max(0, selectedMonthPosition - 2);
+      setVisibleMonthsStart(newStartPosition);
+    }
+    // If clicking on any other month, center the view around it
+    else {
+      let newStartPosition = Math.max(0, selectedMonthPosition - 2);
+
+      // Ensure it wont exceed the available months
+      if (newStartPosition + 3 > allMonths.length) {
+        newStartPosition = Math.max(0, allMonths.length - 3);
+      }
+
+      setVisibleMonthsStart(newStartPosition);
+    }
+  };
+
+  // Fetch transactions for the CategoryTransactions component
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         // Format the month query using the selected year and month
-        const monthParam = `${selectedYear}-${String(selectedMonth).padStart(2, "0")}`
+        const monthParam = `${selectedYear}-${String(selectedMonth).padStart(
+          2,
+          "0"
+        )}`;
 
-        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/categories/summary?type=EXPENSE&page=1&limit=5&month=2025-10`)
-        const data = await response.json()
-        const transactionsData = Array.isArray(data) ? data : data.transactions || []
-        setTransactions(transactionsData)
+        const response = await fetchWithToken(
+          `${process.env.NEXT_PUBLIC_API_URL}/transactions?month=${monthParam}`
+        );
+        const data = await response.json();
+        const transactionsData = Array.isArray(data)
+          ? data
+          : data.transactions || [];
+        setTransactions(transactionsData);
       } catch (error) {
-        console.error("Failed to fetch transactions:", error)
-        setTransactions([])
+        console.error("Failed to fetch transactions:", error);
+        setTransactions([]);
       }
-    }
-    fetchTransactions()
-  }, [selectedMonth, fetchWithToken, selectedYear])
+    };
+    fetchTransactions();
+  }, [selectedMonth, fetchWithToken, selectedYear]);
 
-  const processData = useCallback((): ChartData[] => {
-    const filtered = transactions.filter((t) => {
-      const amt = t.type === "EXPENSE" ? -Math.abs(Number.parseFloat(t.amount)) : Math.abs(Number.parseFloat(t.amount))
-      return activeView === "income" ? amt > 0 : amt < 0
-    })
+  // Fetch category summary
+  useEffect(() => {
+    const fetchCategorySummary = async () => {
+      setLoading(true);
+      setError(null);
 
-    const grouped = filtered.reduce(
-      (acc: Record<number, ChartData>, t: any) => {
-        const key = Number(t.categoryID)
-        if (!acc[key]) {
-          acc[key] = { categoryID: String(key), value: 0, amount: 0 }
+      try {
+        // Format the month query using the selected year and month
+        const monthParam = `${selectedYear}-${String(selectedMonth).padStart(
+          2,
+          "0"
+        )}`;
+        const type = activeView.toUpperCase();
+
+        const response = await fetchWithToken(
+          `${process.env.NEXT_PUBLIC_API_URL}/categories/summary?type=${type}&month=${monthParam}&limit=100`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch category summary: ${response.status}`
+          );
         }
-        const amt =
-          t.type === "EXPENSE" ? -Math.abs(Number.parseFloat(t.amount)) : Math.abs(Number.parseFloat(t.amount))
-        acc[key].value += Math.abs(amt)
-        acc[key].amount += amt
-        return acc
-      },
-      {} as Record<number, ChartData>,
-    )
 
-    const total = Object.values(grouped).reduce((sum, item) => sum + item.value, 0)
+        const data = await response.json();
+        setCategorySummary(data);
+      } catch (err) {
+        console.error("Failed to fetch category summary:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch category summary"
+        );
+        setCategorySummary(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return Object.values(grouped).map((item) => ({
-      ...item,
-      value: total > 0 ? Number(((item.value / total) * 100).toFixed(1)) : 0,
-    }))
-  }, [transactions, activeView])
+    fetchCategorySummary();
+  }, [selectedMonth, selectedYear, activeView, fetchWithToken]);
 
-  const currentData = processData()
+  // Use backend calculation logic
+  const chartData: ChartData[] =
+    categorySummary?.data.map((item) => ({
+      categoryID: String(item.categoryId),
+      value: item.percentage,
+      amount: Number(item.amount) / 100,
+      name: item.name,
+    })) || [];
 
-  const getCategoryColor = useCallback((colorClass = "bg-gray") => {
-    const color = colorClass.replace("bg-", "")
-    return colorMap[color] || colorMap.gray
-  }, [])
+  // Get total amount from backend
+  const totalAmount = categorySummary
+    ? Number(
+        activeView === "income"
+          ? categorySummary.totals.income
+          : categorySummary.totals.expense
+      ) / 100
+    : 0;
 
-  if (loading) return <LoadingState />
-  if (error) return <ErrorState message={error} />
+  if (loading || fetchLoading) return <LoadingState />;
+  if (error || fetchError)
+    return <ErrorState message={error || fetchError || "An error occurred"} />;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-primary px-4 pb-6">
-        <h1 className="text-xl font-semibold text-center text-white py-4">Financial Analysis</h1>
+        <h1 className="text-xl font-semibold text-center text-white py-4">
+          Financial Analysis
+        </h1>
 
-        <div className="flex justify-center gap-3 mb-6">
-          <button
-            className={`px-8 py-1.5 rounded-full text-sm ${
-              activeView === "income" ? "bg-white !text-primary" : "text-white border border-white"
-            }`}
-            onClick={() => setActiveView("income")}
-          >
-            Income
-          </button>
-          <button
-            className={`px-8 py-1.5 rounded-full text-sm ${
-              activeView === "expense" ? "bg-white !text-red" : "text-white border border-white"
-            }`}
-            onClick={() => setActiveView("expense")}
-          >
-            Expense
-          </button>
-        </div>
+        <ChartViewToggle activeView={activeView} onViewChange={setActiveView} />
 
-        <div className="flex overflow-x-auto hide-scrollbar gap-6 px-2 justify-center">
-          {availableMonths.map((month) => (
-            <button
-              key={month}
-              className={`whitespace-nowrap pb-1 ${
-                selectedMonth === month ? "text-white font-medium border-b-2 border-white" : "text-white/70"
-              }`}
-              onClick={() => setSelectedMonth(month)}
-            >
-              {new Date(2000, month - 1).toLocaleString("default", { month: "long" })}
-            </button>
-          ))}
-        </div>
+        {/* Month Pagination */}
+        <MonthSelector
+          visibleMonths={visibleMonths}
+          visibleMonthsStart={visibleMonthsStart}
+          allMonths={allMonths}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onPrevMonths={handlePrevMonths}
+          onNextMonths={handleNextMonths}
+          onMonthSelect={handleMonthSelect}
+        />
       </div>
 
       <div className="p-4">
-        {currentData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray">
-            <Icon icon="mdi:file-search-outline" className="h-16 w-16 mb-4" />
-            <p className="text-lg">No records this month</p>
-          </div>
+        {chartData.length === 0 ? (
+          <EmptyState />
         ) : (
           <div className="max-w-4xl mx-auto">
-            <div className="h-[220px] mb-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={currentData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={65}
-                    outerRadius={85}
-                    paddingAngle={3}
-                    strokeWidth={0}
-                    dataKey="value"
-                  >
-                    {currentData.map((entry, index) => {
-                      const category = TRANSACTION_CATEGORIES[Number(entry.categoryID)]
-                      return <Cell key={index} fill={getCategoryColor(category?.color)} />
-                    })}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {/* Chart Title */}
+            <h2 className="text-2xl font-bold text-center mb-4">
+              {activeView === "income" ? "Income" : "Expense"} Summary
+            </h2>
+
+            <PieChartDisplay
+              chartData={chartData}
+              totalAmount={totalAmount}
+              activeView={activeView}
+            />
 
             {/* Legend */}
-            <div className="grid grid-cols-1 gap-y-4 mb-8 ml-12">
-              {currentData.map((item) => {
-                const category = TRANSACTION_CATEGORIES[Number(item.categoryID)]
-                const colorClass = category?.color || "bg-gray"
-                return (
-                  <div key={item.categoryID} className="flex items-center justify-center w-full">
-                    {/* Dots and Names */}
-                    <div className="flex w-1/2 justify-end items-center gap-2">
-                      {/* dot container */}
-                      <div className="w-4 flex justify-center">
-                        <div className={`w-2.5 h-2.5 rounded-full ${colorClass}`} />
-                      </div>
+            <ChartLegend chartData={chartData} />
 
-                      {/* name container */}
-                      <div className="w-32 text-left">
-                        <span className="text-sm">{category?.name || "Other"}</span>
-                      </div>
-                    </div>
-
-                    {/* Value */}
-                    <div className="w-1/2 flex justify-start pl-8">
-                      <span className="text-sm">{item.value}%</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            <h2 className="font-medium px-1 mb-3">{activeView === "income" ? "Income" : "Expense"} Lists:</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {currentData.map((item) => {
-                const category = TRANSACTION_CATEGORIES[Number(item.categoryID)]
-                const colorClass = category?.color || "bg-gray"
-                return (
-                  <div
-                    key={item.categoryID}
-                    className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-8 pr-8 w-full cursor-pointer hover:opacity-80"
-                    onClick={() => setSelectedCategory(Number(item.categoryID))}
-                  >
-                    <div className="flex items-center space-x-5">
-                      <div className={`${colorClass} p-3 rounded-full`}>
-                        {category?.icon || <Icon icon="mdi:help-circle" className="w-[3em] h-[3em] text-white" />}
-                      </div>
-                      <span className="description-medium">{category?.name || "Other"}</span>
-                    </div>
-                    <span className={`description-medium ${activeView === "income" ? "!text-primary" : "!text-red"}`}>
-                      {activeView === "income" ? "+" : "-"}${Math.abs(item.amount).toFixed(2)}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
+            {/* Category List */}
+            <CategoryList
+              chartData={chartData}
+              activeView={activeView}
+              onCategorySelect={setSelectedCategory}
+            />
           </div>
         )}
       </div>
@@ -248,6 +283,5 @@ export default function ChartPage() {
 
       <NavBar />
     </div>
-  )
+  );
 }
-

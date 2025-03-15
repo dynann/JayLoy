@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { DeleteConfirmation } from "@/components/delete-alert"
+import { DeleteConfirmation } from "./delete-alert"
 
 interface TransactionDetailProps {
   transaction: any
@@ -23,7 +23,7 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
     color: "bg-gray",
   }
 
-  const amount = Number.parseFloat(transaction.amount)
+  const amount = Number.parseFloat(transaction.amount) / 100
   const isExpense = transaction.type === "EXPENSE"
 
   const handleEdit = () => {

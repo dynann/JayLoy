@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu"
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
-import ExpenseModal, { IncomeModal } from "./components/popupModal"
+import ExpenseModal, { DisabledButton, IncomeModal }  from "./components/popupModal";
 import { useRouter, useSearchParams } from "next/navigation"
 import dayjs from "dayjs"
 
@@ -44,7 +44,8 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
       if (storedTransaction) {
         const transaction = JSON.parse(storedTransaction)
         setTransactionType(transaction.type === "EXPENSE" ? "Expense" : "Income")
-        setAmount(Math.abs(transaction.amount).toString())
+        // Convert from cents to dollars for display
+        setAmount((Math.abs(transaction.amount) / 100).toString())
         // Format YYYY-MM-DD
         setDate(formatDate(transaction.date))
         setDescription(transaction.description || "")
@@ -80,23 +81,26 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     }
 
     // Validate amount
-    let trimmedAmount = amount.trim()
+    const trimmedAmount = amount.trim()
     if (!trimmedAmount || trimmedAmount === "-") {
       setAmountError("Please enter a valid amount.")
       return
     }
 
+    const positiveAmount = Math.abs(Number.parseFloat(trimmedAmount));
     try {
       // Get the stored transaction data for the ID when editing
-      const storedTransaction = isEdit
-        ? JSON.parse(localStorage.getItem("editingTransaction") || "{}")
-        : null
+      const storedTransaction = isEdit ? JSON.parse(localStorage.getItem("editingTransaction") || "{}") : null
 
       const endpoint = isEdit
         ? `${process.env.NEXT_PUBLIC_API_URL}/transactions/${storedTransaction.id}`
         : `${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`
 
       const method = isEdit ? "PATCH" : "POST"
+
+      // Convert dollars to cents for the backend
+      const amountIncent= isEdit ? Math.round(positiveAmount * 100) : positiveAmount;
+
 
       const res = await fetch(endpoint, {
         method,
@@ -105,7 +109,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
-          amount: Number(trimmedAmount),
+          amount: amountIncent,
           type: transactionType.toUpperCase(),
           description,
           date,
@@ -122,11 +126,15 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
   }
 
   const categoryType = () => {
-    return transactionType === "Expense" ? (
-      <ExpenseModal category={category} setCategory={setCategory} />
-    ) : (
-      <IncomeModal category={category} setCategory={setCategory} />
-    )
+    if (!transactionType) {
+      return <DisabledButton label="Category" className={"bg-gray"} onClick={undefined} />
+    } else if (transactionType === "Income") {
+      return <IncomeModal category={category} setCategory={setCategory} />
+    } else if (transactionType === "Expense") {
+      return <ExpenseModal category={category} setCategory={setCategory} />
+    } else {
+      return "error"
+    }
   }
 
   const handleTransactionTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,8 +146,8 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     let value = event.target.value
 
     // Allow only numbers and optional negative sign
-    if (/^-?\d*\.?\d*$/.test(value)) {
-      // - for expenses 
+    if (/^-?\d*\.?\d{0,2}$/.test(value)) {
+      // - for expenses
       if (transactionType === "Expense" && !value.startsWith("-")) {
         value = `-${value}`
       }
@@ -191,8 +199,8 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
               </div>
               {transactionTypeError && <p className="text-red text-sm">{transactionTypeError}</p>}
             </fieldset>
-               {/* category */}
-               <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
+            {/* category */}
+            <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
               <legend className="description-small text-black">Category</legend>
               <div className="shrink-0">{categoryType()}</div>
             </div>
@@ -240,3 +248,4 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
     </div>
   )
 }
+

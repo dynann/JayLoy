@@ -9,6 +9,11 @@ interface CategoryModalProps {
   setCategory: (n: number) => void
   type: "Expense" | "Income"
 }
+interface DisabledButtonProps{
+  label: any;
+  onClick: any;
+  className: any;
+}
 
 const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type }) => {
   const categoriesArray = Object.values(TRANSACTION_CATEGORIES)
@@ -35,14 +40,22 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
       setSelectedColor(categoryInfo.color)
     }
   }, [category])
-
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
+  const disableButton = (p0: number) => {
+    setButtonDisabled(true);
+    // alert("Button has been disabled!");
+};
   return (
     <div>
       {/* Button to Open Modal */}
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+        }}
+        
         className={`text-white ${selectedColor} hover:bg-white hover:text-black shadow-sm focus:ring-1 focus:outline-none focus:ring-gray rounded-lg px-5 py-2.5 text-center inline-flex items-center`}
+        
       >
         {selectedCategory}
       </button>
@@ -105,13 +118,31 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
 
 // Exporting Expense and Income Modals
 const ExpenseModal: React.FC<{ category: number; setCategory: (n: number) => void }> = (props) => (
-  <PopupModal {...props} type="Expense" />
+  <PopupModal {...props} type="Expense"  />
 )
 
 const IncomeModal: React.FC<{ category: number; setCategory: (n: number) => void }> = (props) => (
   <PopupModal {...props} type="Income" />
 )
+const DisabledButton: React.FC<DisabledButtonProps> = ({ onClick, label, className }) => {
+  const [isDisabled, setIsDisabled] = useState(false)
+  const handleClick = () => {
+    if (!isDisabled) {
+      setIsDisabled(true)} }
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isDisabled}
+      className={`px-5 py-2.5 rounded-lg opacity-50  text-black 
+        ${isDisabled ? "opacity-50 cursor-not-allowed" : "  "
+      } ${className}`}
+    >
+      {label}
+    </button>
+  )
+}
 
 export default ExpenseModal
-export { IncomeModal }
+export { IncomeModal, DisabledButton }
 
