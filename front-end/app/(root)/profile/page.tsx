@@ -16,7 +16,7 @@ import router, { useRouter, useSearchParams } from "next/navigation";
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-
+      await signOut({ redirect: false });
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
         method: "PATCH",
         headers: {
