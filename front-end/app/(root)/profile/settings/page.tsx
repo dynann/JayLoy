@@ -2,6 +2,8 @@
 import { TabWithCancelButton } from "@/layouts/Tabbar"
 import { useRouter } from "next/navigation"
 import { Icon } from "@iconify/react"
+import { signOut } from "next-auth/react"
+import { async } from '../../../(auth)/actions';
 
 function SettingsPage() {
   const router = useRouter()
@@ -40,8 +42,9 @@ function SettingsPage() {
     {
       title: "Log Out",
       icon: <Icon icon="ph:sign-out-fill" className="text-primary" width="24" height="24" />,
-      action: () => {
+      action: async () => {
         // Handle logout
+        await signOut({ redirect: false })
         localStorage.removeItem("accessToken")
         localStorage.removeItem("tokenTimestamp")
         localStorage.removeItem("refreshToken")
