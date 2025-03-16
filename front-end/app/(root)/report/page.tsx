@@ -25,7 +25,7 @@ interface PieData {
   name: string;
   value: any;
   color: string;
-} 
+}
 
 const Page: React.FC = () => {
   const [reportData, setReportData] = useState<{
@@ -34,14 +34,14 @@ const Page: React.FC = () => {
     total_remaining: number;
   } | null>(null);
 
-  const [totalBalance, setTotalBalance] = useState< 0| null>(null);
+  const [totalBalance, setTotalBalance] = useState<0 | null>(null);
   const [error, setError] = useState<string | null>(null); // Added error state
   const year = dayjs().year();
   const fetchYearlyReport = async (e?: React.FormEvent) => {
     e?.preventDefault();
     try {
       // const userID = 2;
-      
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`,
         {
@@ -54,7 +54,6 @@ const Page: React.FC = () => {
       );
       if (res.ok) {
         const data = await res.json();
-        console.log("Fetched reportdata:", data);
         setReportData(data);
       } else {
         setError("Failed to fetch the report");
@@ -72,11 +71,10 @@ const Page: React.FC = () => {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const userID = 4;
-
         const res = await fetch(
           // `${process.env.NEXT_PUBLIC_API_URL}/accounts/${userID}?year=${year}`,
           `${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`,
+          // `${process.env.NEXT_PUBLIC_API_URL}/accounts/transaction/monthly/totalExpense`,
           {
             method: "GET",
             headers: {
@@ -87,8 +85,8 @@ const Page: React.FC = () => {
         );
         if (!res.ok) throw new Error("Failed to fetch the balance");
         const balanceData = await res.json();
-        console.log("Fetched Balance:", balanceData.amount);
         setTotalBalance(balanceData.amount);
+        // console.log("month",balanceData)
       } catch (error) {
         console.error(error);
         setError("Failed to fetch the balance");
@@ -97,10 +95,7 @@ const Page: React.FC = () => {
 
     fetchBalance();
   }, []);
-  useEffect(() => {
-  }, [totalBalance]);
  
-
   const currentYear = dayjs().year();
 
   function numberConverter(num: number) {
@@ -114,8 +109,8 @@ const Page: React.FC = () => {
       formatted = (absNum / 1_000_000).toFixed(2) + "M";
     } else if (absNum >= 1_000) {
       formatted = (absNum / 1_000).toFixed(2) + "k";
-    }  else if (absNum >= 1_00) {
-        formatted = (absNum / 1_000).toFixed(2) + "k";
+    } else if (absNum >= 1_00) {
+      formatted = (absNum / 1_000).toFixed(2) + "k";
     } else {
       formatted = absNum.toFixed(2);
     }
@@ -125,19 +120,20 @@ const Page: React.FC = () => {
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
   const total_income = reportData ? reportData.total_income / 100 : 0;
   const total_remaining = reportData ? reportData.total_remaining / 100 : 0;
-  const total_balance = totalBalance? totalBalance /100 : 0 ;
- console.log("balance1:" , (totalBalance? totalBalance / 100: 0));
- console.log("totalBalance:", total_balance);
+  const total_balance = totalBalance ? totalBalance / 100 : 0;
   const totalReport: PieData[] = reportData
     ? [
         { name: "Income", value: total_income, color: "hsl(var(--chart-3))" },
         { name: "Expense", value: total_expense, color: "hsl(var(--chart-1))" },
-        { name: "Remaining", value: total_remaining, color: "hsl(var(--chart-2))" },
+        {
+          name: "Remaining",
+          value: total_remaining,
+          color: "hsl(var(--chart-2))",
+        },
       ]
     : [];
 
   let displayReport = totalReport.slice(0, 2);
-
   return (
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {error && <p className="text-red-500">{error}</p>}
@@ -177,7 +173,10 @@ const Page: React.FC = () => {
                 <div key={index} className="w-full flex">
                   <div className="flex flex-col items-center w-full">
                     <h5 className="description-regular">{entry.name}</h5>
-                    <p className="description-medium" style={{ color: entry.color }}>
+                    <p
+                      className="description-medium"
+                      style={{ color: entry.color }}
+                    >
                       {numberConverter(entry.value)}
                     </p>
                   </div>

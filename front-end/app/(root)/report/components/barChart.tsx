@@ -6,7 +6,7 @@ import { Bar, BarChart, LabelList } from "recharts"
 import { TrendingUp } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import dayjs from "dayjs"
 
 const chartConfig = {
@@ -30,55 +30,41 @@ const chartConfig = {
     { month: "November", Expense: 40 },
     { month: "December", Expense: 50 },
   ];
+ 
   
   export default function BudgetBarChart (): React.JSX.Element {
-    // const fetchBalance = async () => {
-    //     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`,{
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: `Bearer ${localStorage.getItem("accessToken")}`, 
-    //       }
-    //     })
-    //   }
-    //    const fetchYearlyReport = async (e?: React.FormEvent) => {
-    //       e?.preventDefault();  // Prevent form submission if it's a form
-          
-    //       try {
-    //         const userID = 2  ;   
-    //         const year = dayjs().year(); 
-    //         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/transaction/monthly/totalExpense/userID=${userID}?year=${year}`, {
-    //           method: "GET",
-    //           headers: {
-    //             "Content-Type": "application/json",
-    //             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-    //           },
-    //         });
-    //         if (res.ok) {
-    //           const data = await res.json();
-    //           console.log("Fetched reportdata:", data); //json of income, expense, remaning
-    //         //   setReportData(data);
-    //         } else {
-    //           setError("Failed to fetch the report");
-    //         }
-    //       } catch (err) {
-    //         setError("Failed to fetch the report");
-    //         console.error("Failed to report", err);
-    //       }
-    //     };
-    //       useEffect(() => {
-    //         fetchYearlyReport();
-    //       }, []);  //call 
-    //       // console.log("report year", reportData)
-    //     const fetchData = async (data: string, year: number) => {
-    //       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/${data}?year=${year}`,{
-    //         method: "GET",
-    //         headers: {
-    //           "Content-Type": "application/json",
-    //           Authorization: `Bearer ${localStorage.getItem("accessToken")}`, 
-    //         }
-    //       })
-    //     }
+    const [MonthlyReport, setMonthlyReport] = useState([]);
+    const [budgetLimit, setBudgetLimit] = useState(10);
+
+
+
+  useEffect(() => {
+    const fetchMonthlyReport = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/accounts/transaction/monthly/totalExpense`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to fetch the balance");
+        const monthlyData = await res.json();
+        setMonthlyReport(monthlyData);
+        console.log("month",monthlyData)
+      } catch (error) {
+        console.error(error);
+        setError("Failed to fetch the balance");
+      }
+    };
+
+    fetchMonthlyReport();
+  }, []);
+  useEffect(() => {}, [MonthlyReport]);
+  console.log("MonthlyReport",MonthlyReport)
     
     return <div>
       <Card>
@@ -88,7 +74,8 @@ const chartConfig = {
             </CardHeader>
             <CardContent>
               <ChartContainer config={chartConfig}>
-                <BarChart data={chartData} margin={{ top: 10 }}>
+                <BarChart data={MonthlyReport} //month
+                 margin={{ top: 10 }}>
                   <RechartsPrimitive.CartesianGrid vertical={false} />
                   <RechartsPrimitive.XAxis
                     dataKey="month"
@@ -123,7 +110,6 @@ const chartConfig = {
           </Card>
     </div>
   }
-
 function setError(arg0: string) {
     throw new Error("Function not implemented.")
 }

@@ -111,7 +111,8 @@ export default function HomePage() {
             <p className="description-big-medium">No records today</p>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto px-4">
+          <div className="max-w-4xl mx-auto px-1">  
+          {/* box */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {transactions.map((transaction) => (
                 <TransactionItem

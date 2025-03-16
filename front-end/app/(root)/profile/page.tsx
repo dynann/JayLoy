@@ -126,7 +126,7 @@ function ProfilePage() {
           <Image
             className="w-24 h-24 p-1 rounded-full ring-2 ring-primary dark:ring-gray mb-3"
             src={ProfileImage || "/placeholder.svg"}
-            alt="Profile image"
+            alt="Profile image" priority={true}
           />
           <h2 className="text-xl font-medium text-center mb-1">{loading ? "Loading..." : username}</h2>
           <p className="text-gray-600 text-center">{loading ? "Loading..." : email}</p>
