@@ -41,7 +41,7 @@ const Page: React.FC = () => {
     e?.preventDefault();
     try {
       // const userID = 2;
-
+      console.log(year)
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`,
         {

@@ -15,21 +15,7 @@ const chartConfig = {
       color: "#3EB075", // primary color
     },
   } satisfies ChartConfig;
-  // Bar chart data
-  const chartData = [
-    { month: "January", Expense: 100 },
-    { month: "February", Expense: 80 },
-    { month: "March", Expense: 60 },
-    { month: "April", Expense: 73 },
-    { month: "May", Expense: 89 },
-    { month: "June", Expense: 110 },
-    { month: "July", Expense: 100 },
-    { month: "August", Expense: 100 },
-    { month: "September", Expense: 100 },
-    { month: "October", Expense: 50 },
-    { month: "November", Expense: 40 },
-    { month: "December", Expense: 50 },
-  ];
+
  
   
   export default function BudgetBarChart (): React.JSX.Element {
@@ -42,7 +28,7 @@ const chartConfig = {
     const fetchMonthlyReport = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/accounts/transaction/monthly/totalExpense`,
+          `${process.env.NEXT_PUBLIC_API_URL}/accounts/transaction/monthly/totalExpense?year=2025`,
           {
             method: "GET",
             headers: {
@@ -51,7 +37,7 @@ const chartConfig = {
             },
           }
         );
-        if (!res.ok) throw new Error("Failed to fetch the balance");
+        if (!res.ok) throw new Error("Failed to fetch the expense the data");
         const monthlyData = await res.json();
         setMonthlyReport(monthlyData);
         console.log("month",monthlyData)
