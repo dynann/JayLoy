@@ -26,6 +26,24 @@ interface PieData {
   value: any;
   color: string;
 }
+export function numberConverter(num: number) {
+  const absNum = Math.abs(num);
+  let formatted = "";
+
+  if (absNum >= 1_000_000_000_000) {
+    formatted = (absNum / 1_000_000_000_000).toFixed(2) + "T";
+  } else if (absNum >= 1_000_000_000) {
+    formatted = (absNum / 1_000_000_000).toFixed(2) + "B";
+  } else if (absNum >= 1_000_000) {
+    formatted = (absNum / 1_000_000).toFixed(2) + "M";
+  } else if (absNum >= 1_000) {
+    formatted = (absNum / 1_000).toFixed(2) + "k";
+  } else {
+    formatted = absNum.toFixed(2);
+  }
+
+  return num < 0 ? `-$${formatted}` : `$${formatted}`;
+}
 
 const Page: React.FC = () => {
   const [reportData, setReportData] = useState<{
@@ -98,24 +116,7 @@ const Page: React.FC = () => {
  
   const currentYear = dayjs().year();
 
-  function numberConverter(num: number) {
-    const absNum = Math.abs(num);
-    let formatted = "";
-    if (absNum >= 1_000_000_000_000) {
-      formatted = (absNum / 1_000_000_000_000).toFixed(2) + "T";
-    } else if (absNum >= 1_000_000_000) {
-      formatted = (absNum / 1_000_000_000).toFixed(2) + "B";
-    } else if (absNum >= 1_000_000) {
-      formatted = (absNum / 1_000_000).toFixed(2) + "M";
-    } else if (absNum >= 1_000) {
-      formatted = (absNum / 1_000).toFixed(2) + "k";
-    } else if (absNum >= 1_00) {
-      formatted = (absNum / 1_000).toFixed(2) + "k";
-    } else {
-      formatted = absNum.toFixed(2);
-    }
-    return num < 0 ? `-$${formatted}` : `$${formatted}`;
-  }
+
 
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
   const total_income = reportData ? reportData.total_income / 100 : 0;
