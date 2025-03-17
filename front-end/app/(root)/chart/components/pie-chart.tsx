@@ -39,7 +39,7 @@ export function PieChartDisplay({ chartData, totalAmount, activeView }: PieChart
   return (
     <div className="relative h-[220px] mb-8">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+        <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
           <Pie
             data={chartData}
             cx="50%"
@@ -49,10 +49,21 @@ export function PieChartDisplay({ chartData, totalAmount, activeView }: PieChart
             paddingAngle={3}
             strokeWidth={0}
             dataKey="value"
+            isAnimationActive={false}
+            cursor="default"
+            // Disable active state and tooltip interactions
+            activeIndex={undefined}
           >
             {chartData.map((entry, index) => {
               const category = TRANSACTION_CATEGORIES[Number(entry.categoryID)]
-              return <Cell key={index} fill={getCategoryColor(category?.color)} />
+              return (
+                <Cell 
+                  key={index} 
+                  fill={getCategoryColor(category?.color)}
+                  // Disable cell interactions
+                  style={{ pointerEvents: "none" }}
+                />
+              )
             })}
           </Pie>
         </PieChart>
@@ -68,4 +79,3 @@ export function PieChartDisplay({ chartData, totalAmount, activeView }: PieChart
     </div>
   )
 }
-

@@ -15,37 +15,37 @@ import { useRouter } from "next/navigation";
 export default function HomePage() {
   const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [currentDate, setCurrentDate] = useState("");
+  const [currentDate, setCurrentDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
-  // today's date in YYYY-MM-DD format using dayjs
-  const getFormattedDate = useCallback(() => {
-    return dayjs().format("YYYY-MM-DD");
-  }, []);
+  const fetchTransactions = useCallback(
+    async (dateToFetch: string) => {
+      try {
+        setLoading(true)
 
-  const fetchTransactions = useCallback(async () => {
-    try {
-      const formattedDate = getFormattedDate();
-      setCurrentDate(formattedDate);
-
-      const response = await fetchWithToken(
-        `${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${formattedDate}`
-      );
-      const data = await response.json();
-      const transactionsData = Array.isArray(data) ? data : data.transactions || [];
-      setTransactions(transactionsData);
-    } catch (err) {
-      console.error("Error fetching transactions:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchWithToken, getFormattedDate, setLoading]);
+        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${dateToFetch}`)
+        const data = await response.json();
+        const transactionsData = Array.isArray(data) ? data : data.transactions || [];
+        setTransactions(transactionsData);
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchWithToken, setLoading],
+  )
 
   useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
+    fetchTransactions(currentDate)
+  }, [fetchTransactions, currentDate])
+
+  const handleDateChange = (newDate: string) => {
+    setCurrentDate(newDate)
+    fetchTransactions(newDate)
+  }
 
   // Calculate total income and expense
   const { totalIncome, totalExpense } = transactions.reduce(
@@ -98,21 +98,30 @@ export default function HomePage() {
   if (loading) return <LoadingState />;
   if (error) return <ErrorState message={error} />;
 
+  const isToday = dayjs(currentDate).isSame(dayjs(), "day")
+  const dateDisplay = isToday ? "today" : dayjs(currentDate).format("YYYY-MM-DD")
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <Header title="Money Tracker" income={totalIncome} expense={totalExpense} date={currentDate} />
+      <Header
+        title="Money Tracker"
+        income={totalIncome}
+        expense={totalExpense}
+        date={currentDate}
+        onDateChange={handleDateChange}
+      />
 
       {/* Transaction List */}
       <div className="p-4">
         {transactions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-500">
             <Icon icon="mdi:file-search-outline" className="h-16 w-16 mb-4" />
-            <p className="description-big-medium">No records today</p>
+            <p className="description-big-medium">No records for {dateDisplay}</p>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto px-1">  
-          {/* box */}
+          <div className="max-w-4xl mx-auto px-1">
+            {/* box */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {transactions.map((transaction) => (
                 <TransactionItem
