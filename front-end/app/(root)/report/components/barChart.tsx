@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
+import Link from "next/link";
+import { TabWithCancelButton } from "@/layouts/Tabbar";
 
 const chartConfig = {
   Expense: {
@@ -29,7 +31,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function BudgetBarChart(): React.JSX.Element {
-  const [MonthlyReport, setMonthlyReport] = useState<
+  const [monthlyReport, setmonthlyReport] = useState<
     { month: string; Expense: number }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export default function BudgetBarChart(): React.JSX.Element {
   const year = dayjs().year();
 
   useEffect(() => {
-    const fetchMonthlyReport = async () => {
+    const fetchmonthlyReport = async () => {
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/accounts/transaction/monthly/totalExpense?year=${year}`,
@@ -50,56 +52,44 @@ export default function BudgetBarChart(): React.JSX.Element {
           }
         );
         if (!res.ok) throw new Error("Failed to fetch the balance");
-
-        const monthlyData = await res.json(); // API returns [{jan: 0}, {feb: 0}, ...]
-        // Month mapping
-        // formart for chartConfig
-        // Jan...Dec, 'Expense'                   follow me
-        const monthMap = [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ];
-        const formattedData = monthlyData.map((item: { [x: string]: any; }, index: number) => {
-          const monthKey = Object.keys(item)[0];  
-          return {
-            month: monthMap[index],  
-            Expense: item[monthKey] /100 , // convert from cent
-          };
-        });
-
-        setMonthlyReport(formattedData);
+        const monthlyData = await res.json();
+        const allMonthlyData = monthlyData.map((item: { Expense: number }) => ({
+          //array
+          ...item,
+          Expense: item.Expense / 100, // divide each Expense by 100
+        }));
+        setmonthlyReport(allMonthlyData);
       } catch (error) {
         console.error(error);
         setError("Failed to fetch the balance");
       }
     };
-    fetchMonthlyReport();
-  }, []);
+    fetchmonthlyReport();
+  }, [year]);
   return (
     <div>
+      {/* <TabWithCancelButton href="/report" text="Limit Budget"/> */}
       <Card>
-        <CardHeader>
-          <CardTitle>Monthly Budget Limit</CardTitle>
-          <CardDescription>Limit Budget: {limitBudget} USD per month</CardDescription>
-        </CardHeader>
+        <div className="flex justify-between m-2">
+          <CardHeader>
+            <CardTitle>Monthly Budget Limit</CardTitle>
+            <CardDescription>
+              Limit Budget: {limitBudget} USD per month
+            </CardDescription>
+          </CardHeader>
+          <Link href="/report/limitBudget" className="flex items-center m-4 text-primary font-bold hover:underline rounded-3xl font-body " >
+           Limit Budget
+          </Link>
+        </div>
+
         <CardContent>
           {error ? (
             <p className="text-red-500">{error}</p>
-          ) : MonthlyReport.length === 0 ? (
+          ) : monthlyReport.length === 0 ? (
             <p>Loading...</p>
           ) : (
             <ChartContainer config={chartConfig}>
-              <BarChart data={(MonthlyReport)} margin={{ top: 30 }}>
+              <BarChart data={monthlyReport} margin={{ top: 30 }}>
                 <RechartsPrimitive.CartesianGrid vertical={false} />
                 <RechartsPrimitive.XAxis
                   dataKey="month"
@@ -112,13 +102,13 @@ export default function BudgetBarChart(): React.JSX.Element {
                   cursor={true}
                   content={<ChartTooltipContent hideLabel />}
                 />
-                <Bar dataKey="Expense" fill="#3EB075" radius={8}>
+                <Bar dataKey="Expense" fill="#3EB075" radius={20}>
                   <LabelList
                     position="top"
-                    offset={12} 
+                    offset={12}
                     className="fill-foreground"
                     fontSize={10}
-                    formatter={(value: number) => numberConverter(value)} 
+                    formatter={(value: number) => numberConverter(value)} // Convert number to formatted string
                   />
                 </Bar>
               </BarChart>

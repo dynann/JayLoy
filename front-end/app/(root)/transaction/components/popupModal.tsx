@@ -126,17 +126,16 @@ const IncomeModal: React.FC<{ category: number; setCategory: (n: number) => void
 )
 const DisabledButton: React.FC<DisabledButtonProps> = ({ onClick, label, className }) => {
   const [isDisabled, setIsDisabled] = useState(false)
-  const handleClick = () => {
-    if (!isDisabled) {
-      setIsDisabled(true)} }
+  // const handleClick = () => {
+  //   if (!isDisabled) {
+  //     setIsDisabled(true)} }
   return (
     <button
       type="button"
-      onClick={handleClick}
-      disabled={isDisabled}
-      className={`px-5 py-2.5 rounded-lg opacity-50  text-black 
-        ${isDisabled ? "opacity-50 cursor-not-allowed" : "  "
-      } ${className}`}
+      // onClick={handleClick}
+      disabled={true}
+      className="px-5 py-2.5 rounded-lg opacity-50 bg-background text-black "
+        
     >
       {label}
     </button>

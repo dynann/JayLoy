@@ -115,9 +115,6 @@ const Page: React.FC = () => {
   }, []);
  
   const currentYear = dayjs().year();
-
-
-
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
   const total_income = reportData ? reportData.total_income / 100 : 0;
   const total_remaining = reportData ? reportData.total_remaining / 100 : 0;
@@ -135,10 +132,44 @@ const Page: React.FC = () => {
     : [];
 
   let displayReport = totalReport.slice(0, 2);
+
+  // Fetch user data when component mounts
+  const [ username, setUsername] = useState("Loading..")
+  const [ email, setEmail] = useState("Loading..")
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("accessToken")
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+        if (res.ok) {
+          const userData = await res.json()
+          // console.log("user email:", userData.email + " username:", userData.username)
+       
+          setEmail(userData.email)
+          setUsername(userData.username)
+        } else {
+          setError("Failed to fetch user data")
+        }
+      } catch (err) {
+        setError("Failed to fetch user data")
+        console.error("Failed to fetch user data:", err)
+      } finally {
+      }
+    }
+    fetchUserData()
+  },  )
   return (
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {error && <p className="text-red-500">{error}</p>}
-
       {/* Account Card */}
       <div className="w-full h-56 mt-16 rounded-xl relative text-white shadow-2xl transition-transform transform hover:scale-110">
         <Image
@@ -148,8 +179,8 @@ const Page: React.FC = () => {
           priority={true}
         />
         <AccountCard
-          username="username"
-          email="san.setha@testing.com"
+          username={username}
+          email={email}
           value={numberConverter(total_balance)}
         />
       </div>
@@ -167,7 +198,6 @@ const Page: React.FC = () => {
               numberConverter={numberConverter}
               remainingBalance={total_remaining}
             />
-
             {/* Total Income/Expense/Remaining Report */}
             <div className="flex flex-row justify-between w-full">
               {totalReport.map((entry, index) => (

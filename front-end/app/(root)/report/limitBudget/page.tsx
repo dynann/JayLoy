@@ -5,6 +5,7 @@ import { TextInput } from "@/components/customeInput";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { TabWithCancelButton } from "@/layouts/Tabbar";
 
 // http://localhost:3000/limitBudget
 export default function LimitBudgetPage() {
@@ -19,6 +20,8 @@ export default function LimitBudgetPage() {
   const router = useRouter();
 
   return (
+    <>
+    <TabWithCancelButton href="/report" text="Limit Budget"/>
     <div className={containerClasses}>
       <div className={contentWrapperClasses}>
         <div className={textCenterClasses}>
@@ -51,5 +54,6 @@ export default function LimitBudgetPage() {
         </form>
       </div>
     </div>
+    </>
   );
 }
