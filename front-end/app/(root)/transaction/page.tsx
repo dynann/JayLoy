@@ -252,6 +252,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
                   desc="Amount is required"
                   value={amount}
                   onChange={handleAmountChange}
+                  maxLength={12}
                 />
                 {amountError && <p className="text-red text-sm mt-1">{amountError}</p>}
               </div>
@@ -276,6 +277,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
               desc="Description is required"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              maxLength={250}
             />
 
             <Button type="submit" className="green-button !text-white">

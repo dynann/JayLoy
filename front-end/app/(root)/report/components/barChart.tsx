@@ -34,11 +34,12 @@ export default function BudgetBarChart(): React.JSX.Element {
     { month: string; Expense: number }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
-  const [limitBudget, setLimitBudget] = useState(100000); //in cent
-  const limitBudgetDisplay = limitBudget/100;
-  const [rawMonthlyReport, setRawMonthlyReport] = useState <{ month: string; Expense: number }[]
+  const [limitBudget, setLimitBudget] = useState(500000); //in cent
+  const limitBudgetDisplay = limitBudget / 100;
+  const [rawMonthlyReport, setRawMonthlyReport] = useState<
+    { month: string; Expense: number }[]
   >([]);
-   
+
   const year = dayjs().year();
   useEffect(() => {
     const fetchmonthlyReport = async () => {
@@ -62,13 +63,18 @@ export default function BudgetBarChart(): React.JSX.Element {
         }));
         setmonthlyReport(allMonthlyData);
         setRawMonthlyReport(monthlyData); //raw amount in cent , no convert
+        console.log(monthlyData);
       } catch (error) {
         console.error(error);
         setError("Failed to fetch the balance");
       }
     };
     fetchmonthlyReport();
-  },[]);
+  }, []);
+  const getBarColor = (expense: number, limit: number) => {
+    return expense > limit ? "#C70039" : "#3EB075";
+  };
+
   return (
     <div>
       {/* <TabWithCancelButton href="/report" text="Limit Budget"/> */}
@@ -108,15 +114,13 @@ export default function BudgetBarChart(): React.JSX.Element {
                   cursor={true}
                   content={<ChartTooltipContent hideLabel />}
                 />
-                <Bar
-                  dataKey="Expense"
-                  radius={20}
-                  fill={
-                    rawMonthlyReport.some((entry) => entry.Expense > limitBudget) // 1.23 vs 1000
-                      ? "#C70039" //red
-                      : "#3EB075" //green
-                  }
-                >
+                <Bar dataKey="Expense" radius={20}>
+                  {rawMonthlyReport.map((entry, index) => (
+                    <RechartsPrimitive.Cell
+                      key={`cell-${index}`}
+                      fill={getBarColor(entry.Expense, limitBudget)}
+                    />
+                  ))}
                   <LabelList
                     position="top"
                     offset={12}

@@ -148,8 +148,6 @@ const Page: React.FC = () => {
         );
         if (res.ok) {
           const userData = await res.json()
-          // console.log("user email:", userData.email + " username:", userData.username)
-       
           setEmail(userData.email)
           setUsername(userData.username)
         } else {
@@ -162,7 +160,7 @@ const Page: React.FC = () => {
       }
     }
     fetchUserData()
-  },  )
+  },[])
   return (
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {error && <p className="text-red-500">{error}</p>}

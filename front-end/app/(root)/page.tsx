@@ -115,7 +115,7 @@ export default function HomePage() {
       {/* Transaction List */}
       <div className="p-4">
         {transactions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+          <div className="flex flex-col items-center justify-center py-20 pb-24  text-gray-500">
             <Icon icon="mdi:file-search-outline" className="h-16 w-16 mb-4" />
             <p className="description-big-medium">No records for {dateDisplay}</p>
           </div>
