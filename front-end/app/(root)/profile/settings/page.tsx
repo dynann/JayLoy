@@ -3,11 +3,30 @@ import { TabWithCancelButton } from "@/layouts/Tabbar"
 import { useRouter } from "next/navigation"
 import { Icon } from "@iconify/react"
 import { signOut } from "next-auth/react"
-import { async } from '../../../(auth)/actions';
+import { useState, useEffect } from "react"
 
 function SettingsPage() {
+  const [userId, setUserId] = useState<number | null>(null)
   const router = useRouter()
-
+  
+  // Move token retrieval and user ID extraction to useEffect
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken")
+    if (!token) {
+      router.push("/login")
+      return
+    }
+    
+    try {
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]))
+      const id = tokenPayload.sub
+      setUserId(id)
+    } catch (error) {
+      console.error("Error parsing token:", error)
+      router.push("/login")
+    }
+  }, []);
+  
   const settingsItems = [
     {
       title: "Account Management",
@@ -38,6 +57,35 @@ function SettingsPage() {
       icon: <Icon icon="ph:trash-fill" className="text-primary" width="24" height="24" />,
       route: "/profile/settings/delete-account",
       highlight: true,
+      action: async () => {
+        if (!userId) return;
+        
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+        console.log(userId)
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            method: "DELETE",
+          })
+          if(!response.ok) {
+            throw new Error("Error deleting account")
+          } 
+          console.log(response)
+          // Clear local storage and redirect after successful deletion
+          localStorage.removeItem("accessToken")
+          localStorage.removeItem("tokenTimestamp")
+          localStorage.removeItem("refreshToken")
+          router.push("/login")
+        } catch (error) {
+          console.error("Error deleting account:", error)
+        }
+      }
     },
     {
       title: "Log Out",
@@ -98,4 +146,3 @@ function SettingsPage() {
 }
 
 export default SettingsPage
-
