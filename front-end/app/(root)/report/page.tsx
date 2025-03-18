@@ -29,17 +29,18 @@ interface PieData {
 export function numberConverter(num: number) {
   const absNum = Math.abs(num);
   let formatted = "";
-
   if (absNum >= 1_000_000_000_000) {
     formatted = (absNum / 1_000_000_000_000).toFixed(2) + "T";
   } else if (absNum >= 1_000_000_000) {
     formatted = (absNum / 1_000_000_000).toFixed(2) + "B";
   } else if (absNum >= 1_000_000) {
     formatted = (absNum / 1_000_000).toFixed(2) + "M";
-  } else if (absNum >= 1_000) {
+  } else if (absNum >= 1_000) { 
     formatted = (absNum / 1_000).toFixed(2) + "k";
-  } else {
-    formatted = absNum.toFixed(2);
+  }  else if (absNum >= 1_00) {  //hundred
+    formatted = (absNum / 1_000).toFixed(2) + "k";
+  }else {
+    formatted = absNum.toFixed(2); //under hundred
   }
 
   return num < 0 ? `-$${formatted}` : `$${formatted}`;
@@ -58,8 +59,6 @@ const Page: React.FC = () => {
   const fetchYearlyReport = async (e?: React.FormEvent) => {
     e?.preventDefault();
     try {
-      // const userID = 2;
-      console.log(year)
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`,
         {
@@ -89,10 +88,7 @@ const Page: React.FC = () => {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const res = await fetch(
-          // `${process.env.NEXT_PUBLIC_API_URL}/accounts/${userID}?year=${year}`,
-          `${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`,
-          // `${process.env.NEXT_PUBLIC_API_URL}/accounts/transaction/monthly/totalExpense`,
+        const res = await fetch( `${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`,
           {
             method: "GET",
             headers: {
