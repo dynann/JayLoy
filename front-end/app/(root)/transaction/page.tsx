@@ -161,7 +161,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
       const method = isEdit ? "PATCH" : "POST"
 
       // Convert dollars to cents for the backend
-      const amountInCents = Math.round(positiveAmount * 100);
+      const amountInCent= isEdit ? Math.round(positiveAmount * 100) : positiveAmount;
 
       const res = await fetch(endpoint, {
         method,
@@ -170,7 +170,7 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
-          amount: amountInCents,
+          amount: amountInCent,
           type: transactionType.toUpperCase(),
           description,
           date,
