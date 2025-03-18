@@ -4,10 +4,13 @@ import { useRouter } from "next/navigation"
 import { Icon } from "@iconify/react"
 import { signOut } from "next-auth/react"
 import { useState, useEffect } from "react"
+import { ConfirmationDialog } from "@/components/confirmation-dialog"
 
 function SettingsPage() {
   const [userId, setUserId] = useState<number | null>(null)
   const router = useRouter()
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
+  const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] = useState(false)
   
   // Move token retrieval and user ID extraction to useEffect
   useEffect(() => {
@@ -26,6 +29,45 @@ function SettingsPage() {
       router.push("/login")
     }
   }, []);
+
+  const handleDeleteAccount = async () => {
+    if (!userId) return;
+    
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    console.log(userId)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        method: "DELETE",
+      })
+      if(!response.ok) {
+        throw new Error("Error deleting account")
+      } 
+      console.log(response)
+      // Clear local storage and redirect after successful deletion
+      localStorage.removeItem("accessToken")
+      localStorage.removeItem("tokenTimestamp")
+      localStorage.removeItem("refreshToken")
+      router.push("/login")
+    } catch (error) {
+      console.error("Error deleting account:", error)
+    }
+  }
+
+  const handleLogout = async () => {
+    // Handle logout
+    await signOut({ redirect: false })
+    localStorage.removeItem("accessToken")
+    localStorage.removeItem("tokenTimestamp")
+    localStorage.removeItem("refreshToken")
+    router.push("/login")
+  }
   
   const settingsItems = [
     {
@@ -55,49 +97,18 @@ function SettingsPage() {
     {
       title: "Delete Account",
       icon: <Icon icon="ph:trash-fill" className="text-primary" width="24" height="24" />,
-      route: "/profile/settings/delete-account",
       highlight: true,
-      action: async () => {
-        if (!userId) return;
-        
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          router.push("/login");
-          return;
+      action: () => {
+        setIsDeleteAccountDialogOpen(true)
+        if(isDeleteAccountDialogOpen) {
+          handleDeleteAccount()
         }
-        console.log(userId)
-        try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            method: "DELETE",
-          })
-          if(!response.ok) {
-            throw new Error("Error deleting account")
-          } 
-          console.log(response)
-          // Clear local storage and redirect after successful deletion
-          localStorage.removeItem("accessToken")
-          localStorage.removeItem("tokenTimestamp")
-          localStorage.removeItem("refreshToken")
-          router.push("/login")
-        } catch (error) {
-          console.error("Error deleting account:", error)
-        }
-      }
+      },
     },
     {
       title: "Log Out",
       icon: <Icon icon="ph:sign-out-fill" className="text-primary" width="24" height="24" />,
-      action: async () => {
-        // Handle logout
-        await signOut({ redirect: false })
-        localStorage.removeItem("accessToken")
-        localStorage.removeItem("tokenTimestamp")
-        localStorage.removeItem("refreshToken")
-        router.push("/login")
-      },
+      action: () => setIsLogoutDialogOpen(true),
       highlight: true,
     },
   ]
@@ -105,42 +116,52 @@ function SettingsPage() {
   return (
     <>
       <TabWithCancelButton text="Settings" onClick={() => router.push("/profile")} />
-
       <div className="min-h-screen pt-16 px-4 bg-background">
-        <div className="max-w-md mx-auto">
-          {/* Settings Menu */}
-          <div className="w-full mt-4">
-            {settingsItems.map((item, index) => (
-              <div
-                key={index}
-                className={`mb-2 p-3 rounded-lg flex items-center justify-between w-full ${
-                  item.highlight ? "bg-red-50" : "hover:bg-gray-50"
-                } cursor-pointer`}
-                onClick={() => {
-                  if (item.action) {
-                    item.action()
-                  } else if (item.route) {
-                    router.push(item.route)
-                  }
-                }}
-              >
-                {/* Left side with icon and title */}
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-full ${item.highlight ? "bg-red-100" : "bg-tertiary"} flex items-center justify-center`}
-                  >
-                    {item.icon}
-                  </div>
-                  <span className={`font-medium ${item.highlight ? "text-red" : "text-gray-800"}`}>{item.title}</span>
-                </div>
-
-                {/* Chevron icon */}
-                <Icon icon="ph:caret-right" className={`w-5 h-5 ${item.highlight ? "text-red" : "text-gray-400"}`} />
+        <div className="divide-y divide-border">
+          {settingsItems.map((item, index) => (
+            <div
+              key={index}
+              className={`flex justify-between py-4 ${item.highlight ? "text-primary" : ""}`}
+              onClick={() => {
+                if (item.route) {
+                  router.push(item.route)
+                } else if (item.action) {
+                  item.action()
+                }
+              }}
+            >
+              <div className="flex items-center gap-4">
+                {item.icon}
+                <span className="description-medium">{item.title}</span>
               </div>
-            ))}
-          </div>
+              <Icon icon="ph:caret-right" className="text-gray" width="20" height="20" />
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isLogoutDialogOpen}
+        onOpenChange={setIsLogoutDialogOpen}
+        onConfirm={handleLogout}
+        title="Log Out"
+        description="Are you sure you want to log out of your account?"
+        confirmText="Log Out"
+        cancelText="Cancel"
+      />
+
+      {/* Delete Account Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isDeleteAccountDialogOpen}
+        onOpenChange={setIsDeleteAccountDialogOpen}
+        onConfirm={handleDeleteAccount}
+        title="Delete Account"
+        description="Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost."
+        confirmText="Delete Account"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </>
   )
 }
