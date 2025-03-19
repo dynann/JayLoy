@@ -34,8 +34,7 @@ export default function BudgetBarChart(): React.JSX.Element {
     { month: string; Expense: number }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
-  const [limitBudget, setLimitBudget] = useState(500000); //in cent
-  const limitBudgetDisplay = limitBudget / 100;
+  // const limitBudgetDisplay = limitBudget / 100;
   const [rawMonthlyReport, setRawMonthlyReport] = useState<
     { month: string; Expense: number }[]
   >([]);
@@ -62,8 +61,7 @@ export default function BudgetBarChart(): React.JSX.Element {
           Expense: item.Expense / 100, // divide each Expense by 100
         }));
         setmonthlyReport(allMonthlyData);
-        setRawMonthlyReport(monthlyData); //raw amount in cent , no convert
-        console.log(monthlyData);
+        setRawMonthlyReport(monthlyData); //raw budget in cent , no convert
       } catch (error) {
         console.error(error);
         setError("Failed to fetch the balance");
@@ -74,6 +72,33 @@ export default function BudgetBarChart(): React.JSX.Element {
   const getBarColor = (expense: number, limit: number) => {
     return expense > limit ? "#C70039" : "#3EB075";
   };
+  //budget Budget limit
+  const [budget, setBudget] =  useState<0 | null>(null);
+  const budgetLimit = budget ? budget / 100 : 0;
+  const rawBudget = budget ? budget : 0;
+  useEffect(() => {
+    const fetchBudget = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/budgets/get`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch the balance");
+
+        const budget = await res.json(); 
+        setBudget(budget.amount)
+      } catch (error) {
+        console.error("Failed to fetch:", error);
+        setError("Failed to fetch the balance");
+      }
+    };
+    fetchBudget();
+  }, []);  
+  useEffect(() => {
+  }, [budget]);
 
   return (
     <div>
@@ -83,7 +108,8 @@ export default function BudgetBarChart(): React.JSX.Element {
           <CardHeader>
             <CardTitle>Monthly Budget Limit</CardTitle>
             <CardDescription>
-              Limit Budget: {numberConverter(limitBudgetDisplay)} USD per month
+              {/* Limit Budget: {numberConverter(limitBudgetDisplay)} USD per month */}
+              Limit Budget: {numberConverter(budgetLimit)} USD per month
             </CardDescription>
           </CardHeader>
           <Link
@@ -118,7 +144,7 @@ export default function BudgetBarChart(): React.JSX.Element {
                   {rawMonthlyReport.map((entry, index) => (
                     <RechartsPrimitive.Cell
                       key={`cell-${index}`}
-                      fill={getBarColor(entry.Expense, limitBudget)}
+                      fill={getBarColor(entry.Expense, rawBudget)}
                     />
                   ))}
                   <LabelList
