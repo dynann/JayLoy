@@ -1,167 +1,178 @@
-"use client"
+"use client";
 
-import { TransactionInput } from "@/components/customeInput"
-import { Button } from "@/components/ui/button"
-import { DropdownMenuDemo } from "@/components/ui/dropdown-menu"
-import type React from "react"
-import { useState, useEffect, useCallback } from "react"
-import ExpenseModal, { DisabledButton, IncomeModal }  from "./components/popupModal";
-import { useRouter, useSearchParams } from "next/navigation"
-import dayjs from "dayjs"
-
+import { TransactionInput } from "@/components/customeInput";
+import { Button } from "@/components/ui/button";
+import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
+import type React from "react";
+import { useState, useEffect, useCallback } from "react";
+import ExpenseModal, {
+  DisabledButton,
+  IncomeModal,
+} from "./components/popupModal";
+import { useRouter, useSearchParams } from "next/navigation";
+import dayjs from "dayjs";
+import Image from "next/image";
 interface TransactionFormProps {
-  isEditing?: boolean
-  existingTransaction?: any
+  isEditing?: boolean;
+  existingTransaction?: any;
 }
 
-export default function Transaction({ isEditing, existingTransaction }: TransactionFormProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const isEdit = searchParams.get("edit") === "true"
+export default function Transaction({
+  isEditing,
+  existingTransaction,
+}: TransactionFormProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isEdit = searchParams.get("edit") === "true";
 
-  const [transactionType, setTransactionType] = useState("")
-  const [amount, setAmount] = useState("")
-  const [date, setDate] = useState(getLocalDate())
-  const [description, setDescription] = useState("")
-  const [category, setCategory] = useState(1)
-  const [transactionTypeError, setTransactionTypeError] = useState("")
-  const [amountError, setAmountError] = useState("")
-  const [dateError, setDateError] = useState("")
-  const [previousType, setPreviousType] = useState("")
+  const [transactionType, setTransactionType] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(getLocalDate());
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(1);
+  const [transactionTypeError, setTransactionTypeError] = useState("");
+  const [amountError, setAmountError] = useState("");
+  const [dateError, setDateError] = useState("");
+  const [previousType, setPreviousType] = useState("");
+  const [selectImage, setSelectedImage] = useState<string>();
 
   // Helper function to get the current date in local time zone
   function getLocalDate() {
-    return dayjs().format("YYYY-MM-DD")
+    return dayjs().format("YYYY-MM-DD");
   }
 
   // Helper function format date string to YYYY-MM-DD
   const formatDate = useCallback((dateString: string) => {
-    return dayjs(dateString).format("YYYY-MM-DD")
-  }, [])
+    return dayjs(dateString).format("YYYY-MM-DD");
+  }, []);
 
   // Load existing transaction data if editing
   useEffect(() => {
     if (isEdit) {
-      const storedTransaction = localStorage.getItem("editingTransaction")
+      const storedTransaction = localStorage.getItem("editingTransaction");
       if (storedTransaction) {
-        const transaction = JSON.parse(storedTransaction)
-        const type = transaction.type === "EXPENSE" ? "Expense" : "Income"
-        setTransactionType(type)
-        setPreviousType(type)
+        const transaction = JSON.parse(storedTransaction);
+        const type = transaction.type === "EXPENSE" ? "Expense" : "Income";
+        setTransactionType(type);
+        setPreviousType(type);
         // Convert from cents to dollars for display
-        setAmount((Math.abs(transaction.amount) / 100).toString())
+        setAmount((Math.abs(transaction.amount) / 100).toString());
         // Format YYYY-MM-DD
-        setDate(formatDate(transaction.date))
-        setDescription(transaction.description || "")
-        setCategory(transaction.categoryID)
+        setDate(formatDate(transaction.date));
+        setDescription(transaction.description || "");
+        setCategory(transaction.categoryID);
         // Keep the transaction data for the ID when updating
-        localStorage.setItem("editingTransaction", JSON.stringify(transaction))
+        localStorage.setItem("editingTransaction", JSON.stringify(transaction));
       }
     }
-  }, [isEdit, formatDate])
+  }, [isEdit, formatDate]);
 
   // Handle transaction type change
-  const handleTransactionTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newType = event.target.value
-    setPreviousType(transactionType)
-    setTransactionType(newType)
-    setTransactionTypeError("")
+  const handleTransactionTypeChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newType = event.target.value;
+    setPreviousType(transactionType);
+    setTransactionType(newType);
+    setTransactionTypeError("");
 
     // set default category based on the new transaction type
     if (newType === "Expense") {
-      setCategory(1)
+      setCategory(1);
     } else if (newType === "Income") {
-      setCategory(10)
+      setCategory(10);
     }
 
-
     if (amount) {
-      const numericAmount = Math.abs(Number.parseFloat(amount))
+      const numericAmount = Math.abs(Number.parseFloat(amount));
       if (!isNaN(numericAmount)) {
         if (newType === "Expense") {
-          setAmount(`-${numericAmount.toFixed(2)}`)
+          setAmount(`-${numericAmount.toFixed(2)}`);
         } else {
-          setAmount(numericAmount.toFixed(2))
+          setAmount(numericAmount.toFixed(2));
         }
       }
     }
-  }
+  };
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let value = event.target.value
+    let value = event.target.value;
 
     if (/^-?\d*\.?\d{0,2}$/.test(value)) {
       if (transactionType === "Expense" && !value.startsWith("-")) {
-        value = `-${value}`
+        value = `-${value}`;
+      } else if (transactionType === "Income" && value.startsWith("-")) {
+        value = value.replace("-", "");
       }
-      else if (transactionType === "Income" && value.startsWith("-")) {
-        value = value.replace("-", "")
-      }
-      setAmount(value)
-      setAmountError("") 
+      setAmount(value);
+      setAmountError("");
     }
-  }
+  };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = e.target.value
-    setDate(selectedDate)
-    setDateError("")
+    const selectedDate = e.target.value;
+    setDate(selectedDate);
+    setDateError("");
 
     // no date in the future
-    const today = dayjs().format("YYYY-MM-DD")
+    const today = dayjs().format("YYYY-MM-DD");
     if (selectedDate > today) {
-      setDateError("Date cannot be in the future")
+      setDateError("Date cannot be in the future");
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+    e.preventDefault();
     // Reset errors
-    setTransactionTypeError("")
-    setAmountError("")
-    setDateError("")
+    setTransactionTypeError("");
+    setAmountError("");
+    setDateError("");
 
     // Validate transaction type
+
     if (!transactionType) {
-      setTransactionTypeError("Please select a transaction type.")
-      return
+      setTransactionTypeError("Please select a transaction type.");
+      return;
     }
 
     // Validate amount
-    const trimmedAmount = amount.trim()
+    const trimmedAmount = amount.trim();
     if (!trimmedAmount || trimmedAmount === "-") {
-      setAmountError("Please enter a valid amount.")
-      return
+      setAmountError("Please enter a valid amount.");
+      return;
     }
 
-    const positiveAmount = Math.abs(Number.parseFloat(trimmedAmount))
+    const positiveAmount = Math.abs(Number.parseFloat(trimmedAmount));
 
     // Validate amount is greater than zero
     if (positiveAmount <= 0) {
-      setAmountError("Amount must be greater than zero.")
-      return
+      setAmountError("Amount must be greater than zero.");
+      return;
     }
 
     // Validate date is not in the future
-    const today = dayjs().format("YYYY-MM-DD")
+    const today = dayjs().format("YYYY-MM-DD");
     if (date > today) {
-      setDateError("Date cannot be in the future")
-      return
+      setDateError("Date cannot be in the future");
+      return;
     }
 
     try {
       // Get the stored transaction data for the ID when editing
-      const storedTransaction = isEdit ? JSON.parse(localStorage.getItem("editingTransaction") || "{}") : null
+      const storedTransaction = isEdit
+        ? JSON.parse(localStorage.getItem("editingTransaction") || "{}")
+        : null;
 
       const endpoint = isEdit
         ? `${process.env.NEXT_PUBLIC_API_URL}/transactions/${storedTransaction.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`
+        : `${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`;
 
-      const method = isEdit ? "PATCH" : "POST"
+      const method = isEdit ? "PATCH" : "POST";
 
       // Convert dollars to cents for the backend
-      const amountInCent= isEdit ? Math.round(positiveAmount * 100) : positiveAmount;
+      const amountInCent = isEdit
+        ? Math.round(positiveAmount * 100)
+        : positiveAmount;
 
       const res = await fetch(endpoint, {
         method,
@@ -176,37 +187,50 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
           date,
           categoryID: category,
         }),
-      })
+      });
 
-      if (!res.ok) throw new Error("Failed to save transaction")
+      if (!res.ok) throw new Error("Failed to save transaction");
 
-      router.push("/")
+      router.push("/");
     } catch (err) {
-      alert(isEdit ? "Failed to update transaction!" : "Failed to create new transaction!")
+      alert(
+        isEdit
+          ? "Failed to update transaction!"
+          : "Failed to create new transaction!"
+      );
     }
-  }
+  };
 
   const categoryType = () => {
     if (!transactionType) {
-      return <DisabledButton label="Category" className={"bg-gray"} onClick={undefined} />
+      return (
+        <DisabledButton
+          label="Category"
+          className={"bg-gray"}
+          onClick={undefined}
+        />
+      );
     } else if (transactionType === "Income") {
-      return <IncomeModal category={category} setCategory={setCategory} />
+      return <IncomeModal category={category} setCategory={setCategory} />;
     } else if (transactionType === "Expense") {
-      return <ExpenseModal category={category} setCategory={setCategory} />
+      return <ExpenseModal category={category} setCategory={setCategory} />;
     } else {
-      return "error"
+      return "error";
     }
   }
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-4">
       <div className="w-full bg-background p-0 relative z-0">
         <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl shadow-lg sm:rounded-3xl">
-          <h1 className="text-2xl mb-8">{isEdit ? "Edit record" : "Add record"}</h1>
+          <h1 className="text-2xl mb-8">
+            {isEdit ? "Edit record" : "Add record"}
+          </h1>
           <form id="form" onSubmit={handleSubmit}>
             {/* radio  */}
             <fieldset className="relative z-0 w-full p-px mb-5">
-              <legend className="description-small text-black">Choose type of transaction</legend>
+              <legend className="description-small text-black">
+                Choose type of transaction
+              </legend>
               <div className="block pt-3 pb-2 space-x-4">
                 <label className="text-red">
                   <input
@@ -232,7 +256,9 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
                   Income
                 </label>
               </div>
-              {transactionTypeError && <p className="text-red text-sm">{transactionTypeError}</p>}
+              {transactionTypeError && (
+                <p className="text-red text-sm">{transactionTypeError}</p>
+              )}
             </fieldset>
             {/* category */}
             <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
@@ -254,7 +280,9 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
                   onChange={handleAmountChange}
                   maxLength={12}
                 />
-                {amountError && <p className="text-red text-sm mt-1">{amountError}</p>}
+                {amountError && (
+                  <p className="text-red text-sm mt-1">{amountError}</p>
+                )}
               </div>
             </div>
 
@@ -267,10 +295,14 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
                 value={date} // YYYY-MM-DD format
                 onChange={handleDateChange}
               />
-              {dateError && <p className="text-red text-sm mt-1">{dateError}</p>}
+              {dateError && (
+                <p className="text-red text-sm mt-1">{dateError}</p>
+              )}
             </div>
 
-            <legend className="description-small text-black">Description</legend>
+            <legend className="description-small text-black">
+              Description
+            </legend>
             <TransactionInput
               type="text"
               placeholder="Description"
@@ -280,6 +312,73 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
               maxLength={250}
             />
 
+            <legend className="description-small text-black">Image</legend>
+            <div
+              className="flex flex-col items-center justify-center w-full p-4 m-2 border-2 border-dashed border-gray-300 rounded-lg"
+              id="dropzone"
+            >
+              <input
+                type="file"
+                // className="  inset-0 w-full h-full opacity-0 z-50"
+                className="w-full h-full"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  setSelectedImage(
+                    file ? URL.createObjectURL(file) : undefined
+                  );
+                }}
+              />
+              {selectImage && (
+                <Image
+                  src={selectImage}
+                  width={100}
+                  height={100}
+                  alt="Preveiw"
+                  className="w-full"
+                  priority={true}
+                />
+              )}
+              
+        
+
+              {/* {!selectImage? (
+                  <><div className="text-center  ">
+                  <Image
+                    className="mx-auto   "
+                    width={90}
+                    height={90}
+                    src="https://www.svgrepo.com/show/357902/image-upload.svg"
+                    alt="" priority={true} />
+                  <h3 className="mt-2 text-sm font-medium text-primary  ">
+                    <label className="relative cursor-pointer">
+                      <span>Drag and drop</span>
+                      <span className="text-primary"> or browse</span>
+                      <span>to upload</span>
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only" />
+                    </label>
+                  </h3>
+                  <p className="mt-1 text-xs text-primary">
+                    PNG, JPG, GIF up to 10MB
+                  </p>
+                </div>
+                    </>
+              ):(<>
+               {selectImage && (
+                <Image
+                  src={selectImage}
+                  width={100}
+                  height={100}
+                  alt="Preveiw"
+                  className="w-full"
+                  priority={true}
+                />
+              )}</>)} */}
+            </div>
             <Button type="submit" className="green-button !text-white">
               {isEdit ? "Save Changes" : "Add Record"}
             </Button>
@@ -287,6 +386,5 @@ export default function Transaction({ isEditing, existingTransaction }: Transact
         </div>
       </div>
     </div>
-  )
+  );
 }
-
