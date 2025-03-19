@@ -3,6 +3,7 @@
 import { TransactionInput } from "@/components/customeInput";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type React from "react";
 import { useState, useEffect, useCallback, type ChangeEvent } from "react";
 import ExpenseModal, { DisabledButton, IncomeModal } from "./components/popupModal";
@@ -283,6 +284,73 @@ export default function Transaction({
     }
   }
 
+  const renderImageUploadModal = () => {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="w-full">
+            Upload Transaction Image
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Upload Transaction Image</DialogTitle>
+          </DialogHeader>
+          
+          <div className="w-full relative">
+            {loading && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <p className="text-sm text-gray-600">Processing your image...</p>
+                </div>
+              </div>
+            )}
+            
+            <div className="mb-6">
+              <label
+                htmlFor="imageUpload"
+                className="block w-full p-4 text-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
+              >
+                Click to upload an image
+              </label>
+              <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+            </div>
+
+            {previewUrl && (
+              <div className="mb-6 relative w-full h-64">
+                <Image
+                  src={previewUrl}
+                  alt="Preview"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  className="rounded-lg"
+                />
+              </div>
+            )}
+
+            <Button
+              type="button"
+              className="green-button !text-white w-full"
+              onClick={generateDescription}
+              disabled={loading || !selectedImage}
+            >
+              {loading ? "Processing..." : "Process Image record"}
+            </Button>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                {error}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-4">
       <div className="w-full bg-background p-0 relative z-0">
@@ -370,51 +438,11 @@ export default function Transaction({
             </Button>
 
             {/* Image Upload Section */}
-            <legend className="description-small text-black mt-8">
+            <legend className="description-small text-black mt-8 text-center font-bold">
               Upload your record without filling information
             </legend>
-            <div className="w-full max-w-2xl mx-auto">
-              <div className="mb-6">
-                <label
-                  htmlFor="imageUpload"
-                  className="block w-full p-4 text-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
-                >
-                  Click to upload an image
-                </label>
-                <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-              </div>
-
-              {previewUrl && (
-                <div className="mb-6 relative w-full h-64">
-                  <Image
-                    src={previewUrl || "/placeholder.svg"}
-                    alt="Preview"
-                    fill
-                    style={{ objectFit: "contain" }}
-                    className="rounded-lg"
-                  />
-                </div>
-              )}
-
-              <Button
-                type="button"
-                className="green-button !text-white w-full"
-                onClick={generateDescription}
-                disabled={loading || !selectedImage}
-              >
-                {loading ? "Processing..." : "Process Image record"}
-              </Button>
-
-              {error && (
-                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">{error}</div>
-              )}
-
-              {information && (
-                <div className="mt-6">
-                  <h2 className="text-xl font-semibold mb-2">Image Description:</h2>
-                  <div className="p-4 bg-gray-100 rounded-lg">{information}</div>
-                </div>
-              )}
+            <div className="mt-6">
+              {renderImageUploadModal()}
             </div>
           </form>
         </div>
