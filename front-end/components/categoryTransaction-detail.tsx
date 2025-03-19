@@ -64,7 +64,7 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="relative">
-                    <div className={`${categoryInfo.color} p-4 rounded-full`}>{categoryInfo.icon}</div>
+                    <div className={`${categoryInfo.color} p-4 rounded-2xl`}>{categoryInfo.icon}</div>
                     <button
                       onClick={handleEdit}
                       className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-primary hover:text-primary/80 text-lg transition-colors whitespace-nowrap"

@@ -28,11 +28,11 @@ export function CategoryList({
           return (
             <div
               key={item.categoryID}
-              className="flex items-center justify-between bg-white rounded-full p-3 shadow-sm pl-8 pr-8 w-full cursor-pointer hover:opacity-80 transition-all"
+              className="flex items-center justify-between bg-white rounded-lg p-3 shadow-sm pl-8 pr-8 w-full cursor-pointer hover:opacity-80 transition-all"
               onClick={() => onCategorySelect(Number(item.categoryID))}
             >
               <div className="flex items-center space-x-5">
-                <div className={`${colorClass} p-3 rounded-full`}>
+                <div className={`${colorClass} p-1 rounded-lg`}>
                   {category?.icon || <Icon icon="mdi:help-circle" className="w-[3em] h-[3em] text-white" />}
                 </div>
                 <span className="description-medium">{item.name || category?.name || "Other"}</span>
