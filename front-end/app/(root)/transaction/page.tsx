@@ -251,7 +251,7 @@ export default function Transaction({
             type: parsedData.type.toUpperCase(),
             description: parsedData.description,
             date: parsedData.date,
-            categoryID: category,
+            categoryID: parsedData.type === "EXPENSE" ? 10 : 14,
           }),
         });
 
