@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  placeholder: string;
+  placeholder: any;
 }
 
 export function TextInput({ type, placeholder, value, onChange }: InputProps) {
