@@ -24,9 +24,9 @@ export async function POST(req: NextRequest) {
     };
     const result = await model.generateContent([
       `extract essential information in this transaction picture and format into following json format: 
-      response only json format, remember the format json that they send to make api request 
+      response only json format, remember the format json that they send to make api request,
       {
-        "amount": example (100) put only number ,
+        "amount": example (100) put only number and if use see KHR currency please convert to USD format, by multiply by 4000 ,
         "type": EXPENSE OR INCOME,
         "description": example : "I bought cake",  mostly in remark option,
         "date": example format like this "2025-12-31",
