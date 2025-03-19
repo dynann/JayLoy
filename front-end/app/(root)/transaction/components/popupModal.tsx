@@ -21,7 +21,7 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
 
   // Filter categories based on type
   const filteredCategories = categoriesArray.filter((category) =>
-    isExpense ? category.id >= 0 && category.id <= 9 : category.id >= 10 && category.id <= 12,
+    isExpense ? category.id >= 0 && category.id <= 10 : category.id >= 11 && category.id <= 14,
   )
 
   const [isOpen, setIsOpen] = useState(false)
