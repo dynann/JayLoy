@@ -4,7 +4,7 @@ import { TransactionInput } from "@/components/customeInput";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import type React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, ChangeEvent } from "react";
 import ExpenseModal, {
   DisabledButton,
   IncomeModal,
@@ -34,7 +34,11 @@ export default function Transaction({
   const [amountError, setAmountError] = useState("");
   const [dateError, setDateError] = useState("");
   const [previousType, setPreviousType] = useState("");
-  const [selectImage, setSelectedImage] = useState<string>();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [information, setInformation] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Helper function to get the current date in local time zone
   function getLocalDate() {
@@ -217,7 +221,81 @@ export default function Transaction({
     } else {
       return "error";
     }
-  }
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setSelectedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setDescription("");
+      setError(null);
+    }
+  };
+
+  const generateDescription = async (): Promise<void> => {
+    if (!selectedImage) {
+      setError("Please select an image first");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", selectedImage);
+
+      const response = await fetch("/api/LLM", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      const jsonString = data.description.toString()
+        .replace("```json", "")
+        .replace("```", "")
+        .trim();
+      const parsedData = JSON.parse(jsonString);
+      console.log(Math.abs(Number.parseFloat(parsedData.amount)), parsedData.type, parsedData.description, parsedData.date);
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to process image");
+      }
+      setInformation(jsonString);
+      // console.log('informatioin: ', jsonString);
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({
+            amount: Math.round(Math.abs(Number.parseFloat(parsedData.amount))),
+            type: parsedData.type.toUpperCase(),
+            description: parsedData.description,
+            date: parsedData.date,
+            categoryID: category,
+          }),  
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error('Transaction creation failed:', errorData);
+          throw new Error(errorData.message || "Failed to save transaction");
+        }
+        router.push("/");
+      } catch (err) {
+        console.error('Error creating transaction:', err);
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-4">
       <div className="w-full bg-background p-0 relative z-0">
@@ -312,72 +390,64 @@ export default function Transaction({
               maxLength={250}
             />
 
-            <legend className="description-small text-black">Image</legend>
-            <div
-              className="flex flex-col items-center justify-center w-full p-4 m-2 border-2 border-dashed border-gray-300 rounded-lg"
-              id="dropzone"
-            >
-              <input
-                type="file"
-                // className="  inset-0 w-full h-full opacity-0 z-50"
-                className="w-full h-full"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  setSelectedImage(
-                    file ? URL.createObjectURL(file) : undefined
-                  );
-                }}
-              />
-              {selectImage && (
-                <Image
-                  src={selectImage}
-                  width={100}
-                  height={100}
-                  alt="Preveiw"
-                  className="w-full"
-                  priority={true}
+            <legend className="description-small text-black ">
+              upload your record without filling information
+            </legend>
+            <div className="w-full max-w-2xl mx-auto">
+              <div className="mb-6">
+                <label
+                  htmlFor="imageUpload"
+                  className="block w-full p-4 text-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  Click to upload an image
+                </label>
+                <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
                 />
-              )}
-              
-        
+              </div>
 
-              {/* {!selectImage? (
-                  <><div className="text-center  ">
+              {previewUrl && (
+                <div className="mb-6 relative w-full h-64">
                   <Image
-                    className="mx-auto   "
-                    width={90}
-                    height={90}
-                    src="https://www.svgrepo.com/show/357902/image-upload.svg"
-                    alt="" priority={true} />
-                  <h3 className="mt-2 text-sm font-medium text-primary  ">
-                    <label className="relative cursor-pointer">
-                      <span>Drag and drop</span>
-                      <span className="text-primary"> or browse</span>
-                      <span>to upload</span>
-                      <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
-                        className="sr-only" />
-                    </label>
-                  </h3>
-                  <p className="mt-1 text-xs text-primary">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
+                    src={previewUrl}
+                    alt="Preview"
+                    fill
+                    style={{ objectFit: "contain" }}
+                    className="rounded-lg"
+                  />
                 </div>
-                    </>
-              ):(<>
-               {selectImage && (
-                <Image
-                  src={selectImage}
-                  width={100}
-                  height={100}
-                  alt="Preveiw"
-                  className="w-full"
-                  priority={true}
-                />
-              )}</>)} */}
+              )}
+
+              
+              <Button
+                type="submit"
+                className="green-button !text-white"
+                onClick={generateDescription}
+                disabled={loading || !selectedImage}
+              >
+                {loading ? "Processing..." : "Process Image record"}
+              </Button>
+
+              {error && (
+                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              {information && (
+                <div className="mt-6">
+                  <h2 className="text-xl font-semibold mb-2">
+                    Image Description:
+                  </h2>
+                  <div className="p-4 bg-gray-100 rounded-lg">
+                    {information}
+                  </div>
+                </div>
+              )}
             </div>
             <Button type="submit" className="green-button !text-white">
               {isEdit ? "Save Changes" : "Add Record"}
