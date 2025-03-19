@@ -82,7 +82,7 @@ export default function Transaction({
     if (newType === "Expense") {
       setCategory(1);
     } else if (newType === "Income") {
-      setCategory(10);
+      setCategory(11);
     }
 
     if (amount) {
