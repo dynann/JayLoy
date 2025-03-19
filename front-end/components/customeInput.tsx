@@ -54,7 +54,10 @@ export function TransactionInput({
   desc,
   value,
   onChange,
+  maxLength,
+  accept,
   required = false, // Make it optional with a default value
+  
 }: {
   type: string;
   placeholder: string;
@@ -62,6 +65,8 @@ export function TransactionInput({
   value?: string | number; // Optional value
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void; // Optional onChange for controlled input
   required?: boolean; // Make this optional
+  maxLength?: number;
+  accept?: string;
 }) {
   const [internalValue, setInternalValue] = useState<string | number>("");
 
@@ -80,6 +85,8 @@ export function TransactionInput({
         }}
         className="pt-3 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
         required={required} // Use the required prop
+        maxLength={maxLength}
+        accept={accept}
       />
       <label className="absolute duration-300 top-3 -z-1 origin-0 text-gray"></label>
     </div>

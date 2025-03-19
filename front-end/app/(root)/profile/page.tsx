@@ -8,14 +8,13 @@ import { useRouter } from "next/navigation"
 import { signOut } from "next-auth/react"
 
 function ProfilePage() {
-  const containerClasses = "min-h-screen flex flex-col items-center justify-center px-4 gap-2 bg-background"
+  const containerClasses = "min-h-screen flex flex-col items-center justify-center px-4 pb-24 gap-2 bg-background"
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<number | null>(null)
-
   // Fetch user data when component mounts
   useEffect(() => {
     const fetchUserData = async () => {

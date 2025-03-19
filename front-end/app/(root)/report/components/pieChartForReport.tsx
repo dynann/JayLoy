@@ -13,7 +13,6 @@ interface PieChartComponentProps {
   pieData: PieData[];
   numberConverter: (num: number) => string;
   remainingBalance: any;
-  //num parameter
 }
 
 const PieChartComponent: React.FC<PieChartComponentProps> = ({
@@ -22,7 +21,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
   remainingBalance,
 }) => {
   return (
-    <ResponsiveContainer width="100%" height={300} className="h-[300px] flex flex-col items-center">
+    <ResponsiveContainer width="100%" height={300} className="h-[300px] flex flex-col items-center text-sm">
       <PieChart>
         <Pie
           data={pieData}

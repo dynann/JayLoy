@@ -21,11 +21,10 @@ import {
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import Link from "next/link";
-import { TabWithCancelButton } from "@/layouts/Tabbar";
 
 const chartConfig = {
   Expense: {
-    label: "Expense",
+    label: <span>Expense</span>,
     color: "#3EB075",
   },
 } satisfies ChartConfig;
@@ -35,9 +34,13 @@ export default function BudgetBarChart(): React.JSX.Element {
     { month: string; Expense: number }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
-  const [limitBudget, setLimitBudget] = useState(100);
-  const year = dayjs().year();
+  const [limitBudget, setLimitBudget] = useState(500000); //in cent
+  const limitBudgetDisplay = limitBudget / 100;
+  const [rawMonthlyReport, setRawMonthlyReport] = useState<
+    { month: string; Expense: number }[]
+  >([]);
 
+  const year = dayjs().year();
   useEffect(() => {
     const fetchmonthlyReport = async () => {
       try {
@@ -59,26 +62,35 @@ export default function BudgetBarChart(): React.JSX.Element {
           Expense: item.Expense / 100, // divide each Expense by 100
         }));
         setmonthlyReport(allMonthlyData);
+        setRawMonthlyReport(monthlyData); //raw amount in cent , no convert
+        console.log(monthlyData);
       } catch (error) {
         console.error(error);
         setError("Failed to fetch the balance");
       }
     };
     fetchmonthlyReport();
-  }, [year]);
+  }, []);
+  const getBarColor = (expense: number, limit: number) => {
+    return expense > limit ? "#C70039" : "#3EB075";
+  };
+
   return (
     <div>
       {/* <TabWithCancelButton href="/report" text="Limit Budget"/> */}
-      <Card>
+      <Card className="w-full">
         <div className="flex justify-between m-2">
           <CardHeader>
             <CardTitle>Monthly Budget Limit</CardTitle>
             <CardDescription>
-              Limit Budget: {limitBudget} USD per month
+              Limit Budget: {numberConverter(limitBudgetDisplay)} USD per month
             </CardDescription>
           </CardHeader>
-          <Link href="/report/limitBudget" className="flex items-center m-4 text-primary font-bold hover:underline rounded-3xl font-body " >
-           Limit Budget
+          <Link
+            href="/report/limitBudget"
+            className="flex items-center m-4 text-primary font-bold hover:underline rounded-3xl font-body "
+          >
+            Limit Budget
           </Link>
         </div>
 
@@ -102,7 +114,13 @@ export default function BudgetBarChart(): React.JSX.Element {
                   cursor={true}
                   content={<ChartTooltipContent hideLabel />}
                 />
-                <Bar dataKey="Expense" fill="#3EB075" radius={20}>
+                <Bar dataKey="Expense" radius={20}>
+                  {rawMonthlyReport.map((entry, index) => (
+                    <RechartsPrimitive.Cell
+                      key={`cell-${index}`}
+                      fill={getBarColor(entry.Expense, limitBudget)}
+                    />
+                  ))}
                   <LabelList
                     position="top"
                     offset={12}

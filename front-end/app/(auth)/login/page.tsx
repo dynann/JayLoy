@@ -26,7 +26,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(process.env.NEXT_PUBLIC_API_URL)
-    console.log({email, password});
+    // console.log({email, password});
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: "POST",
