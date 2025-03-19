@@ -5,6 +5,7 @@ import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { DeleteConfirmation } from "./delete-alert"
+import { formatCurrency } from "@/utils/formatCurrency"
 
 interface TransactionDetailProps {
   transaction: any
@@ -27,8 +28,7 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
   const isExpense = transaction.type === "EXPENSE"
 
   const handleEdit = () => {
-    localStorage.setItem("editingTransaction", JSON.stringify(transaction))
-    router.push(`/transaction?edit=true`)
+    onEdit()
   }
 
   const handleDelete = () => {
@@ -77,7 +77,7 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
                 <div className="flex items-center gap-5">
                   <span className={`text-2xl font-medium ${isExpense ? "text-red" : "text-primary"}`}>
                     {isExpense ? "-" : "+"}
-                    {Math.abs(amount).toFixed(2)}
+                    {formatCurrency(Math.abs(amount), 2).replace("$", "")}
                   </span>
                   <button onClick={handleDelete} className="text-red hover:text-red/80 transition-colors">
                     <Icon icon="mdi:trash-can" className="w-8 h-8" />

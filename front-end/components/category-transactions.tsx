@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { TabWithCancelButton } from "@/layouts/Tabbar"
 import dayjs from "dayjs"
+import { formatCurrency } from "@/utils/formatCurrency"
 
 interface Transaction {
   id: string
@@ -103,7 +104,7 @@ export function CategoryTransactions({ categoryId, transactions, onClose, month,
                       className={`description-medium ${transaction.type === "EXPENSE" ? "!text-red" : "!text-primary"}`}
                     >
                       {transaction.type === "EXPENSE" ? "-" : "+"}
-                      {Math.abs(Number(transaction.amount) / 100).toFixed(2)}
+                      {formatCurrency(Math.abs(Number(transaction.amount) / 100), 2).replace("$", "")}
                     </span>
                   </div>
                 ))}

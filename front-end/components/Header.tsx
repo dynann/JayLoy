@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import dayjs from "dayjs"
+import { formatCurrency } from "@/utils/formatCurrency"
 
 interface HeaderProps {
   title: string
@@ -37,13 +38,13 @@ export const Header = ({ title, income, expense, date, onDateChange }: HeaderPro
       <div className="flex items-center justify-center mt-3 gap-x-10">
         <div className="space-y-1">
           <div className="description-big-medium">Expenses:</div>
-          <div className="description-big-medium">${Math.abs(expense).toFixed(2)}</div>
+          <div className="description-big-medium">{formatCurrency(Math.abs(expense))}</div>
         </div>
 
         <div className="flex items-center gap-x-6">
           <div className="space-y-1 text-center">
             <div className="description-big-medium">Income:</div>
-            <div className="description-big-medium">${income.toFixed(2)}</div>
+            <div className="description-big-medium">{formatCurrency(income)}</div>
           </div>
 
           <div className="w-[2px] h-10 bg-black/20"></div>
