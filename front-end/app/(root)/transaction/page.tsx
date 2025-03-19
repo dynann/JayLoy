@@ -4,21 +4,19 @@ import { TransactionInput } from "@/components/customeInput";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
 import type React from "react";
-import { useState, useEffect, useCallback, ChangeEvent } from "react";
-import ExpenseModal, {
-  DisabledButton,
-  IncomeModal,
-} from "./components/popupModal";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback, type ChangeEvent } from "react";
+import ExpenseModal, { DisabledButton, IncomeModal } from "./components/popupModal";
+import { useRouter, useSearchParams } from "next/navigation"
 import dayjs from "dayjs";
 import Image from "next/image";
+
 interface TransactionFormProps {
   isEditing?: boolean;
   existingTransaction?: any;
 }
 
 export default function Transaction({
-  isEditing,
+  isEditing, 
   existingTransaction,
 }: TransactionFormProps) {
   const router = useRouter();
@@ -103,6 +101,7 @@ export default function Transaction({
     let value = event.target.value;
 
     if (/^-?\d*\.?\d{0,2}$/.test(value)) {
+
       if (transactionType === "Expense" && !value.startsWith("-")) {
         value = `-${value}`;
       } else if (transactionType === "Income" && value.startsWith("-")) {
@@ -127,15 +126,15 @@ export default function Transaction({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     // Reset errors
     setTransactionTypeError("");
     setAmountError("");
     setDateError("");
 
     // Validate transaction type
-
     if (!transactionType) {
-      setTransactionTypeError("Please select a transaction type.");
+      setTransactionTypeError("Please select a transaction type.")
       return;
     }
 
@@ -163,9 +162,7 @@ export default function Transaction({
 
     try {
       // Get the stored transaction data for the ID when editing
-      const storedTransaction = isEdit
-        ? JSON.parse(localStorage.getItem("editingTransaction") || "{}")
-        : null;
+      const storedTransaction = isEdit ? JSON.parse(localStorage.getItem("editingTransaction") || "{}") : null;
 
       const endpoint = isEdit
         ? `${process.env.NEXT_PUBLIC_API_URL}/transactions/${storedTransaction.id}`
@@ -173,10 +170,7 @@ export default function Transaction({
 
       const method = isEdit ? "PATCH" : "POST";
 
-      // Convert dollars to cents for the backend
-      const amountInCent = isEdit
-        ? Math.round(positiveAmount * 100)
-        : positiveAmount;
+      const amountToSend = isEdit ? Math.round(positiveAmount * 100) : positiveAmount;
 
       const res = await fetch(endpoint, {
         method,
@@ -185,7 +179,7 @@ export default function Transaction({
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
-          amount: amountInCent,
+          amount: amountToSend,
           type: transactionType.toUpperCase(),
           description,
           date,
@@ -193,36 +187,15 @@ export default function Transaction({
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to save transaction");
+      if (!res.ok) throw new Error("Failed to save transaction")
 
       router.push("/");
     } catch (err) {
-      alert(
-        isEdit
-          ? "Failed to update transaction!"
-          : "Failed to create new transaction!"
-      );
+      alert(isEdit ? "Failed to update transaction!" : "Failed to create new transaction!")
     }
-  };
+  }
 
-  const categoryType = () => {
-    if (!transactionType) {
-      return (
-        <DisabledButton
-          label="Category"
-          className={"bg-gray"}
-          onClick={undefined}
-        />
-      );
-    } else if (transactionType === "Income") {
-      return <IncomeModal category={category} setCategory={setCategory} />;
-    } else if (transactionType === "Expense") {
-      return <ExpenseModal category={category} setCategory={setCategory} />;
-    } else {
-      return "error";
-    }
-  };
-
+  // Image handling functions
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -253,17 +226,19 @@ export default function Transaction({
       });
 
       const data = await response.json();
-      const jsonString = data.description.toString()
-        .replace("```json", "")
-        .replace("```", "")
-        .trim();
+      const jsonString = data.description.toString().replace("```json", "").replace("```", "").trim();
       const parsedData = JSON.parse(jsonString);
-      console.log(Math.abs(Number.parseFloat(parsedData.amount)), parsedData.type, parsedData.description, parsedData.date);
+      console.log(
+        Math.abs(Number.parseFloat(parsedData.amount)),
+        parsedData.type,
+        parsedData.description,
+        parsedData.date,
+      )
       if (!response.ok) {
         throw new Error(data.error || "Failed to process image");
       }
-      setInformation(jsonString);
-      // console.log('informatioin: ', jsonString);
+      setInformation(jsonString)
+
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`, {
           method: "POST",
@@ -272,43 +247,51 @@ export default function Transaction({
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify({
-            amount: Math.round(Math.abs(Number.parseFloat(parsedData.amount))),
+            amount: Math.abs(Number.parseFloat(parsedData.amount)),
             type: parsedData.type.toUpperCase(),
             description: parsedData.description,
             date: parsedData.date,
             categoryID: category,
-          }),  
+          }),
         });
-        
+
         if (!res.ok) {
           const errorData = await res.json();
-          console.error('Transaction creation failed:', errorData);
+          console.error("Transaction creation failed:", errorData);
           throw new Error(errorData.message || "Failed to save transaction");
         }
         router.push("/");
       } catch (err) {
-        console.error('Error creating transaction:', err);
+        console.error("Error creating transaction:", err);
       }
     } catch (err) {
       setError((err as Error).message);
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const categoryType = () => {
+    if (!transactionType) {
+      return <DisabledButton label="Category" className={"bg-gray"} onClick={undefined} />
+    } else if (transactionType === "Income") {
+      return <IncomeModal category={category} setCategory={setCategory} />
+    } else if (transactionType === "Expense") {
+      return <ExpenseModal category={category} setCategory={setCategory} />
+    } else {
+      return "error"
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-4">
       <div className="w-full bg-background p-0 relative z-0">
         <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl shadow-lg sm:rounded-3xl">
-          <h1 className="text-2xl mb-8">
-            {isEdit ? "Edit record" : "Add record"}
-          </h1>
+          <h1 className="text-2xl mb-8">{isEdit ? "Edit record" : "Add record"}</h1>
           <form id="form" onSubmit={handleSubmit}>
             {/* radio  */}
             <fieldset className="relative z-0 w-full p-px mb-5">
-              <legend className="description-small text-black">
-                Choose type of transaction
-              </legend>
+              <legend className="description-small text-black">Choose type of transaction</legend>
               <div className="block pt-3 pb-2 space-x-4">
                 <label className="text-red">
                   <input
@@ -334,9 +317,7 @@ export default function Transaction({
                   Income
                 </label>
               </div>
-              {transactionTypeError && (
-                <p className="text-red text-sm">{transactionTypeError}</p>
-              )}
+              {transactionTypeError && <p className="text-red text-sm">{transactionTypeError}</p>}
             </fieldset>
             {/* category */}
             <div className="relative z-50 w-full mb-5 flex items-center justify-between gap-2">
@@ -358,9 +339,7 @@ export default function Transaction({
                   onChange={handleAmountChange}
                   maxLength={12}
                 />
-                {amountError && (
-                  <p className="text-red text-sm mt-1">{amountError}</p>
-                )}
+                {amountError && <p className="text-red text-sm mt-1">{amountError}</p>}
               </div>
             </div>
 
@@ -373,14 +352,10 @@ export default function Transaction({
                 value={date} // YYYY-MM-DD format
                 onChange={handleDateChange}
               />
-              {dateError && (
-                <p className="text-red text-sm mt-1">{dateError}</p>
-              )}
+              {dateError && <p className="text-red text-sm mt-1">{dateError}</p>}
             </div>
 
-            <legend className="description-small text-black">
-              Description
-            </legend>
+            <legend className="description-small text-black">Description</legend>
             <TransactionInput
               type="text"
               placeholder="Description"
@@ -390,8 +365,13 @@ export default function Transaction({
               maxLength={250}
             />
 
-            <legend className="description-small text-black ">
-              upload your record without filling information
+            <Button type="submit" className="green-button !text-white w-full mb-6">
+              {isEdit ? "Save Changes" : "Add Record"}
+            </Button>
+
+            {/* Image Upload Section */}
+            <legend className="description-small text-black mt-8">
+              Upload your record without filling information
             </legend>
             <div className="w-full max-w-2xl mx-auto">
               <div className="mb-6">
@@ -401,19 +381,13 @@ export default function Transaction({
                 >
                   Click to upload an image
                 </label>
-                <input
-                  id="imageUpload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
+                <input id="imageUpload" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
               </div>
 
               {previewUrl && (
                 <div className="mb-6 relative w-full h-64">
                   <Image
-                    src={previewUrl}
+                    src={previewUrl || "/placeholder.svg"}
                     alt="Preview"
                     fill
                     style={{ objectFit: "contain" }}
@@ -422,10 +396,9 @@ export default function Transaction({
                 </div>
               )}
 
-              
               <Button
-                type="submit"
-                className="green-button !text-white"
+                type="button"
+                className="green-button !text-white w-full"
                 onClick={generateDescription}
                 disabled={loading || !selectedImage}
               >
@@ -433,28 +406,20 @@ export default function Transaction({
               </Button>
 
               {error && (
-                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                  {error}
-                </div>
+                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">{error}</div>
               )}
 
               {information && (
                 <div className="mt-6">
-                  <h2 className="text-xl font-semibold mb-2">
-                    Image Description:
-                  </h2>
-                  <div className="p-4 bg-gray-100 rounded-lg">
-                    {information}
-                  </div>
+                  <h2 className="text-xl font-semibold mb-2">Image Description:</h2>
+                  <div className="p-4 bg-gray-100 rounded-lg">{information}</div>
                 </div>
               )}
             </div>
-            <Button type="submit" className="green-button !text-white">
-              {isEdit ? "Save Changes" : "Add Record"}
-            </Button>
           </form>
         </div>
       </div>
     </div>
   );
 }
+
