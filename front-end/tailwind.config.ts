@@ -21,6 +21,7 @@ export default {
 			lightred: '#F25858',
   			purple: '#9747FF',
   			blue: '#304FFE',
+			dark_blue:"#005f78", 
 			orange: '#FFAE4C',
   			indigo: '#5856D6',
   			pink: '#FF2D55',

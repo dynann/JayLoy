@@ -43,7 +43,7 @@ export const TRANSACTION_CATEGORIES: { [key: number]: TransactionCategory } = {
     id: 6,
     name: "Rent",
     icon: <Icon icon="mdi:house-clock-outline" width="3em" height="3em" className="text-white" />,
-    color: "bg-blue",
+    color: "bg-dark_blue",
   },
   7: {
     id: 7,
@@ -63,22 +63,35 @@ export const TRANSACTION_CATEGORIES: { [key: number]: TransactionCategory } = {
     icon: <Icon icon="material-symbols:wifi-rounded" width="3em" height="3em" className="text-white" />,
     color: "bg-primary",
   },
-  10: {
-    id: 10,
+  10:{
+    id: 10, 
+    name: "Transfer",
+    icon: <Icon icon="ion:arrow-redo-sharp" width="3em" height="3em" className="text-white"  />,  
+    color: "bg-red"
+  },
+  11: {
+    id: 11,
     name: "Salary",
     icon: <Icon icon="si:wallet-detailed-duotone" width="3em" height="3em" className="text-white" />,
     color: "bg-brown",
   },
-  11: {
-    id: 11,
+  12: {
+    id: 12,
     name: "Freelance",
     icon: <Icon icon="tdesign:money" width="3em" height="3em" className="text-white" />,
     color: "bg-cyan",
   },
-  12: {
-    id: 12,
+  13: {
+    id: 13,
     name: "Invest",
     icon: <Icon icon="streamline:investment-selection" width="3em" height="3em" className="text-white" />,
     color: "bg-gray",
   },
+  14: {
+    id: 14,
+    name: "Recieve",
+    icon: <Icon icon="ion:arrow-undo" width="3em" height="3em" className="text-white" />,
+    color: "bg-blue",
+  },
+
 };

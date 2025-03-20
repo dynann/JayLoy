@@ -96,6 +96,9 @@ body {
   .sub-header {
     @apply font-poppins text-[24px] font-bold text-black;
   }
+  .sub-header-white {
+    @apply font-poppins text-[24px] font-bold text-white;
+  }
 
   .description-medium {
     @apply font-poppins text-[16px] font-medium text-black;
@@ -138,4 +141,33 @@ body {
     @apply w-full rounded-xl bg-red hover:bg-lightred description-small;
   }
 
+}
+
+
+
+.container {
+  display: flex;
+  flex-direction: column; /* Mobile-first approach */
+}
+
+/* For medium and larger screens */
+@media (min-width : 768px) {
+  .container {
+    flex-direction: row;
+    gap: 1rem; /* Switch to row layout for tablets and larger screens */
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    flex-direction: row;
+    gap: 1rem; /* Row layout for laptops and larger screens */
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    flex-direction: row; 
+    gap: 1rem;
+  }
 }

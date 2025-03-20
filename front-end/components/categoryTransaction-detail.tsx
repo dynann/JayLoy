@@ -4,7 +4,8 @@ import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { DeleteConfirmation } from "@/components/delete-alert"
+import { DeleteConfirmation } from "./delete-alert"
+import { formatCurrency } from "@/utils/formatCurrency"
 
 interface TransactionDetailProps {
   transaction: any
@@ -23,12 +24,11 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
     color: "bg-gray",
   }
 
-  const amount = Number.parseFloat(transaction.amount)
+  const amount = Number.parseFloat(transaction.amount) / 100
   const isExpense = transaction.type === "EXPENSE"
 
   const handleEdit = () => {
-    localStorage.setItem("editingTransaction", JSON.stringify(transaction))
-    router.push(`/transaction?edit=true`)
+    onEdit()
   }
 
   const handleDelete = () => {
@@ -64,7 +64,7 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="relative">
-                    <div className={`${categoryInfo.color} p-4 rounded-full`}>{categoryInfo.icon}</div>
+                    <div className={`${categoryInfo.color} p-4 rounded-2xl`}>{categoryInfo.icon}</div>
                     <button
                       onClick={handleEdit}
                       className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-primary hover:text-primary/80 text-lg transition-colors whitespace-nowrap"
@@ -77,7 +77,7 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
                 <div className="flex items-center gap-5">
                   <span className={`text-2xl font-medium ${isExpense ? "text-red" : "text-primary"}`}>
                     {isExpense ? "-" : "+"}
-                    {Math.abs(amount).toFixed(2)}
+                    {formatCurrency(Math.abs(amount), 2).replace("$", "")}
                   </span>
                   <button onClick={handleDelete} className="text-red hover:text-red/80 transition-colors">
                     <Icon icon="mdi:trash-can" className="w-8 h-8" />

@@ -9,6 +9,11 @@ interface CategoryModalProps {
   setCategory: (n: number) => void
   type: "Expense" | "Income"
 }
+interface DisabledButtonProps{
+  label: any;
+  onClick: any;
+  className: any;
+}
 
 const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type }) => {
   const categoriesArray = Object.values(TRANSACTION_CATEGORIES)
@@ -16,7 +21,7 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
 
   // Filter categories based on type
   const filteredCategories = categoriesArray.filter((category) =>
-    isExpense ? category.id >= 0 && category.id <= 9 : category.id >= 10 && category.id <= 12,
+    isExpense ? category.id >= 0 && category.id <= 10 : category.id >= 11 && category.id <= 14,
   )
 
   const [isOpen, setIsOpen] = useState(false)
@@ -35,14 +40,22 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
       setSelectedColor(categoryInfo.color)
     }
   }, [category])
-
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
+  const disableButton = (p0: number) => {
+    setButtonDisabled(true);
+    // alert("Button has been disabled!");
+};
   return (
     <div>
       {/* Button to Open Modal */}
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+        }}
+        
         className={`text-white ${selectedColor} hover:bg-white hover:text-black shadow-sm focus:ring-1 focus:outline-none focus:ring-gray rounded-lg px-5 py-2.5 text-center inline-flex items-center`}
+        
       >
         {selectedCategory}
       </button>
@@ -50,7 +63,7 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
       {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-70 flex items-center justify-center w-full h-full bg-black bg-opacity-50">
-          <div className="relative z-80 p-4 w-full max-w-md bg-white rounded-lg shadow-sm">
+          <div className="relative z-80 p-4 w-full max-w-md bg-background rounded-lg shadow-sm">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b rounded-t">
               <h3 className="description-medium">Choose a category</h3>
@@ -105,13 +118,30 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
 
 // Exporting Expense and Income Modals
 const ExpenseModal: React.FC<{ category: number; setCategory: (n: number) => void }> = (props) => (
-  <PopupModal {...props} type="Expense" />
+  <PopupModal {...props} type="Expense"  />
 )
 
 const IncomeModal: React.FC<{ category: number; setCategory: (n: number) => void }> = (props) => (
   <PopupModal {...props} type="Income" />
 )
+const DisabledButton: React.FC<DisabledButtonProps> = ({ onClick, label, className }) => {
+  const [isDisabled, setIsDisabled] = useState(false)
+  // const handleClick = () => {
+  //   if (!isDisabled) {
+  //     setIsDisabled(true)} }
+  return (
+    <button
+      type="button"
+      // onClick={handleClick}
+      disabled={true}
+      className="px-5 py-2.5 rounded-lg opacity-50 bg-background text-black "
+        
+    >
+      {label}
+    </button>
+  )
+}
 
 export default ExpenseModal
-export { IncomeModal }
+export { IncomeModal, DisabledButton }
 

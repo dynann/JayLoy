@@ -9,13 +9,13 @@ const NavBar: React.FC = () => {
 
   return (
     <div>
-      <div className="fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 rounded-full bottom-4 left-1/2 shadow-lg bg-white">
+      <div className="fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 rounded-xl bottom-0 left-1/2 shadow-lg bg-white">
         <div className="grid h-full max-w-lg grid-cols-5 mx-auto">
           {/* Home Button */}
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-gray dark:hover:bg-variant group"
+            className="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="lucide:house" width="24" height="24" />
             <span className="sr-only">Home</span>
@@ -25,7 +25,7 @@ const NavBar: React.FC = () => {
           <button
             type="button"
             onClick={() => router.push("/chart")}
-            className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray dark:hover:bg-variant group"
+            className="inline-flex flex-col items-center justify-center px-5 hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="gg:chart" width="24" height="24" />
             <span className="sr-only">Chart</span>
@@ -47,7 +47,7 @@ const NavBar: React.FC = () => {
           <button
             type="button"
             onClick={() => router.push("/report")}
-            className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray dark:hover:bg-variant group"
+            className="inline-flex flex-col items-center justify-center px-5 hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="mi:document" width="24" height="24" />
             <span className="sr-only">Report</span>
@@ -57,7 +57,7 @@ const NavBar: React.FC = () => {
           <button
             type="button"
             onClick={() => router.push("/profile")}
-            className="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-gray dark:hover:bg-variant group"
+            className="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="iconamoon:profile-duotone" width="24" height="24" />
             <span className="sr-only">Profile</span>
