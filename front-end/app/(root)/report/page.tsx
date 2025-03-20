@@ -165,7 +165,7 @@ const Page: React.FC = () => {
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {error && <p className="text-red-500">{error}</p>}
       {/* Account Card */}
-      <div className="w-full h-56 mt-16 rounded-xl relative text-white shadow-2xl transition-transform transform hover:scale-110">
+      <div className="w-full h-40 mt-16 rounded-xl relative text-white shadow-2xl transition-transform transform hover:scale-110">
         <Image
           src={GreenCard}
           className="relative object-cover w-full h-full rounded-xl"

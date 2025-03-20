@@ -108,8 +108,8 @@ export default function LoginPage() {
           <TextInput type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <PasswordInput placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-          {error && <p className="text-center description-medium !text-red">{error}!!!!</p> }
-          {error && <p className="text-center description-medium !text-red">Wrong Email or Password</p> }
+          {/* {error && <p className="text-center smalltext !text-red">{error}!!!!</p> } */}
+          {error && <p className="text-center smalltext !text-red">Incredential Email or Password</p> }
 
           <div className="text-center">
             <Link href="#" className="hover:underline description-small flex justify-end">Forget password</Link>
