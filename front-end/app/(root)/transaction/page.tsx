@@ -10,6 +10,7 @@ import ExpenseModal, { DisabledButton, IncomeModal } from "./components/popupMod
 import { useRouter, useSearchParams } from "next/navigation"
 import dayjs from "dayjs";
 import Image from "next/image";
+import { Icon } from "@iconify/react";
 
 interface TransactionFormProps {
   isEditing?: boolean;
@@ -294,7 +295,7 @@ export default function Transaction({
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Upload Transaction Image</DialogTitle>
+            <DialogTitle> Upload Transaction Image</DialogTitle>
           </DialogHeader>
           
           <div className="w-full relative">
@@ -349,13 +350,12 @@ export default function Transaction({
     );
   };
 
-  
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 gap-4">
-      <div className="w-full bg-background p-0 relative z-0">
-        <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl shadow-lg sm:rounded-3xl">
-          <h1 className="text-2xl mb-8">{isEdit ? "Edit record" : "Add record"}</h1>
+    <div className="min-h-screen flex flex-col bg-white  items-center justify-center px-4 gap-4">
+      <div className="w-full p-0  bg-white relative z-0">
+        <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl   sm:rounded-3xl">
+          <h1 className="text-2xl mt-5">{isEdit ? "Edit record" : "How much do you spend today?"}</h1>
           <form id="form" onSubmit={handleSubmit}>
             {/* radio  */}
             <fieldset className="relative z-0 w-full p-px mb-5">
@@ -438,8 +438,8 @@ export default function Transaction({
             </Button>
 
             {/* Image Upload Section */}
-            <legend className="description-small text-black mt-8 text-center font-bold">
-              Upload your record without filling information
+            <legend className="description-small flex justify-between text-black mt-8 text-center font-bold">
+            <Icon icon="lucide:image" width="24" height="24"/>Upload your record without filling information
             </legend>
             <div className="mt-6">
               {renderImageUploadModal()}
