@@ -30,11 +30,6 @@ function AccountManagementPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!userId) {
-      setError("User ID not found")
-      return
-    }
-
     // Reset error
     setError("")
 
@@ -50,23 +45,26 @@ function AccountManagementPage() {
       return
     }
 
+    if (!currentPassword) {
+      setError("Current password is required")
+      return
+    }
+
     try {
       setLoading(true)
 
-      // Dak joal sin, i still need clarification on this
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/password?password=${encodeURIComponent(newPassword)}&oldPassword=${encodeURIComponent(currentPassword)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         },
-        body: JSON.stringify({
-          password: newPassword,
-        }),
-      })
+      )
 
       if (response.ok) {
-        // Navigate back to settings page if success
         router.push("/profile/settings")
       } else {
         const data = await response.json()
