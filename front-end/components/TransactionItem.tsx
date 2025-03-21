@@ -31,7 +31,8 @@ export const TransactionItem = ({ transaction, onClick }: TransactionItemProps) 
       </div>
       <span className={`description-medium ${isExpense ? "!text-red" : "!text-primary"}`}>
         {isExpense ? "-" : "+"}
-        {formatCurrency(Math.abs(amount), 2).replace("$", "")}
+        {/* {formatCurrency(Math.abs(amount), 2).replace("$", "")} */}
+        {formatCurrency(Math.abs(amount), 2)}
       </span>
     </div>
   )

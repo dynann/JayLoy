@@ -13,7 +13,6 @@ import {
 import BudgetBarChart from "./components/barChart";
 import PieChartComponent from "./components/pieChartForReport";
 import AccountCard from "./components/card";
-
 interface Transaction {
   id: number;
   amount: string;
@@ -42,74 +41,59 @@ export function numberConverter(num: number) {
   }else {
     formatted = absNum.toFixed(2); //under hundred
   }
-
   return num < 0 ? `-$${formatted}` : `$${formatted}`;
 }
-
 const Page: React.FC = () => {
   const [reportData, setReportData] = useState<{
     total_income: number;
     total_expense: number;
     total_remaining: number;
   } | null>(null);
-
+  //fetch data
+  const getAuthHeaders = () => ({
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+  });
+  const fetchData = async (url: string) => {
+    try {
+      const res = await fetch(url, { method: "GET", headers: getAuthHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch data");
+      return await res.json();
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return null;
+    }
+  };
+  //yearly reports
   const [totalBalance, setTotalBalance] = useState<0 | null>(null);
   const [error, setError] = useState<string | null>(null); // Added error state
   const year = dayjs().year();
   const fetchYearlyReport = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setReportData(data);
-      } else {
-        setError("Failed to fetch the report");
-      }
-    } catch (err) {
+    const data = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`);
+    if (data) {
+      setReportData(data);
+    } else {
       setError("Failed to fetch the report");
-      console.error("Failed to report", err);
     }
   };
-
   useEffect(() => {
     fetchYearlyReport();
   }, []);
+  //fetch Balance 
 
   useEffect(() => {
     const fetchBalance = async () => {
-      try {
-        const res = await fetch( `${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-        if (!res.ok) throw new Error("Failed to fetch the balance");
-        const balanceData = await res.json();
+      const balanceData = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`);
+      if (balanceData) {
         setTotalBalance(balanceData.amount);
-        // console.log("month",balanceData)
-      } catch (error) {
-        console.error(error);
+      } else {
         setError("Failed to fetch the balance");
       }
     };
-
     fetchBalance();
   }, []);
- 
+  
   const currentYear = dayjs().year();
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
   const total_income = reportData ? reportData.total_income / 100 : 0;
@@ -134,30 +118,14 @@ const Page: React.FC = () => {
   const [ email, setEmail] = useState("Loading..")
   useEffect(() => {
     const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("accessToken")
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
-        if (res.ok) {
-          const userData = await res.json()
-          setEmail(userData.email)
-          setUsername(userData.username)
-        } else {
-          setError("Failed to fetch user data")
-        }
-      } catch (err) {
-        setError("Failed to fetch user data")
-        console.error("Failed to fetch user data:", err)
-      } finally {
-      }
+        const res = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
+        if (res){
+          // const userData = await res.json()
+          setEmail(res.email)
+          setUsername(res.username)
+        }else{
+          setError("Failed to fetch user data");
+        }  
     }
     fetchUserData()
   },[])
@@ -178,7 +146,6 @@ const Page: React.FC = () => {
           value={numberConverter(total_balance)}
         />
       </div>
-
       <div className="space-y-2 min-w-full mb-14 flex flex-col justify-items-stretch container">
         <Card>
           <CardHeader>
