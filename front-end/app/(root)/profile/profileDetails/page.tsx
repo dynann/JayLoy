@@ -142,13 +142,6 @@ function ProfileDetailsPage() {
                     <TransparentInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                 </div>
-
-                <div className="flex items-center p-4">
-                  <span className="text-sm text-gray-600 flex-1">Phone</span>
-                  <div className="w-1/2">
-                    <TransparentInput type="text" value="None" onChange={() => {}} />
-                  </div>
-                </div>
               </div>
 
               <div className="mt-6 px-4">
@@ -161,6 +154,7 @@ function ProfileDetailsPage() {
                   {saving ? "Saving..." : "Save changes"}
                 </Button>
               </div>
+              
             </div>
           </>
         )}
