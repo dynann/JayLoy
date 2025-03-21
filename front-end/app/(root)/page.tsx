@@ -28,7 +28,7 @@ export default function HomePage() {
         const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${dateToFetch}`)
         const data = await response.json();
         const transactionsData = Array.isArray(data) ? data : data.transactions || [];
-        setTransactions(transactionsData);
+        setTransactions(transactionsData.reverse()); //reverse so it'll show from the newest to the oldest
       } catch (err) {
         console.error("Error fetching transactions:", err);
       } finally {
@@ -102,7 +102,7 @@ export default function HomePage() {
   const dateDisplay = isToday ? "today" : dayjs(currentDate).format("YYYY-MM-DD")
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <Header
         title="Money Tracker"
