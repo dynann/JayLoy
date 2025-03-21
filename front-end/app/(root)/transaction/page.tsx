@@ -39,6 +39,8 @@ export default function Transaction({
   const [information, setInformation] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
 
   // Helper function to get the current date in local time zone
   function getLocalDate() {
@@ -133,6 +135,7 @@ export default function Transaction({
     setTransactionTypeError("");
     setAmountError("");
     setDateError("");
+    setSuccessMessage(null);
 
     // Validate transaction type
     if (!transactionType) {
@@ -191,7 +194,16 @@ export default function Transaction({
 
       if (!res.ok) throw new Error("Failed to save transaction")
 
-      router.push("/");
+      // Set success message and show modal
+      setSuccessMessage(isEdit ? "Transaction updated successfully!" : "Transaction added successfully!");
+      setShowSuccessModal(true);
+      
+      // Navigate after a short delay to show the message
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        router.push("/");
+      }, 2000);
+      
     } catch (err) {
       alert(isEdit ? "Failed to update transaction!" : "Failed to create new transaction!")
     }
@@ -262,7 +274,14 @@ export default function Transaction({
           console.error("Transaction creation failed:", errorData);
           throw new Error(errorData.message || "Failed to save transaction");
         }
-        router.push("/");
+        setSuccessMessage(isEdit ? "Transaction updated successfully!" : "Transaction added successfully!");
+        setShowSuccessModal(true);
+        
+        // Navigate after a short delay to show the message
+        setTimeout(() => {
+          setShowSuccessModal(false);
+          router.push("/");
+        }, 2000);
       } catch (err) {
         console.error("Error creating transaction:", err);
       }
@@ -350,12 +369,35 @@ export default function Transaction({
     );
   };
 
+  // Success Modal Component
+  const SuccessModal = () => {
+    return (
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl">Success!</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-6">
+            <div className="mb-4 text-green-600">
+              <Icon icon="heroicons:check-circle" width="64" height="64" />
+            </div>
+            <p className="text-center text-lg">{successMessage}</p>
+            <p className="text-center text-sm text-gray-500 mt-2">Redirecting to home page...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white  items-center justify-center px-4 gap-4">
-      <div className="w-full p-0  bg-white relative z-0">
-        <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl   sm:rounded-3xl">
+    <div className="min-h-screen flex flex-col bg-white items-center justify-center px-4 gap-4">
+      {/* Success Modal */}
+      <SuccessModal />
+      
+      <div className="w-full p-0 bg-white relative z-0">
+        <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl sm:rounded-3xl">
           <h1 className="text-2xl mt-5">{isEdit ? "Edit record" : "How much do you spend today?"}</h1>
+          
           <form id="form" onSubmit={handleSubmit}>
             {/* radio  */}
             <fieldset className="relative z-0 w-full p-px mb-5">
