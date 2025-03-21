@@ -212,7 +212,7 @@ export default function ChartPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24 ">
-      <div className="bg-primary px-4 pb-6">
+      <div className="bg-emerald-500 px-4 pb-6">
         <h1 className="sub-header-white text-center py-4">
           Financial Analysis
         </h1>
