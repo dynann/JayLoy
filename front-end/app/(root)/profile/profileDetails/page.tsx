@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Icon } from "@iconify/react"
 import Image from "next/image"
 import ProfileImage from "@/public/images/plant.webp"
+import LoadingOverlay from "@/components/LoadingOverlay"
 
 function ProfileDetailsPage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ function ProfileDetailsPage() {
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const [userId, setUserId] = useState<number | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -69,6 +71,7 @@ function ProfileDetailsPage() {
     }
 
     try {
+      setActionLoading("Saving profile")
       setSaving(true)
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
@@ -94,11 +97,16 @@ function ProfileDetailsPage() {
       console.error("Failed to update profile:", err)
     } finally {
       setSaving(false)
+      setActionLoading(null)
     }
   }
 
   return (
     <>
+      <LoadingOverlay 
+        isLoading={!!actionLoading} 
+        message={actionLoading || "Loading..."} 
+      />
       <TabWithCancelButton text="Edit" onClick={() => router.push("/profile")} />
 
       <div className={containerClasses}>
