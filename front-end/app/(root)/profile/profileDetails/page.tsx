@@ -74,7 +74,7 @@ function ProfileDetailsPage() {
       setActionLoading("Saving profile")
       setSaving(true)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -103,10 +103,10 @@ function ProfileDetailsPage() {
 
   return (
     <>
-      <LoadingOverlay 
+      <LoadingOverlay
         isLoading={!!actionLoading} 
         message={actionLoading || "Loading..."} 
-      />
+        />
       <TabWithCancelButton text="Edit" onClick={() => router.push("/profile")} />
 
       <div className={containerClasses}>

@@ -89,18 +89,6 @@ function SettingsPage() {
       highlight: false,
     },
     {
-      title: "Notification",
-      icon: <Icon icon="ph:bell-fill" className="text-primary" width="24" height="24" />,
-      route: "/profile/settings/notifications",
-      highlight: false,
-    },
-    {
-      title: "Accessibility",
-      icon: <Icon icon="ph:eye-fill" className="text-primary" width="24" height="24" />,
-      route: "/profile/settings/accessibility",
-      highlight: false,
-    },
-    {
       title: "Delete Account",
       icon: <Icon icon="ph:trash-fill" className="text-primary" width="24" height="24" />,
       route: "/profile/settings/delete-account",
