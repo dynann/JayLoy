@@ -106,7 +106,7 @@ export function CategoryTransactions({ categoryId, transactions, onClose, month,
                       className={`description-medium ${transaction.type === "EXPENSE" ? "!text-red" : "!text-primary"}`}
                     >
                       {transaction.type === "EXPENSE" ? "-" : "+"}
-                      {formatCurrency(Math.abs(Number(transaction.amount) / 100), 2).replace("$", "")}
+                      {formatCurrency(Math.abs(Number(transaction.amount) / 100), 2)}
                     </span>
                   </div>
                 ))}
