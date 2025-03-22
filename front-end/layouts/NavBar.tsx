@@ -13,11 +13,9 @@ const NavBar: React.FC = () => {
     setNavLoading(label)
     router.push(route)
     
-    // Clear loading state after a short delay
-    // (since Next.js client-side navigation is usually fast)
     setTimeout(() => {
       setNavLoading(null)
-    }, 500)
+    }, 1000)
   }
 
   return (

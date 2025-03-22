@@ -41,6 +41,9 @@ export default function Transaction({
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
+  const [formPopulatedFromImage, setFormPopulatedFromImage] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Helper function to get the current date in local time zone
   function getLocalDate() {
@@ -165,17 +168,30 @@ export default function Transaction({
       return;
     }
 
+    // Set submitting state to true to disable the button
+    setIsSubmitting(true);
+
     try {
       // Get the stored transaction data for the ID when editing
       const storedTransaction = isEdit ? JSON.parse(localStorage.getItem("editingTransaction") || "{}") : null;
 
-      const endpoint = isEdit
-        ? `${process.env.NEXT_PUBLIC_API_URL}/transactions/${storedTransaction.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`;
-
+      const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/${isEdit ? `transactions/${storedTransaction.id}` : 'accounts/insert'}`;
+      
       const method = isEdit ? "PATCH" : "POST";
 
-      const amountToSend = isEdit ? Math.round(positiveAmount * 100) : positiveAmount;
+      // FIX: Send the amount directly without multiplying by 100
+      const amountToSend = positiveAmount;
+
+      // Prepare request body with the expected structure
+      const requestBody = {
+        amount: amountToSend,
+        type: transactionType.toUpperCase(),
+        description,
+        date,
+        categoryID: category,
+      };
+
+      console.log("Sending transaction data:", endpoint, method, requestBody);
 
       const res = await fetch(endpoint, {
         method,
@@ -183,33 +199,31 @@ export default function Transaction({
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify({
-          amount: amountToSend,
-          type: transactionType.toUpperCase(),
-          description,
-          date,
-          categoryID: category,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      if (!res.ok) throw new Error("Failed to save transaction")
-
-      // Set success message and show modal
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Transaction API response:", await res.text().catch(() => "Could not read response text"));
+        throw new Error(errorData.message || `Failed to ${isEdit ? 'update' : 'create'} transaction`);
+      }
       setSuccessMessage(isEdit ? "Transaction updated successfully!" : "Transaction added successfully!");
       setShowSuccessModal(true);
-      
-      // Navigate after a short delay to show the message
       setTimeout(() => {
         setShowSuccessModal(false);
         router.push("/");
       }, 2000);
       
     } catch (err) {
-      alert(isEdit ? "Failed to update transaction!" : "Failed to create new transaction!")
+      console.error("Transaction error details:", err);
+      alert(isEdit ? "Failed to update transaction!" : "Failed to create new transaction!");
+    } finally {
+      // Reset submitting state regardless of outcome
+      setIsSubmitting(false);
     }
   }
 
-  // Image handling functions
+
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -251,44 +265,26 @@ export default function Transaction({
       if (!response.ok) {
         throw new Error(data.error || "Failed to process image");
       }
-      setInformation(jsonString)
-
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/accounts/insert`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            amount: Math.abs(Number.parseFloat(parsedData.amount)),
-            type: parsedData.type.toUpperCase(),
-            description: parsedData.description,
-            date: parsedData.date,
-            categoryID: parsedData.type === "EXPENSE" ? 10 : 14,
-          }),
-        });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          console.error("Transaction creation failed:", errorData);
-          throw new Error(errorData.message || "Failed to save transaction");
-        }
-        setSuccessMessage(isEdit ? "Transaction updated successfully!" : "Transaction added successfully!");
-        setShowSuccessModal(true);
-        
-        // Navigate after a short delay to show the message
-        setTimeout(() => {
-          setShowSuccessModal(false);
-          router.push("/");
-        }, 2000);
-      } catch (err) {
-        console.error("Error creating transaction:", err);
+      setInformation(jsonString);
+      const type = parsedData.type.toUpperCase() === "EXPENSE" ? "Expense" : "Income";
+      setTransactionType(type);
+      setPreviousType(type);
+      const numericAmount = Math.abs(Number.parseFloat(parsedData.amount));
+      if (type === "Expense") {
+        setAmount(`-${numericAmount.toFixed(2)}`);
+      } else {
+        setAmount(numericAmount.toFixed(2));
       }
+      setDate(formatDate(parsedData.date));
+      setDescription(parsedData.description || "");
+      setCategory(type === "Expense" ? 10 : 14);
+      setFormPopulatedFromImage(true);
+      setImageModalOpen(false);
+      
     } catch (err) {
       setError((err as Error).message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -306,9 +302,13 @@ export default function Transaction({
 
   const renderImageUploadModal = () => {
     return (
-      <Dialog>
+      <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="w-full">
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={() => setImageModalOpen(true)}
+          >
             Upload Transaction Image
           </Button>
         </DialogTrigger>
@@ -369,7 +369,6 @@ export default function Transaction({
     );
   };
 
-  // Success Modal Component
   const SuccessModal = () => {
     return (
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
@@ -391,13 +390,16 @@ export default function Transaction({
 
   return (
     <div className="min-h-screen flex flex-col bg-white items-center justify-center px-4 gap-4">
-      {/* Success Modal */}
       <SuccessModal />
-      
       <div className="w-full p-0 bg-white relative z-0">
         <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl sm:rounded-3xl">
           <h1 className="text-2xl mt-5">{isEdit ? "Edit record" : "How much do you spend today?"}</h1>
-          
+          {formPopulatedFromImage && (
+            <div className="mt-4 mb-6 p-3 bg-primary border border-blue-200 rounded-lg text-white flex items-center gap-2">
+              <Icon icon="heroicons:information-circle" width="24" height="24" />
+              <p className="font-medium">Please Verify your information</p>
+            </div>
+          )}
           <form id="form" onSubmit={handleSubmit}>
             {/* radio  */}
             <fieldset className="relative z-0 w-full p-px mb-5">
@@ -475,8 +477,19 @@ export default function Transaction({
               maxLength={250}
             />
 
-            <Button type="submit" className="green-button !text-white w-full mb-6">
-              {isEdit ? "Save Changes" : "Add Record"}
+            <Button 
+              type="submit" 
+              className="green-button !text-white w-full mb-6"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                  {isEdit ? "Saving..." : "Adding..."}
+                </span>
+              ) : (
+                isEdit ? "Save Changes" : "Add Record"  
+              )}
             </Button>
 
             {/* Image Upload Section */}
