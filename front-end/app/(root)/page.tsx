@@ -23,24 +23,31 @@ export default function HomePage() {
   const fetchTransactions = useCallback(
     async (dateToFetch: string) => {
       try {
-        setLoading(true)
-
-        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${dateToFetch}`)
+        setLoading(true);
+        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${dateToFetch}`);
         const data = await response.json();
+        console.log("API transaction response:", data);
         const transactionsData = Array.isArray(data) ? data : data.transactions || [];
-        setTransactions(transactionsData.reverse()); //reverse so it'll show from the newest to the oldest
+        setTransactions(transactionsData.reverse());
       } catch (err) {
         console.error("Error fetching transactions:", err);
       } finally {
         setLoading(false);
       }
     },
-    [fetchWithToken, setLoading],
-  )
+    [fetchWithToken, setLoading]
+  );
 
   useEffect(() => {
     fetchTransactions(currentDate)
   }, [fetchTransactions, currentDate])
+
+  useEffect(() => {
+    console.log("Transactions loaded:", transactions);
+    // Check if any transactions have imageUrl
+    const hasImages = transactions.some(t => t.imageUrl);
+    console.log("Any transactions with images:", hasImages);
+  }, [transactions]);
 
   const handleDateChange = (newDate: string) => {
     setCurrentDate(newDate)

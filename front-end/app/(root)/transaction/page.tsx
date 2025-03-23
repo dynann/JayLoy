@@ -44,6 +44,7 @@ export default function Transaction({
   const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
   const [formPopulatedFromImage, setFormPopulatedFromImage] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   // Helper function to get the current date in local time zone
   function getLocalDate() {
@@ -131,6 +132,35 @@ export default function Transaction({
     }
   };
 
+  const uploadImageToCloudinary = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', "ml_default");
+
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dlbbfck9n/image/upload",
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      const imageUrl = data.secure_url;
+      console.log(imageUrl);
+      setImageUrl(imageUrl);
+      return data.secure_url;
+    } catch (error) {
+      console.error('Error uploading image to Cloudinary:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -146,7 +176,6 @@ export default function Transaction({
       return;
     }
 
-    // Validate amount
     const trimmedAmount = amount.trim();
     if (!trimmedAmount || trimmedAmount === "-") {
       setAmountError("Please enter a valid amount.");
@@ -155,40 +184,40 @@ export default function Transaction({
 
     const positiveAmount = Math.abs(Number.parseFloat(trimmedAmount));
 
-    // Validate amount is greater than zero
     if (positiveAmount <= 0) {
       setAmountError("Amount must be greater than zero.");
       return;
     }
 
-    // Validate date is not in the future
     const today = dayjs().format("YYYY-MM-DD");
     if (date > today) {
       setDateError("Date cannot be in the future");
       return;
     }
-
-    // Set submitting state to true to disable the button
     setIsSubmitting(true);
 
     try {
-      // Get the stored transaction data for the ID when editing
+      let cloudinaryUrl = null;
+      if (selectedImage) {
+        try {
+          cloudinaryUrl = await uploadImageToCloudinary(selectedImage);
+          console.log("Cloudinary upload successful:", cloudinaryUrl);
+        } catch (error) {
+          console.error("Cloudinary upload failed:", error);
+        }
+      }
+
       const storedTransaction = isEdit ? JSON.parse(localStorage.getItem("editingTransaction") || "{}") : null;
-
       const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/${isEdit ? `transactions/${storedTransaction.id}` : 'accounts/insert'}`;
-      
       const method = isEdit ? "PATCH" : "POST";
-
-      // FIX: Send the amount directly without multiplying by 100
       const amountToSend = positiveAmount;
-
-      // Prepare request body with the expected structure
       const requestBody = {
         amount: amountToSend,
         type: transactionType.toUpperCase(),
         description,
         date,
         categoryID: category,
+        imageUrl: cloudinaryUrl,
       };
 
       console.log("Sending transaction data:", endpoint, method, requestBody);
