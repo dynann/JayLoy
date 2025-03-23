@@ -71,8 +71,9 @@ export default function HomePage() {
         title="Money Tracker"
         income={totalIncome}
         expense={totalExpense}
-        date={currentDate}
-      />
+        date={currentDate} onDateChange={function (date: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
 
       {/* Transaction List */}
       <div className="p-4">
