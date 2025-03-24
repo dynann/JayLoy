@@ -1,8 +1,7 @@
 "use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { TrendingUp } from "lucide-react";
-import { Label, Pie, PieChart } from "recharts";
+
 
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -84,10 +83,10 @@ export {
   CardContent,
 };
  
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+// import {
+//   ChartConfig,
+//   ChartContainer,
+//   ChartTooltip,
+//   ChartTooltipContent,
+// } from "@/components/ui/chart";
  

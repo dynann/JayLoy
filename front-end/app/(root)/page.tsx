@@ -11,12 +11,13 @@ import NavBar from "@/layouts/NavBar";
 import { Icon } from "@iconify/react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { Transaction } from "@/type/transaction";
 
 export default function HomePage() {
   const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currentDate, setCurrentDate] = useState(dayjs().format("YYYY-MM-DD"));
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null> (null);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 

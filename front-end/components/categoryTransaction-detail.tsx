@@ -1,25 +1,25 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { DeleteConfirmation } from "./delete-alert"
 import { formatCurrency } from "@/utils/formatCurrency"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import dayjs from "dayjs"
+import { Transaction } from "@/type/transaction"
 
 interface TransactionDetailProps {
-  transaction: any
+  transaction: Transaction
   onClose: () => void
   onEdit: () => void
   onDelete: () => void
 }
 
 export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: TransactionDetailProps) {
-  const router = useRouter()
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const [imageModalOpen, setImageModalOpen] = useState(false)
 
@@ -142,13 +142,14 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
         </DialogContent>
       </Dialog>
       
+      {/* Delete Confirmation - Now using Dialog component for proper overlay */}
       <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Delete Transaction</DialogTitle>
           </DialogHeader>
           <div className="py-3">
-            <p className="text-center mb-4">Are you sure you want to delete this transaction?</p>
+            <p className="text-center mb-4">Are you sure you want to delete this transaction? This action cannot be undone.</p>
             <div className="flex space-x-3 justify-center">
               <Button variant="outline" onClick={handleCancelDelete}>
                 Cancel

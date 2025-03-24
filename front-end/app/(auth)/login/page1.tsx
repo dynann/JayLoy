@@ -6,7 +6,7 @@ import { PasswordInput, TextInput } from "@/components/customeInput";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import LoadingOverlay from "@/components/LoadingOverlay";
-
+import Image from "next/image";
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -123,13 +123,13 @@ export default function LoginPage() {
             }}
             disabled={loading}
           >
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
+            <Image src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
             Continue with Google
           </Button>
 
           <div className="text-center ">
             <Link href="/signup" className="description-small hover:underline">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
             </Link>
           </div>
         </form>

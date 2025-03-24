@@ -19,6 +19,7 @@ import {
 import { ChartLegend } from "@/app/(root)/chart/components/chart-legend";
 import { CategoryList } from "@/app/(root)/chart/components/category-list";
 import { EmptyState } from "@/app/(root)/chart/components/empty-state";
+import { Transaction } from "@/type/transaction";
 
 type CategorySummary = {
   categoryId: number;
@@ -51,7 +52,7 @@ export default function ChartPage() {
   } = useAuthFetch();
   const [activeView, setActiveView] = useState<"income" | "expense">("expense");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categorySummary, setCategorySummary] =
     useState<SummaryResponse | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);

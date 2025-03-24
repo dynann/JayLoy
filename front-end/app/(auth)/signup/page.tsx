@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PasswordInput, TextInput } from "@/components/customeInput";
 import { getSession, signIn, useSession } from "next-auth/react";
 import LoadingOverlay from "@/components/LoadingOverlay";
-
+import Image from "next/image";
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Creating your account...");
   const router = useRouter();
-  const {data: session, status} = useSession() 
+  const {data: session } = useSession() 
   
   useEffect(() => {
     if (session?.accessToken) {
@@ -212,7 +212,7 @@ export default function SignUpPage() {
             onClick={handleGoogleLogin}
             disabled={loading}
           >
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
+           <Image src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
             Continue with Google
           </Button>
 
