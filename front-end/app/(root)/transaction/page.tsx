@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-
 import { TransactionInput } from "@/components/customeInput";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuDemo } from "@/components/ui/dropdown-menu";
@@ -12,15 +12,7 @@ import dayjs from "dayjs";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
 
-interface TransactionFormProps {
-  isEditing?: boolean;
-  existingTransaction?: any;
-}
-
-export default function Transaction({
-  isEditing, 
-  existingTransaction,
-}: TransactionFormProps) {
+export default function Transaction() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isEdit = searchParams.get("edit") === "true";
@@ -35,7 +27,9 @@ export default function Transaction({
   const [dateError, setDateError] = useState("");
   const [previousType, setPreviousType] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [validSelectedImage, setValidSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [validReceiptUrl, setValidReceiptUrl] = useState<string | null>(null);
   const [information, setInformation] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +50,7 @@ export default function Transaction({
     confirmClass: "bg-primary",
     icon: null as React.ReactNode
   })
+  const [showImagePreviewModal, setShowImagePreviewModal] = useState<boolean>(false);
 
   const handleDelete = (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -228,8 +223,15 @@ export default function Transaction({
     setIsSubmitting(true);
 
     try {
-      let cloudinaryUrl = null;
-      if (selectedImage) {
+      let cloudinaryUrl: string = "";
+      if (validSelectedImage && formPopulatedFromImage) {
+        try {
+          cloudinaryUrl = await uploadImageToCloudinary(validSelectedImage);
+          console.log("Cloudinary upload successful:", cloudinaryUrl);
+        } catch (error) {
+          console.error("Cloudinary upload failed:", error);
+        }
+      } else if (selectedImage && !formPopulatedFromImage) {
         try {
           cloudinaryUrl = await uploadImageToCloudinary(selectedImage);
           console.log("Cloudinary upload successful:", cloudinaryUrl);
@@ -314,22 +316,35 @@ export default function Transaction({
       });
 
       const data = await response.json();
-      const jsonString = data.description.toString().replace("```json", "").replace("```", "").trim();
-      const parsedData = JSON.parse(jsonString);
-      console.log(
-        Math.abs(Number.parseFloat(parsedData.amount)),
-        parsedData.type,
-        parsedData.description,
-        parsedData.date,
-      )
+      
       if (!response.ok) {
         throw new Error(data.error || "Failed to process image");
       }
-      setInformation(jsonString);
+      
+      let parsedData;
+      try {
+        const jsonString = data.description.toString().replace("```json", "").replace("```", "").trim();
+        parsedData = JSON.parse(jsonString);
+        setInformation(jsonString);
+      } catch (parseError) {
+        throw new Error("Please upload valid transaction receipt");
+      }
+      
+      // Check if amount is zero or very small
+      const numericAmount = Math.abs(Number.parseFloat(parsedData.amount || "0"));
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+        throw new Error("Please upload valid transaction receipt");
+      }
+      
+      // Store the successfully processed image and url
+      setValidSelectedImage(selectedImage);
+      setValidReceiptUrl(previewUrl);
+      
+      // Rest of the successful processing logic
       const type = parsedData.type.toUpperCase() === "EXPENSE" ? "Expense" : "Income";
       setTransactionType(type);
       setPreviousType(type);
-      const numericAmount = Math.abs(Number.parseFloat(parsedData.amount));
+      
       if (type === "Expense") {
         setAmount(`-${numericAmount.toFixed(2)}`);
       } else {
@@ -429,6 +444,32 @@ export default function Transaction({
     );
   };
 
+  const renderImagePreviewModal = () => {
+    return (
+      <Dialog open={showImagePreviewModal} onOpenChange={setShowImagePreviewModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Uploaded Receipt</DialogTitle>
+          </DialogHeader>
+          
+          <div className="w-full">
+            {validReceiptUrl && (
+              <div className="relative w-full h-64">
+                <Image
+                  src={validReceiptUrl}
+                  alt="Receipt"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  className="rounded-lg"
+                />
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   const SuccessModal = () => {
     return (
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
@@ -451,13 +492,27 @@ export default function Transaction({
   return (
     <div className="min-h-screen flex flex-col bg-white items-center justify-center px-4 gap-4">
       <SuccessModal />
+      {renderImagePreviewModal()}
       <div className="w-full p-0 bg-white relative z-0">
         <div className="mx-auto max-w-md px-6 py-12 bg-white border-0 rounded-2xl sm:rounded-3xl">
           <h1 className="text-2xl mt-5">{isEdit ? "Edit record" : "How much do you spend today?"}</h1>
           {formPopulatedFromImage && (
-            <div className="mt-4 mb-6 p-3 bg-primary border border-blue-200 rounded-lg text-white flex items-center gap-2">
-              <Icon icon="heroicons:information-circle" width="24" height="24" />
-              <p className="font-medium">Please Verify your information</p>
+            <div className="mt-4 mb-6 p-3 bg-primary border border-blue-200 rounded-lg text-white">
+              <div className="flex items-center gap-2">
+                <Icon icon="heroicons:information-circle" width="24" height="24" />
+                <p className="font-medium">Please Verify your information</p>
+              </div>
+              <div className="mt-2 text-center">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setShowImagePreviewModal(true)}
+                  className="bg-white text-primary hover:bg-blue-50 border-white mt-1"
+                >
+                  <Icon icon="lucide:image" className="mr-1" width="16" height="16"/>
+                  View Receipt Image
+                </Button>
+              </div>
             </div>
           )}
           <form id="form" onSubmit={handleSubmit}>
@@ -560,11 +615,9 @@ export default function Transaction({
               )}
             </Button>
 
-          
           </form>
         </div>
       </div>
     </div>
   );
 }
-

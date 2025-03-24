@@ -5,14 +5,14 @@ import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface PieData {
   name: string;
-  value: any;
+  value: number;
   color: string;
 }
 
 interface PieChartComponentProps {
   pieData: PieData[];
   numberConverter: (num: number) => string;
-  remainingBalance: any;
+  remainingBalance: number;
 }
 
 const PieChartComponent: React.FC<PieChartComponentProps> = ({
