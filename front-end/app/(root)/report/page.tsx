@@ -101,17 +101,17 @@ const Page: React.FC = () => {
   const total_balance = totalBalance ? totalBalance / 100 : 0;
   const totalReport: PieData[] = reportData
     ? [
-        { name: "Income", value: total_income, color: "hsl(var(--chart-3))" },
+        { name: "Income", value: total_income, color: "hsl(var(--chart-2))" },
         { name: "Expense", value: total_expense, color: "hsl(var(--chart-1))" },
         {
           name: "Remaining",
           value: total_remaining,
-          color: "hsl(var(--chart-2))",
+          color: "hsl(var(--chart-3))",
         },
       ]
     : [];
 
-  let displayReport = totalReport.slice(0, 2);
+    let displayReport = totalReport.slice(1, 3);
 
   // Fetch user data when component mounts
   const [ username, setUsername] = useState("Loading..")
@@ -157,7 +157,7 @@ const Page: React.FC = () => {
             <PieChartComponent
               pieData={displayReport}
               numberConverter={numberConverter}
-              remainingBalance={total_remaining}
+              remainingBalance={total_income}
             />
             {/* Total Income/Expense/Remaining Report */}
             <div className="flex flex-row justify-between w-full">
