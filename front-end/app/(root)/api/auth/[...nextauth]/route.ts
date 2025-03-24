@@ -1,19 +1,19 @@
 // app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google"
-export const authOptions = {
+import Google from "next-auth/providers/google";
+import { AuthOptions } from "next-auth";
+
+const authOptions: AuthOptions = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  }),
+    }),
   ],
   callbacks: {
     async signIn({ user, account }: any) {
       if (account.provider === "google") {
-        console.log('hello world google')
         try {
-          // Send Google user data to your backend
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
             method: "POST",
             headers: {
@@ -31,13 +31,9 @@ export const authOptions = {
             throw new Error('cannot create user')
           }
           console.log(res)
-
           const { accessToken, refreshToken } = await res.json();
-          
-          // Attach tokens to user object
           user.accessToken = accessToken;
           user.refreshToken = refreshToken;
-
           return true;
         } catch (error) {
           console.error("Google login error:", error);
