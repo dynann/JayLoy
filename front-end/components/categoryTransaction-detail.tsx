@@ -125,33 +125,41 @@ export function TransactionDetail({ transaction, onClose, onEdit, onDelete }: Tr
       </div>
       
       {/* Image Modal with proper accessibility structure */}
-      {transaction.imageUrl && (
-        <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Transaction Receipt</DialogTitle>
-            </DialogHeader>
-            <div className="relative w-full h-80">
-              <Image
-                src={transaction.imageUrl}
-                alt="Receipt"
-                fill
-                style={{ objectFit: "contain" }}
-                className="rounded-lg"
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Transaction Receipt</DialogTitle>
+          </DialogHeader>
+          <div className="relative w-full h-80">
+            <Image
+              src={transaction.imageUrl || ""}
+              alt="Receipt"
+              fill
+              style={{ objectFit: "contain" }}
+              className="rounded-lg"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
       
-      {/* Delete Confirmation */}
-      {showDeleteConfirmation && (
-        <DeleteConfirmation
-          onConfirm={handleConfirmDelete}
-          onCancel={handleCancelDelete}
-        />
-      )}
+      <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Transaction</DialogTitle>
+          </DialogHeader>
+          <div className="py-3">
+            <p className="text-center mb-4">Are you sure you want to delete this transaction?</p>
+            <div className="flex space-x-3 justify-center">
+              <Button variant="outline" onClick={handleCancelDelete}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDelete}>
+                Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
-
