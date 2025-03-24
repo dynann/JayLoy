@@ -496,8 +496,17 @@ export default function Transaction() {
               onChange={(e) => setDescription(e.target.value)}
               maxLength={250}
             />
-            <Button
-              type="submit"
+
+              {/* Image Upload Section */}
+              <legend className="description-small flex justify-between text-black mt-8 text-center font-bold">
+            <Icon icon="lucide:image" width="24" height="24"/>Upload your record without filling information
+            </legend>
+            <div className="m-6">
+              {renderImageUploadModal()}
+            </div>
+
+            <Button 
+              type="submit" 
               className="green-button !text-white w-full mb-6"
               disabled={isSubmitting}
             >
@@ -512,10 +521,14 @@ export default function Transaction() {
                 "Add Record"
               )}
             </Button>
+
+            {/* Image Upload Section */}
             <legend className="description-small flex justify-between text-black mt-8 text-center font-bold">
-              <Icon icon="lucide:image" width="24" height="24" />Upload your record without filling information
+            <Icon icon="lucide:image" width="24" height="24"/>Upload your record without filling information
             </legend>
-            <div className="mt-6">{renderImageUploadModal()}</div>
+            <div className="mt-6">
+              {renderImageUploadModal()}
+            </div>
           </form>
         </div>
       </div>
