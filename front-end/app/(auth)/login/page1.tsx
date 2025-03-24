@@ -123,7 +123,13 @@ export default function LoginPage() {
             }}
             disabled={loading}
           >
-            <Image src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
+            <Image 
+  src="https://www.google.com/favicon.ico" 
+  alt="Google" 
+  width={24} 
+  height={24} 
+  className="mr-2 h-4 w-4" 
+/>
             Continue with Google
           </Button>
 
