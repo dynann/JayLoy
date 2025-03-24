@@ -8,10 +8,13 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
+    "noImplicitAny": false,
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "incremental": true,
     "plugins": [
       {

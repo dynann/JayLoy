@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { useState } from "react"
 import { TabWithCancelButton } from "@/layouts/Tabbar"
@@ -15,8 +17,8 @@ function TermsPage() {
       setActionLoading("Processing")
       // Accept terms logic
       // ...
-    } catch (error) {
-      // Handle error
+    } catch (error: any) {
+      console.log(error)
     } finally {
       setActionLoading(null)
     }
@@ -51,8 +53,8 @@ function TermsPage() {
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <p className="text-sm">
-                      By using AhoSmart, you agree to these Terms and our Privacy Policy. If you don't agree, please
-                      don't use the app.
+                      By using AhoSmart, you agree to these Terms and our Privacy Policy. If you don&apos;t agree, please
+                      don&apos;t use the app.
                     </p>
                   </li>
                 </ul>

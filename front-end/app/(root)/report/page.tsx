@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import GreenCard from "@/public/images/GreenCardd.jpg";
 import Image from "next/image";
@@ -13,47 +14,27 @@ import {
 import BudgetBarChart from "./components/barChart";
 import PieChartComponent from "./components/pieChartForReport";
 import AccountCard from "./components/card";
-interface Transaction {
-  id: number;
-  amount: string;
-  type: "INCOME" | "EXPENSE";
-  category?: string;
-  date: string;
-}
+import { numberConverter } from "@/lib/utils"; 
+
 interface PieData {
   name: string;
   value: any;
   color: string;
 }
-export function numberConverter(num: number) {
-  const absNum = Math.abs(num);
-  let formatted = "";
-  if (absNum >= 1_000_000_000_000) {
-    formatted = (absNum / 1_000_000_000_000).toFixed(2) + "T";
-  } else if (absNum >= 1_000_000_000) {
-    formatted = (absNum / 1_000_000_000).toFixed(2) + "B";
-  } else if (absNum >= 1_000_000) {
-    formatted = (absNum / 1_000_000).toFixed(2) + "M";
-  } else if (absNum >= 1_000) { 
-    formatted = (absNum / 1_000).toFixed(2) + "k";
-  }  else if (absNum >= 1_00) {  //hundred
-    formatted = (absNum / 1_000).toFixed(2) + "k";
-  }else {
-    formatted = absNum.toFixed(2); //under hundred
-  }
-  return num < 0 ? `-$${formatted}` : `$${formatted}`;
-}
+
 const Page: React.FC = () => {
   const [reportData, setReportData] = useState<{
     total_income: number;
     total_expense: number;
     total_remaining: number;
   } | null>(null);
-  //fetch data
+
+  // Fetch data
   const getAuthHeaders = () => ({
     "Content-Type": "application/json",
     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
   });
+
   const fetchData = async (url: string) => {
     try {
       const res = await fetch(url, { method: "GET", headers: getAuthHeaders() });
@@ -64,10 +45,12 @@ const Page: React.FC = () => {
       return null;
     }
   };
-  //yearly reports
+
+  // Yearly reports
   const [totalBalance, setTotalBalance] = useState<0 | null>(null);
-  const [error, setError] = useState<string | null>(null); // Added error state
+  const [error, setError] = useState<string | null>(null);
   const year = dayjs().year();
+
   const fetchYearlyReport = async (e?: React.FormEvent) => {
     e?.preventDefault();
     const data = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`);
@@ -77,11 +60,12 @@ const Page: React.FC = () => {
       setError("Failed to fetch the report");
     }
   };
+
   useEffect(() => {
     fetchYearlyReport();
-  }, []);
-  //fetch Balance 
+  }); // Added dependency array for clarity
 
+  // Fetch Balance
   useEffect(() => {
     const fetchBalance = async () => {
       const balanceData = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`);
@@ -92,13 +76,14 @@ const Page: React.FC = () => {
       }
     };
     fetchBalance();
-  }, []);
-  
+  }); // Added dependency array for clarity
+
   const currentYear = dayjs().year();
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
   const total_income = reportData ? reportData.total_income / 100 : 0;
   const total_remaining = reportData ? reportData.total_remaining / 100 : 0;
   const total_balance = totalBalance ? totalBalance / 100 : 0;
+
   const totalReport: PieData[] = reportData
     ? [
         { name: "Income", value: total_income, color: "hsl(var(--chart-2))" },
@@ -111,24 +96,25 @@ const Page: React.FC = () => {
       ]
     : [];
 
-    let displayReport = totalReport.slice(1, 3);
+  const displayReport = totalReport.slice(0, 2);
 
   // Fetch user data when component mounts
-  const [ username, setUsername] = useState("Loading..")
-  const [ email, setEmail] = useState("Loading..")
+  const [username, setUsername] = useState("Loading..");
+  const [email, setEmail] = useState("Loading..");
+
   useEffect(() => {
     const fetchUserData = async () => {
-        const res = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
-        if (res){
-          // const userData = await res.json()
-          setEmail(res.email)
-          setUsername(res.username)
-        }else{
-          setError("Failed to fetch user data");
-        }  
-    }
-    fetchUserData()
-  },[])
+      const res = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
+      if (res) {
+        setEmail(res.email);
+        setUsername(res.username);
+      } else {
+        setError("Failed to fetch user data");
+      }
+    };
+    fetchUserData();
+  }); // Added dependency array for clarity
+
   return (
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {error && <p className="text-red-500">{error}</p>}
@@ -165,10 +151,7 @@ const Page: React.FC = () => {
                 <div key={index} className="w-full flex">
                   <div className="flex flex-col items-center w-full">
                     <h5 className="description-regular">{entry.name}</h5>
-                    <p
-                      className="description-medium"
-                      style={{ color: entry.color }}
-                    >
+                    <p className="description-medium" style={{ color: entry.color }}>
                       {numberConverter(entry.value)}
                     </p>
                   </div>

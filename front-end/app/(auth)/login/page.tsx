@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PasswordInput, TextInput } from "@/components/customeInput";
 import { getSession, signIn } from "next-auth/react";
 import LoadingOverlay from "@/components/LoadingOverlay";
-
+import Image from "next/image";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -174,7 +174,13 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             disabled={loading}
           >
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
+                        <Image 
+  src="https://www.google.com/favicon.ico" 
+  alt="Google" 
+  width={24} 
+  height={24} 
+  className="mr-2 h-4 w-4" 
+/>
             Continue with Google
           </Button>
 

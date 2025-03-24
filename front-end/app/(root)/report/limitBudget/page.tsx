@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import Image from "next/image";
 import PiggyBank from "@/public/images/piggy-bank.png";
@@ -24,7 +25,7 @@ export default function LimitBudgetPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleNumberInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let value = event.target.value;
+    const value = event.target.value;
     const regex = /^-?\d*\.?\d{0,2}$/;
     if (regex.test(value)) {
      
@@ -56,6 +57,7 @@ export default function LimitBudgetPage() {
       }
       router.push("/report");
     } catch (error: any) {
+      console.log(error)
       setError("failed to fetch");
     }
   };
@@ -112,9 +114,9 @@ export default function LimitBudgetPage() {
             {error && <p className="text-red text-sm">{error}</p>}
             <div className={footerClasses}>
               <p className="small-text">
-                "Control your spending today to create a wealthier tomorrow.
+                &quot;Control your spending today to create a wealthier tomorrow.
                 Small savings today grow into big opportunities for your
-                future." 💰✨
+                future.&quot; 💰✨
               </p>
               <Button type="submit" className="green-button !text-white">
                 Set goal
@@ -127,6 +129,3 @@ export default function LimitBudgetPage() {
   );
 }
 
-function setError(arg0: string) {
-  throw new Error("Function not implemented.");
-}

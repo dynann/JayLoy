@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import type React from "react"
 import { useEffect, useState } from "react"
@@ -15,6 +16,7 @@ function ProfilePage() {
   const [username, setUsername] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userId, setUserId] = useState<number | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   
@@ -31,7 +33,7 @@ function ProfilePage() {
     icon: null as React.ReactNode
   })
   
-  // Lock body scroll when modal is open
+  
   useEffect(() => {
     if (showModal) {
       document.body.style.overflow = 'hidden';

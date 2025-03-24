@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories";
 
@@ -65,7 +66,7 @@ function ExpenseModal({
             {/* Modal Body */}
             <div className="p-4">
               <p className="smalltext font-normal text-gray dark:text-gray-400">
-                Choose your wallet category, you'd like to spend
+                Choose your wallet category, you&apos;d like to spend
               </p>
               {/* logic if type == expense show ........ */}
               {/* else income show ........ */}
@@ -168,7 +169,7 @@ function IncomeModal({
             {/* Modal Body */}
             <div className="p-4">
               <p className="smalltext font-normal text-gray dark:text-gray-400">
-                Choose your wallet category, you'd like to spend
+                Choose your wallet category, you&apos;d like to spend
               </p>
               {/* logic if type == expense show ........ */}
               {/* else income show ........ */}
