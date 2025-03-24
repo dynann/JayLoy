@@ -6,15 +6,7 @@ import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { TabWithCancelButton } from "@/layouts/Tabbar"
 import dayjs from "dayjs"
 import { formatCurrency } from "@/utils/formatCurrency"
-
-interface Transaction {
-  id: string
-  amount: number
-  type: "EXPENSE" | "INCOME"
-  categoryID: number
-  date: string
-  description?: string
-}
+import { Transaction } from "@/type/transaction"
 
 interface CategoryTransactionsProps {
   categoryId: number
