@@ -45,8 +45,39 @@ export default function Transaction({
   const [formPopulatedFromImage, setFormPopulatedFromImage] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false)
+  const [modalConfig, setModalConfig] = useState({
+    title: "",
+    message: "",
+    confirmAction: () => {},
+    cancelAction: () => {},
+    confirmText: "Confirm",
+    cancelText: "Cancel",
+    confirmClass: "bg-primary",
+    icon: null as React.ReactNode
+  })
 
-  // Helper function to get the current date in local time zone
+  const handleDelete = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    showDeleteConfirmation()
+  }
+  
+  const showDeleteConfirmation = () => {
+    setModalConfig({
+      title: "Log Out",
+      message: "Are you sure you want to log out of your account?",
+      confirmAction: () => {
+        setShowModal(false)
+      },
+      cancelAction: () => setShowModal(false),
+      confirmText: "Log Out",
+      cancelText: "Cancel",
+      confirmClass: "bg-red active:bg-red-700 transition-colors",
+      icon: <Icon icon="ph:sign-out-fill" className="text-red-600" width="32" height="32" />
+    })
+    setShowModal(true)
+  }
+
   function getLocalDate() {
     return dayjs().format("YYYY-MM-DD");
   }
