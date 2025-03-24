@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PasswordInput, TextInput } from "@/components/customeInput";
-
+import Image from "next/image";
 
 export default function SignUpPage() {
   return (
@@ -34,7 +34,7 @@ export default function SignUpPage() {
           </div>
 
           <div className="text-center description-small">
-            By creating your account, you're agreeing to our{" "}
+            By creating your account, you&apos;re agreeing to our{" "}
             <Link href="#" className="underline hover:text-primary">Terms and Conditions</Link>{" "}
             and{" "}
             <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>.
@@ -52,7 +52,7 @@ export default function SignUpPage() {
           </div>
 
           <Button variant="outline" className="w-full rounded-full">
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
+            <Image src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
             Continue with Google
           </Button>
 

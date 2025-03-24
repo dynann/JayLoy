@@ -3,9 +3,10 @@
 import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { formatCurrency } from "@/utils/formatCurrency"
+import { Transaction } from "@/type/transaction"
 
 interface TransactionItemProps {
-  transaction: any
+  transaction: Transaction
   onClick?: () => void // Add optional onClick prop
 }
 

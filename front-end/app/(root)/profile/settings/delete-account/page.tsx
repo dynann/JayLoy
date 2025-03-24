@@ -62,7 +62,7 @@ function DeleteAccountPage() {
             <h1 className="text-2xl font-bold mb-4">Delete my account</h1>
 
             <p className="text-gray-700 mb-6">
-              We're sorry to see you go! If you proceed, your account will be permanently deleted along with all your
+              We&apos;re sorry to see you go! If you proceed, your account will be permanently deleted along with all your
               data. This action cannot be undone, and you will lose all your saved preferences, messages, and any other
               information associated with your account.
             </p>

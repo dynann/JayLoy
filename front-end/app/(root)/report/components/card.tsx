@@ -2,8 +2,8 @@ import React from "react";
 
 interface cardProps {
   email: string;
-  username: String;
-  value: any;
+  username: string;
+  value: number | string;
 }
 const AccountCard: React.FC<cardProps> = ({ email, username, value }) => {
   return (
@@ -21,7 +21,7 @@ const AccountCard: React.FC<cardProps> = ({ email, username, value }) => {
           <div className="pt-1 pr-0">
             <div className="flex justify-between">
               <button className="px-4 py-1 bg-secondary opacity-0 rounded-3xl font-body text-white">
-                vieW history
+                view history
               </button>
               <div className="flex flex-col">
                 <p className=" text-3xl  font-black  text-textColor">{value}</p>

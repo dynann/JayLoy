@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, InputHTMLAttributes } from "react";
@@ -51,7 +52,6 @@ export function PasswordInput({ placeholder, value, onChange }: InputProps) {
 export function TransactionInput({
   type,
   placeholder,
-  desc,
   value,
   onChange,
   maxLength,
