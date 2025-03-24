@@ -1,14 +1,35 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
+import { useState } from "react"
 import { TabWithCancelButton } from "@/layouts/Tabbar"
 import { useRouter } from "next/navigation"
 import logo from "@/public/images/logo.png"
 import Image from "next/image"
+import LoadingOverlay from "@/components/LoadingOverlay"
 
 function TermsPage() {
   const router = useRouter()
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  const handleAcceptTerms = async () => {
+    try {
+      setActionLoading("Processing")
+      // Accept terms logic
+      // ...
+    } catch (error: any) {
+      console.log(error)
+    } finally {
+      setActionLoading(null)
+    }
+  }
 
   return (
     <>
+      <LoadingOverlay 
+        isLoading={!!actionLoading} 
+        message={actionLoading || "Loading..."} 
+      />
       <TabWithCancelButton text="Terms & Privacy Policy" onClick={() => router.push("/profile")} />
 
       <div className="min-h-screen pt-16 px-4 bg-background">
@@ -32,8 +53,8 @@ function TermsPage() {
                   <li className="flex items-start">
                     <span className="mr-2">•</span>
                     <p className="text-sm">
-                      By using AhoSmart, you agree to these Terms and our Privacy Policy. If you don't agree, please
-                      don't use the app.
+                      By using AhoSmart, you agree to these Terms and our Privacy Policy. If you don&apos;t agree, please
+                      don&apos;t use the app.
                     </p>
                   </li>
                 </ul>

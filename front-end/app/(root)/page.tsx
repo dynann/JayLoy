@@ -11,36 +11,44 @@ import NavBar from "@/layouts/NavBar";
 import { Icon } from "@iconify/react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { Transaction } from "@/type/transaction";
 
 export default function HomePage() {
   const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currentDate, setCurrentDate] = useState(dayjs().format("YYYY-MM-DD"));
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null> (null);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   const fetchTransactions = useCallback(
     async (dateToFetch: string) => {
       try {
-        setLoading(true)
-
-        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${dateToFetch}`)
+        setLoading(true);
+        const response = await fetchWithToken(`${process.env.NEXT_PUBLIC_API_URL}/transactions?date=${dateToFetch}`);
         const data = await response.json();
+        console.log("API transaction response:", data);
         const transactionsData = Array.isArray(data) ? data : data.transactions || [];
-        setTransactions(transactionsData);
+        setTransactions(transactionsData.reverse());
       } catch (err) {
         console.error("Error fetching transactions:", err);
       } finally {
         setLoading(false);
       }
     },
-    [fetchWithToken, setLoading],
-  )
+    [fetchWithToken, setLoading]
+  );
 
   useEffect(() => {
     fetchTransactions(currentDate)
   }, [fetchTransactions, currentDate])
+
+  useEffect(() => {
+    console.log("Transactions loaded:", transactions);
+    // Check if any transactions have imageUrl
+    const hasImages = transactions.some(t => t.imageUrl);
+    console.log("Any transactions with images:", hasImages);
+  }, [transactions]);
 
   const handleDateChange = (newDate: string) => {
     setCurrentDate(newDate)
@@ -102,7 +110,7 @@ export default function HomePage() {
   const dateDisplay = isToday ? "today" : dayjs(currentDate).format("YYYY-MM-DD")
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <Header
         title="Money Tracker"

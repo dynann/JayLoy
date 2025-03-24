@@ -6,15 +6,19 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PasswordInput, TextInput } from "@/components/customeInput";
 import { getSession, signIn, useSession } from "next-auth/react";
-
+import LoadingOverlay from "@/components/LoadingOverlay";
+import Image from "next/image";
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Creating your account...");
   const router = useRouter();
-  const {data: session, status} = useSession() 
+  const {data: session } = useSession() 
+  
   useEffect(() => {
     if (session?.accessToken) {
       // Store tokens in localStorage
@@ -24,8 +28,10 @@ export default function SignUpPage() {
       router.push("/");
     }
   }, [session, router]);
+  
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     // Handle password mismatch
     if (password !== confirmPassword) {
@@ -35,6 +41,9 @@ export default function SignUpPage() {
     }
 
     try {
+      setLoading(true);
+      setLoadingMessage("Creating your account...");
+      
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
         method: "POST",
         headers: {
@@ -46,7 +55,10 @@ export default function SignUpPage() {
       if (res.ok) {
         const data = await res.json();
         console.log("Sign Up successful", data);
-        router.push("/login");
+        setLoadingMessage("Signup successful! Redirecting...");
+        setTimeout(() => {
+          router.push("/login");
+        }, 1000);
       } else {
         // Handle error
         const errorData = await res.json();
@@ -57,16 +69,26 @@ export default function SignUpPage() {
     } catch (err) {
       setError("Failed to fetch");
       console.error("Failed to fetch", err);
+    } finally {
+      setLoading(false);
     }
   };
+  
   const handleGoogleLogin = async (e: React.FormEvent) => {
-      e.preventDefault();
+    e.preventDefault();
+    setError("");
+    
+    try {
+      setLoading(true);
+      setLoadingMessage("Connecting to Google...");
+      
       const result = await signIn("google", { redirect: false });
       
       if (result?.error) {
         setError(result.error);
       } else {
         // Get the session after successful login
+        setLoadingMessage("Creating your account...");
         const session = await getSession();
         
         if (session?.user) {
@@ -97,10 +119,18 @@ export default function SignUpPage() {
           }
         }
       }
-    };
+    } catch (err) {
+      setError("An error occurred during Google sign up");
+      console.error("Google sign up error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
+      <LoadingOverlay isLoading={loading} message={loadingMessage} />
+      
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="header">JayLoy</h1>
@@ -108,13 +138,39 @@ export default function SignUpPage() {
         </div>
 
         <form className="space-y-4" onSubmit={handleSignUp}>
-          <TextInput type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
-          <TextInput type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <TextInput 
+            type="text" 
+            placeholder="Username" 
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)} 
+            disabled={loading}
+            required
+          />
+          <TextInput 
+            type="email" 
+            placeholder="E-mail" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            disabled={loading}
+            required
+          />
 
-          <PasswordInput placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <PasswordInput placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          <PasswordInput 
+            placeholder="Password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            disabled={loading}
+            required
+          />
+          <PasswordInput 
+            placeholder="Confirm Password" 
+            value={confirmPassword} 
+            onChange={(e) => setConfirmPassword(e.target.value)} 
+            disabled={loading}
+            required
+          />
 
-          {error && <p className="text-center description-medium !text-red">{error}!!!!</p>}
+          {error && <p className="text-center description-medium !text-red">{error}</p>}
 
           <div className="relative description-small">
             <div className="absolute inset-0 flex items-center">
@@ -132,7 +188,13 @@ export default function SignUpPage() {
             <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>.
           </div>
 
-          <Button type="submit" className="green-button !text-white">Sign Up</Button>
+          <Button 
+            type="submit" 
+            className="green-button !text-white"
+            disabled={loading}
+          >
+            Sign Up
+          </Button>
 
           <div className="relative description-small">
             <div className="absolute inset-0 flex items-center">
@@ -143,8 +205,14 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          <Button variant="outline" className="w-full rounded-full" onClick={handleGoogleLogin} >
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
+          <Button 
+            type="button"
+            variant="outline" 
+            className="w-full rounded-full" 
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
+           <Image src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
             Continue with Google
           </Button>
 

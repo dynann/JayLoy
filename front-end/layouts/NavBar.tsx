@@ -1,20 +1,37 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Icon } from "@iconify/react"
+import LoadingOverlay from "@/components/LoadingOverlay"
 
 const NavBar: React.FC = () => {
   const router = useRouter()
+  const [navLoading, setNavLoading] = useState<string | null>(null)
+
+  const handleNavigation = (route: string, label: string) => {
+    setNavLoading(label)
+    router.push(route)
+    
+    setTimeout(() => {
+      setNavLoading(null)
+    }, 1000)
+  }
 
   return (
     <div>
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isLoading={!!navLoading} 
+        message={`${navLoading}...`} 
+      />
+      
       <div className="fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 rounded-xl bottom-0 left-1/2 shadow-lg bg-white">
         <div className="grid h-full max-w-lg grid-cols-5 mx-auto">
           {/* Home Button */}
           <button
             type="button"
-            onClick={() => router.push("/")}
+            onClick={() => handleNavigation("/", "Home")}
             className="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="lucide:house" width="24" height="24" />
@@ -24,7 +41,7 @@ const NavBar: React.FC = () => {
           {/* Chart Button */}
           <button
             type="button"
-            onClick={() => router.push("/chart")}
+            onClick={() => handleNavigation("/chart", "Charts")}
             className="inline-flex flex-col items-center justify-center px-5 hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="gg:chart" width="24" height="24" />
@@ -35,7 +52,7 @@ const NavBar: React.FC = () => {
           <div className="flex items-center justify-center">
             <button
               type="button"
-              onClick={() => router.push("/transaction")}
+              onClick={() => handleNavigation("/transaction", "Transaction")}
               className="inline-flex items-center justify-center w-10 h-10 font-medium bg-variant rounded-full hover:bg-primary group focus:ring-4 focus:ring-variant focus:outline-none dark:focus:ring-variant"
             >
               <Icon icon="gg:add" width="24" height="24" />
@@ -46,7 +63,7 @@ const NavBar: React.FC = () => {
           {/* Report Button */}
           <button
             type="button"
-            onClick={() => router.push("/report")}
+            onClick={() => handleNavigation("/report", "Reports")}
             className="inline-flex flex-col items-center justify-center px-5 hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="mi:document" width="24" height="24" />
@@ -56,7 +73,7 @@ const NavBar: React.FC = () => {
           {/* Profile Button */}
           <button
             type="button"
-            onClick={() => router.push("/profile")}
+            onClick={() => handleNavigation("/profile", "Profile")}
             className="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-variant dark:hover:bg-variant group"
           >
             <Icon icon="iconamoon:profile-duotone" width="24" height="24" />

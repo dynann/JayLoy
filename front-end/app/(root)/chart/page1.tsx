@@ -9,6 +9,7 @@ import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { LoadingState } from "@/components/LoadingState"
 import { ErrorState } from "@/components/ErrorState"
 import { CategoryTransactions } from "@/components/category-transactions"
+import { Transaction } from "@/type/transaction"
 
 type CategorySummary = {
   categoryId: number
@@ -64,7 +65,7 @@ export default function ChartPage() {
   const { fetchWithToken, loading: fetchLoading, error: fetchError } = useAuthFetch()
   const [activeView, setActiveView] = useState<"income" | "expense">("expense")
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [transactions, setTransactions] = useState<any[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [categorySummary, setCategorySummary] = useState<SummaryResponse | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())

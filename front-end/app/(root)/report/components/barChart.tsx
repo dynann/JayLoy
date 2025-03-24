@@ -3,7 +3,7 @@ import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 import { Bar, BarChart, LabelList } from "recharts";
 import { TrendingUp } from "lucide-react";
-import { numberConverter } from "../page";
+
 import {
   Card,
   CardHeader,
@@ -21,6 +21,7 @@ import {
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import Link from "next/link";
+import { numberConverter } from "@/lib/utils";
 
 const chartConfig = {
   Expense: {
@@ -68,7 +69,7 @@ export default function BudgetBarChart(): React.JSX.Element {
       }
     };
     fetchmonthlyReport();
-  }, []);
+  });
   const getBarColor = (expense: number, limit: number) => {
     return expense > limit ? "#C70039" : "#3EB075";
   };
