@@ -96,7 +96,7 @@ const Page: React.FC = () => {
       ]
     : [];
 
-  const displayReport = totalReport.slice(0, 2);
+  const displayReport = totalReport.slice(1, 3);
 
   // Fetch user data when component mounts
   const [username, setUsername] = useState("Loading..");
@@ -126,6 +126,7 @@ const Page: React.FC = () => {
           alt="card"
           priority={true}
         />
+
         <AccountCard
           username={username}
           email={email}
