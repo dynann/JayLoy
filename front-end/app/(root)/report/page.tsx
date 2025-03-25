@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import GreenCard from "@/public/images/GreenCardd.jpg";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import {
@@ -86,9 +84,13 @@ const Page: React.FC = () => {
 
   const totalReport: PieData[] = reportData
     ? [
-        { name: "Income", value: total_income, color: "hsl(var(--chart-3))" },
+        { name: "Income", value: total_income, color: "hsl(var(--chart-2))" },
         { name: "Expense", value: total_expense, color: "hsl(var(--chart-1))" },
-        { name: "Remaining", value: total_remaining, color: "hsl(var(--chart-2))" },
+        {
+          name: "Remaining",
+          value: total_remaining,
+          color: "hsl(var(--chart-3))",
+        },
       ]
     : [];
 
@@ -116,12 +118,7 @@ const Page: React.FC = () => {
       {error && <p className="text-red-500">{error}</p>}
       {/* Account Card */}
       <div className="w-full h-40 mt-16 rounded-xl relative text-white shadow-2xl transition-transform transform hover:scale-110">
-        <Image
-          src={GreenCard}
-          className="relative object-cover w-full h-full rounded-xl"
-          alt="card"
-          priority={true}
-        />
+    
         <AccountCard
           username={username}
           email={email}
@@ -139,7 +136,7 @@ const Page: React.FC = () => {
             <PieChartComponent
               pieData={displayReport}
               numberConverter={numberConverter}
-              remainingBalance={total_remaining}
+              remainingBalance={total_income}
             />
             {/* Total Income/Expense/Remaining Report */}
             <div className="flex flex-row justify-between w-full">

@@ -15,10 +15,12 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("Creating your account...");
+  const [loadingMessage, setLoadingMessage] = useState(
+    "Creating your account..."
+  );
   const router = useRouter();
-  const {data: session } = useSession() 
-  
+  const { data: session } = useSession();
+
   useEffect(() => {
     if (session?.accessToken) {
       // Store tokens in localStorage
@@ -28,7 +30,7 @@ export default function SignUpPage() {
       router.push("/");
     }
   }, [session, router]);
-  
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -43,7 +45,7 @@ export default function SignUpPage() {
     try {
       setLoading(true);
       setLoadingMessage("Creating your account...");
-      
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
         method: "POST",
         headers: {
@@ -73,46 +75,49 @@ export default function SignUpPage() {
       setLoading(false);
     }
   };
-  
+
   const handleGoogleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     try {
       setLoading(true);
       setLoadingMessage("Connecting to Google...");
-      
+
       const result = await signIn("google", { redirect: false });
-      
+
       if (result?.error) {
         setError(result.error);
       } else {
         // Get the session after successful login
         setLoadingMessage("Creating your account...");
         const session = await getSession();
-        
+
         if (session?.user) {
           // Send user info to your backend
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: session.user.email,
-              name: session.user.name,
-              image: session.user.image,
-            }),
-          });
-  
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: session.user.email,
+                name: session.user.name,
+                image: session.user.image,
+              }),
+            }
+          );
+
           if (response.ok) {
             const { accessToken, refreshToken } = await response.json();
-            
+
             // Store tokens
             localStorage.setItem("accessToken", accessToken);
             localStorage.setItem("refreshToken", refreshToken);
             localStorage.setItem("tokenTimestamp", Date.now().toString());
-            
+
             router.push("/");
           } else {
             setError("Failed to get tokens from backend");
@@ -130,47 +135,51 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <LoadingOverlay isLoading={loading} message={loadingMessage} />
-      
+
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="header">JayLoy</h1>
-          <p className="description-medium mt-2">Spend wisely, waste less, save more</p>
+          <p className="description-medium mt-2">
+            Spend wisely, waste less, save more
+          </p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSignUp}>
-          <TextInput 
-            type="text" 
-            placeholder="Username" 
-            value={username} 
-            onChange={(e) => setUsername(e.target.value)} 
+          <TextInput
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             disabled={loading}
             required
           />
-          <TextInput 
-            type="email" 
-            placeholder="E-mail" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            disabled={loading}
-            required
-          />
-
-          <PasswordInput 
-            placeholder="Password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            disabled={loading}
-            required
-          />
-          <PasswordInput 
-            placeholder="Confirm Password" 
-            value={confirmPassword} 
-            onChange={(e) => setConfirmPassword(e.target.value)} 
+          <TextInput
+            type="email"
+            placeholder="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             required
           />
 
-          {error && <p className="text-center description-medium !text-red">{error}</p>}
+          <PasswordInput
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            required
+          />
+          <PasswordInput
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={loading}
+            required
+          />
+
+          {error && (
+            <p className="text-center description-medium !text-red">{error}</p>
+          )}
 
           <div className="relative description-small">
             <div className="absolute inset-0 flex items-center">
@@ -183,13 +192,18 @@ export default function SignUpPage() {
 
           <div className="text-center description-small">
             By creating your account, you&apos;re agreeing to our{" "}
-            <Link href="#" className="underline hover:text-primary">Terms and Conditions</Link>{" "}
+            <Link href="#" className="underline hover:text-primary">
+              Terms and Conditions
+            </Link>{" "}
             and{" "}
-            <Link href="#" className="underline hover:text-primary">Privacy Policy</Link>.
+            <Link href="#" className="underline hover:text-primary">
+              Privacy Policy
+            </Link>
+            .
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="green-button !text-white"
             disabled={loading}
           >
@@ -201,18 +215,26 @@ export default function SignUpPage() {
               <div className="w-full border-t"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">or</span>
+              <span className="bg-background px-2 text-muted-foreground">
+                or
+              </span>
             </div>
           </div>
 
-          <Button 
+          <Button
             type="button"
-            variant="outline" 
-            className="w-full rounded-full" 
+            variant="outline"
+            className="w-full rounded-full"
             onClick={handleGoogleLogin}
             disabled={loading}
           >
-           <Image src="https://www.google.com/favicon.ico" alt="Google" className="mr-2 h-4 w-4" />
+            <Image
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              width={24}
+              height={24}
+              className="mr-2 h-4 w-4"
+            />
             Continue with Google
           </Button>
 
