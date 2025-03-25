@@ -1,0 +1,24 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "npm run build && echo 'Build completed successfully' || (echo 'Build failed' && exit 1)",
+    "environment": {
+      "NODE_VERSION": "20",
+      "RAILWAY_VERBOSE_BUILD": "true"
+    }
+  },
+  "deploy": {
+    "startCommand": "npm run start",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 180,
+    "restartPolicyType": "always",
+    "restartPolicy": {
+      "maxRetries": 3
+    }
+  },
+  "scripts": {
+    "prebuild": "echo 'Starting build process...'",
+    "postbuild": "echo 'Build process completed. Checking artifacts...' && ls -la .next"
+  }
+}
