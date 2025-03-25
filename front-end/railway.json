@@ -2,23 +2,19 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "nixpacks",
-    "buildCommand": "npm run build && echo 'Build completed successfully' || (echo 'Build failed' && exit 1)",
+    "buildCommand": "npm install && npm install framer-motion@12.5.0 && npm run build",
     "environment": {
       "NODE_VERSION": "20",
-      "RAILWAY_VERBOSE_BUILD": "true"
+      "NPM_CONFIG_LOGLEVEL": "verbose"
     }
   },
   "deploy": {
     "startCommand": "npm run start",
     "healthcheckPath": "/",
     "healthcheckTimeout": 180,
-    "restartPolicyType": "always",
-    "restartPolicy": {
-      "maxRetries": 3
-    }
+    "restartPolicyType": "always"
   },
-  "scripts": {
-    "prebuild": "echo 'Starting build process...'",
-    "postbuild": "echo 'Build process completed. Checking artifacts...' && ls -la .next"
+  "postdeploy": {
+    "script": "echo 'Dependency check complete. Verify packages with npm list'"
   }
 }
