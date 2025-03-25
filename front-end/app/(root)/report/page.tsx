@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import GreenCard from "@/public/images/GreenCardd.jpg";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -119,16 +118,9 @@ const Page: React.FC = () => {
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {error && <p className="text-red-500">{error}</p>}
       {/* Account Card */}
-      <div className="w-full h-40 mt-16 rounded-xl relative text-white shadow-2xl transition-transform transform hover:scale-110">
-        <Image
-          src={GreenCard}
-          className="relative object-cover w-full h-full rounded-xl"
-          alt="card"
-          priority={true}
-        />
-
+      <div className="w-full h-40 mt-16 rounded-xl relative text-white bg-primary">
         <AccountCard
-          username={username}
+          username={username ? username : "user"}
           email={email}
           value={numberConverter(total_balance)}
         />

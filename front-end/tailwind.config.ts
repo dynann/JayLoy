@@ -32,7 +32,8 @@ export default {
   			gray: '#909090',
 			lightorange: '#FFD3B6',
 			tertiary: '#FDF7F4',
-
+			custom_purple: '#6c5dac',
+			custom_brown: '#cd6f47',
 
 			foreground: 'hsl(var(--foreground))',
   			card: {
