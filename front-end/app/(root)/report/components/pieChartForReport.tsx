@@ -53,7 +53,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
           dominantBaseline="middle"
           className="description-small"
         >
-          Remaining
+          Total Income
         </text>
       </PieChart>
     </ResponsiveContainer>

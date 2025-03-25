@@ -8,7 +8,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className=" containClasses  bg-background">
-      <TabWithCancelButton href= "/" text={"Add record "} />
+      <TabWithCancelButton href= "/" text={"Transaction"} />
       {children}
     </div>
   );
