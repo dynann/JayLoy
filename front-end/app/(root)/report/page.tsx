@@ -84,9 +84,13 @@ const Page: React.FC = () => {
 
   const totalReport: PieData[] = reportData
     ? [
-        { name: "Income", value: total_income, color: "hsl(var(--chart-3))" },
+        { name: "Income", value: total_income, color: "hsl(var(--chart-2))" },
         { name: "Expense", value: total_expense, color: "hsl(var(--chart-1))" },
-        { name: "Remaining", value: total_remaining, color: "hsl(var(--chart-2))" },
+        {
+          name: "Remaining",
+          value: total_remaining,
+          color: "hsl(var(--chart-3))",
+        },
       ]
     : [];
 
@@ -132,7 +136,7 @@ const Page: React.FC = () => {
             <PieChartComponent
               pieData={displayReport}
               numberConverter={numberConverter}
-              remainingBalance={total_remaining}
+              remainingBalance={total_income}
             />
             {/* Total Income/Expense/Remaining Report */}
             <div className="flex flex-row justify-between w-full">
