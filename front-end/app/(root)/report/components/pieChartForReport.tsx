@@ -21,7 +21,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
   remainingBalance,
 }) => {
   return (
-    <ResponsiveContainer width="100%" height={300} className="h-[300px] flex flex-col items-center text-sm">
+    <ResponsiveContainer width="100%" height={200} className="h-[200px] flex flex-col items-center text-sm">
       <PieChart>
         <Pie
           data={pieData}
@@ -30,7 +30,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
           innerRadius={60}
           outerRadius={100}
           dataKey="value"
-          label={({ name, value }) => `${name}: $${value.toLocaleString()}`}
+          // label={({ name, value }) => `${name}: $${value.toLocaleString()}`}
         >
           {pieData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
