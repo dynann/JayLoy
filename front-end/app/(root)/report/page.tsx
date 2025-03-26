@@ -111,11 +111,25 @@ const Page: React.FC = () => {
           </CardHeader>
           <CardContent>
             {/* Pie Chart */}
+            <div className="flex flex-col items-center">
             <PieChartComponent
               pieData={displayReport}
               numberConverter={numberConverter}
               remainingBalance={total_income}
             />
+            <div className="flex flex-row justify-between w-full">
+              {displayReport.map((entry, index) => (
+                <div key={index} className="w-full flex">
+                  <div className="flex flex-col items-center w-full p-4">
+                    <div className="text-white font-sm font-thin px-2 py-1 rounded-full" style={{ background: entry.color }}>
+                    {entry.name}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            </div>
+             
             {/* Total Income/Expense/Remaining Report */}
             <div className="flex flex-row justify-between w-full">
               {totalReport.map((entry, index) => (
