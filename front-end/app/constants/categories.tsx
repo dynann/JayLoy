@@ -35,8 +35,8 @@ export const TRANSACTION_CATEGORIES: { [key: number]: TransactionCategory } = {
   },
   5: {
     id: 5,
-    name: "Savings",
-    icon: <Icon icon="hugeicons:money-saving-jar" width="3em" className="text-white" />,
+    name: "Clothing",
+    icon: <Icon icon="ph:t-shirt" width="3em" className="text-white" />,
     color: "bg-cyan",
   },
   6: {
