@@ -2,7 +2,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { formatCurrency } from "@/utils/formatCurrency"
 
 export type ChartData = {
@@ -37,12 +37,28 @@ export function PieChartDisplay({ chartData, totalAmount, activeView }: PieChart
     return colorMap[color] || colorMap.gray
   }, [])
 
+  // Add a small invisible segment if there's only one category
+  const animatedData = useMemo(() => {
+    if (chartData.length === 1) {
+      return [
+        ...chartData,
+        {
+          categoryID: "invisible",
+          value: 0.1,
+          amount: 0,
+          name: "",
+        }
+      ]
+    }
+    return chartData
+  }, [chartData])
+
   return (
       <div className="relative h-[220px] mb-8">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
             <Pie
-              data={chartData}
+              data={animatedData}
               cx="50%"
               cy="50%"
               innerRadius={65}
@@ -50,17 +66,22 @@ export function PieChartDisplay({ chartData, totalAmount, activeView }: PieChart
               paddingAngle={3}
               strokeWidth={0}
               dataKey="value"
-              isAnimationActive={false}
+              isAnimationActive={true}
+              animationBegin={0}
+              animationDuration={1500}
+              animationEasing="ease-out"
               cursor="default"
               activeIndex={undefined}
           >
-            {chartData.map((entry, index) => {
+            {animatedData.map((entry, index) => {
+              if (entry.categoryID === "invisible") {
+                return <Cell key={index} fill="transparent" style={{ pointerEvents: "none" }} />
+              }
               const category = TRANSACTION_CATEGORIES[Number(entry.categoryID)]
               return (
                 <Cell 
                   key={index} 
                   fill={getCategoryColor(category?.color)}
-                  // Disable cell interactions
                   style={{ pointerEvents: "none" }}
                 />
               )
