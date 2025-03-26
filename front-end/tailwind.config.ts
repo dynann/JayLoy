@@ -10,6 +10,30 @@ export default {
   ],
   theme: {
   	extend: {
+  		keyframes: {
+  			float1: {
+  				'0%, 100%': { transform: 'translate(0, 0)' },
+  				'50%': { transform: 'translate(10px, 10px)' }
+  			},
+  			float2: {
+  				'0%, 100%': { transform: 'translate(0, 0)' },
+  				'50%': { transform: 'translate(-10px, -10px)' }
+  			},
+  			float3: {
+  				'0%, 100%': { transform: 'translate(0, 0)' },
+  				'50%': { transform: 'translate(-10px, 10px)' }
+  			},
+  			float4: {
+  				'0%, 100%': { transform: 'translate(0, 0)' },
+  				'50%': { transform: 'translate(10px, -10px)' }
+  			}
+  		},
+  		animation: {
+  			float1: 'float1 4s ease-in-out infinite',
+  			float2: 'float2 4s ease-in-out infinite 1s',
+  			float3: 'float3 4s ease-in-out infinite 2s',
+  			float4: 'float4 4s ease-in-out infinite 3s'
+  		},
   		colors: {
   			primary: '#3EB075',
   			secondary: '#86EFAC',

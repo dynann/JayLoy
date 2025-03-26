@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import {
@@ -97,33 +96,12 @@ const Page: React.FC = () => {
 
   const displayReport = totalReport.slice(1, 3);
 
-  // Fetch user data when component mounts
-  const [username, setUsername] = useState("Loading..");
-  const [email, setEmail] = useState("Loading..");
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const res = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
-      if (res) {
-        setEmail(res.email);
-        setUsername(res.username);
-      } else {
-        setError("Failed to fetch user data");
-      }
-    };
-    fetchUserData();
-  }); // Added dependency array for clarity
-
   return (
     <div className="space-y-4 min-h-screen pb-24 flex flex-col items-center px-4">
       {error && <p className="text-red-500">{error}</p>}
       {/* Account Card */}
-      <div className="w-full h-40 mt-16 rounded-xl relative text-white bg-primary">
-        <AccountCard
-          username={username ? username : "user"}
-          email={email}
-          value={numberConverter(total_balance)}
-        />
+      <div className="w-full h-40 mt-16 rounded-xl relative overflow-hidden">
+        <AccountCard value={numberConverter(total_balance)} />
       </div>
       <div className="space-y-2 min-w-full mb-14 flex flex-col justify-items-stretch container">
         <Card>
