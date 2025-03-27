@@ -67,7 +67,7 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="text-gray bg-transparent hover:bg-gray hover:text-gray-900 rounded-lg text-sm h-8 w-8 inline-flex justify-center items-center"
+                className="text-gray bg-transparent  hover:text-black rounded-lg text-sm h-8 w-8 inline-flex justify-center items-center"
               >
                 <svg className="w-3 h-3" viewBox="0 0 14 14" fill="none">
                   <path
