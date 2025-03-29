@@ -6,15 +6,7 @@ import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { TabWithCancelButton } from "@/layouts/Tabbar"
 import dayjs from "dayjs"
 import { formatCurrency } from "@/utils/formatCurrency"
-
-interface Transaction {
-  id: string
-  amount: number
-  type: "EXPENSE" | "INCOME"
-  categoryID: number
-  date: string
-  description?: string
-}
+import { Transaction } from "@/type/transaction"
 
 interface CategoryTransactionsProps {
   categoryId: number
@@ -62,14 +54,16 @@ export function CategoryTransactions({ categoryId, transactions, onClose, month,
   }, [transactions, categoryId, month, year])
 
   return (
-    <div className="fixed inset-0 bg-background z-50">
+    <div className="fixed inset-0 bg-background z-50 flex flex-col">
       {/* Header */}
-      <TabWithCancelButton text="Record Details" onClick={onClose} />
+      <div className="flex-shrink-0">
+        <TabWithCancelButton text="Record Details" onClick={onClose} />
+      </div>
 
       {/* Transaction List Container */}
-      <div className="flex-1 overflow-y-auto pt-16">
+      <div className="flex-1 overflow-y-auto pt-16 pb-8">
         <div className="max-w-4xl mx-auto p-4">
-          {/* Category Header - Now part of the first date group */}
+          {/* Category Header */}
           <div className="flex items-center space-x-5 mb-6 px-8 mt-2">
             <div className={`${category?.color || "bg-gray"} p-1 rounded-lg`}>
               {category?.icon || <Icon icon="mdi:help-circle" className="w-[3em] h-[3em] text-white" />}
@@ -104,7 +98,7 @@ export function CategoryTransactions({ categoryId, transactions, onClose, month,
                       className={`description-medium ${transaction.type === "EXPENSE" ? "!text-red" : "!text-primary"}`}
                     >
                       {transaction.type === "EXPENSE" ? "-" : "+"}
-                      {formatCurrency(Math.abs(Number(transaction.amount) / 100), 2).replace("$", "")}
+                      {formatCurrency(Math.abs(Number(transaction.amount) / 100), 2)}
                     </span>
                   </div>
                 ))}

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Icon } from "@iconify/react"
 import Image from "next/image"
 import ProfileImage from "@/public/images/plant.webp"
+import LoadingOverlay from "@/components/LoadingOverlay"
 
 function ProfileDetailsPage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ function ProfileDetailsPage() {
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const [userId, setUserId] = useState<number | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -69,9 +71,10 @@ function ProfileDetailsPage() {
     }
 
     try {
+      setActionLoading("Saving profile")
       setSaving(true)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -94,11 +97,16 @@ function ProfileDetailsPage() {
       console.error("Failed to update profile:", err)
     } finally {
       setSaving(false)
+      setActionLoading(null)
     }
   }
 
   return (
     <>
+      <LoadingOverlay
+        isLoading={!!actionLoading} 
+        message={actionLoading || "Loading..."} 
+        />
       <TabWithCancelButton text="Edit" onClick={() => router.push("/profile")} />
 
       <div className={containerClasses}>
@@ -134,13 +142,6 @@ function ProfileDetailsPage() {
                     <TransparentInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
                 </div>
-
-                <div className="flex items-center p-4">
-                  <span className="text-sm text-gray-600 flex-1">Phone</span>
-                  <div className="w-1/2">
-                    <TransparentInput type="text" value="None" onChange={() => {}} />
-                  </div>
-                </div>
               </div>
 
               <div className="mt-6 px-4">
@@ -153,6 +154,7 @@ function ProfileDetailsPage() {
                   {saving ? "Saving..." : "Save changes"}
                 </Button>
               </div>
+              
             </div>
           </>
         )}

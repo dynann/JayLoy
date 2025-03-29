@@ -1,18 +1,18 @@
 // PieChartComponent.tsx
 
-import React from "react";
+import React, { useMemo } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface PieData {
   name: string;
-  value: any;
+  value: number;
   color: string;
 }
 
 interface PieChartComponentProps {
   pieData: PieData[];
   numberConverter: (num: number) => string;
-  remainingBalance: any;
+  remainingBalance: number;
 }
 
 const PieChartComponent: React.FC<PieChartComponentProps> = ({
@@ -20,20 +20,42 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
   numberConverter,
   remainingBalance,
 }) => {
+  // Add a small invisible segment if there's only one category
+  const animatedData = useMemo(() => {
+    if (pieData.length === 1) {
+      return [
+        ...pieData,
+        {
+          name: "invisible",
+          value: 0.1,
+          color: "transparent",
+        }
+      ]
+    }
+    return pieData
+  }, [pieData])
+
   return (
-    <ResponsiveContainer width="100%" height={300} className="h-[300px] flex flex-col items-center text-sm">
+    <ResponsiveContainer width="100%" height={200} className="h-[200px] flex flex-col items-center text-sm">
       <PieChart>
         <Pie
-          data={pieData}
+          data={animatedData}
           cx="50%"
           cy="50%"
           innerRadius={60}
           outerRadius={100}
           dataKey="value"
-          label={({ name, value }) => `${name}: $${value.toLocaleString()}`}
+          isAnimationActive={true}
+          animationBegin={0}
+          animationDuration={1500}
+          animationEasing="ease-out"
         >
-          {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
+          {animatedData.map((entry, index) => (
+            <Cell 
+              key={`cell-${index}`} 
+              fill={entry.name === "invisible" ? "transparent" : entry.color}
+              style={{ pointerEvents: "none" }}
+            />
           ))}
         </Pie>
         <text
@@ -43,7 +65,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
           dominantBaseline="middle"
           className="sub-header"
         >
-          {numberConverter(remainingBalance)} {/* Placeholder for dynamic amount */}
+          {numberConverter(remainingBalance)}
         </text>
         <br />
         <text
@@ -53,7 +75,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
           dominantBaseline="middle"
           className="description-small"
         >
-          Remaining
+          Total Income
         </text>
       </PieChart>
     </ResponsiveContainer>

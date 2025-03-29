@@ -3,9 +3,10 @@
 import { Icon } from "@iconify/react"
 import { TRANSACTION_CATEGORIES } from "@/app/constants/categories"
 import { formatCurrency } from "@/utils/formatCurrency"
+import { Transaction } from "@/type/transaction"
 
 interface TransactionItemProps {
-  transaction: any
+  transaction: Transaction
   onClick?: () => void // Add optional onClick prop
 }
 
@@ -27,11 +28,20 @@ export const TransactionItem = ({ transaction, onClick }: TransactionItemProps) 
     >
       <div className="flex items-center space-x-5">
         <div className={`${categoryInfo.color} p-1 rounded-lg`}>{categoryInfo.icon}</div>
-        <span className="description-medium">{categoryInfo.name}</span>
+        <div className="flex flex-col">
+          <span className="description-medium">{categoryInfo.name}</span>
+          {transaction.imageUrl && (
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <Icon icon="heroicons:paper-clip-mini" className="h-3 w-3" />
+              Attachment
+            </span>
+          )}
+        </div>
       </div>
       <span className={`description-medium ${isExpense ? "!text-red" : "!text-primary"}`}>
         {isExpense ? "-" : "+"}
-        {formatCurrency(Math.abs(amount), 2).replace("$", "")}
+        {/* {formatCurrency(Math.abs(amount), 2).replace("$", "")} */}
+        {formatCurrency(Math.abs(amount), 2)}
       </span>
     </div>
   )

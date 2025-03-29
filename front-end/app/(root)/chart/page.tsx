@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable@typescript-eslint/no-unused-vars */
+/* eslint-disable@typescript-eslint/no-unused-vars */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,6 +23,7 @@ import {
 import { ChartLegend } from "@/app/(root)/chart/components/chart-legend";
 import { CategoryList } from "@/app/(root)/chart/components/category-list";
 import { EmptyState } from "@/app/(root)/chart/components/empty-state";
+import { Transaction } from "@/type/transaction";
 
 type CategorySummary = {
   categoryId: number;
@@ -51,7 +56,7 @@ export default function ChartPage() {
   } = useAuthFetch();
   const [activeView, setActiveView] = useState<"income" | "expense">("expense");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categorySummary, setCategorySummary] =
     useState<SummaryResponse | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -60,6 +65,7 @@ export default function ChartPage() {
   const [allMonths, setAllMonths] = useState<MonthData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isTransitionsLoading, setIsTransitionsLoading] = useState(false);
 
   const { generateMonthsHistory } = useMonthSelector();
 
@@ -149,7 +155,7 @@ export default function ChartPage() {
   // Fetch category summary
   useEffect(() => {
     const fetchCategorySummary = async () => {
-      setLoading(true);
+      setIsTransitionsLoading(true);
       setError(null);
 
       try {
@@ -181,7 +187,7 @@ export default function ChartPage() {
         );
         setCategorySummary(null);
       } finally {
-        setLoading(false);
+        setIsTransitionsLoading(false);
       }
     };
 
@@ -206,18 +212,48 @@ export default function ChartPage() {
       ) / 100
     : 0;
 
-  if (loading || fetchLoading) return <LoadingState />;
   if (error || fetchError)
     return <ErrorState message={error || fetchError || "An error occurred"} />;
 
   return (
-    <div className="min-h-screen bg-background pb-24 ">
-      <div className="bg-primary px-4 pb-6">
+    <div className="min-h-screen bg-background pb-24">
+      <div className="bg-emerald-500 px-4 pb-6">
         <h1 className="sub-header-white text-center py-4">
           Financial Analysis
         </h1>
 
-        <ChartViewToggle activeView={activeView} onViewChange={setActiveView} />
+        {/* type transaction filter */}
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex bg-emerald-500 rounded-md border border-white shadow-sm relative w-[280px] p-1">
+            <div
+              className="absolute h-full top-0 transition-all duration-300 ease-in-out rounded-md bg-variant/50"
+              style={{
+                width: '50%',
+                left: activeView === 'income' ? '0%' : '50%',
+              }}
+            />
+            <button
+              onClick={() => setActiveView('income')}
+              className={`flex-1 px-3 py-1.5 text-md font-medium rounded-md z-10 transition-colors duration-300 ${
+                activeView === 'income' 
+                  ? 'text-black' 
+                  : 'text-white hover:text-white'
+              }`}
+            >
+              Income
+            </button>
+            <button
+              onClick={() => setActiveView('expense')}
+              className={`flex-1 px-3 py-1.5 text-md font-medium rounded-md z-10 transition-colors duration-300 ${
+                activeView === 'expense' 
+                  ? 'text-black' 
+                  : 'text-white hover:text-white'
+              }`}
+            >
+              Expense
+            </button>
+          </div>
+        </div>
 
         {/* Month Pagination */}
         <MonthSelector
@@ -242,21 +278,28 @@ export default function ChartPage() {
               {activeView === "income" ? "Income" : "Expense"} Summary
             </h2>
 
-            <PieChartDisplay
-              chartData={chartData}
-              totalAmount={totalAmount}
-              activeView={activeView}
-            />
-
-            {/* Legend */}
-            <ChartLegend chartData={chartData} />
-
-            {/* Category List */}
-            <CategoryList
-              chartData={chartData}
-              activeView={activeView}
-              onCategorySelect={setSelectedCategory}
-            />
+            <div className="relative min-h-[400px]">
+              {isTransitionsLoading && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-transparent ">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+                </div>
+              )}
+              <div className={`transition-all duration-300 ${
+                isTransitionsLoading ? 'opacity-0 blur-[0px]' : 'opacity-100 blur-0'
+              }`}>
+                <PieChartDisplay
+                  chartData={chartData}
+                  totalAmount={totalAmount}
+                  activeView={activeView}
+                />
+                <ChartLegend chartData={chartData} />
+                <CategoryList
+                  chartData={chartData}
+                  activeView={activeView}
+                  onCategorySelect={setSelectedCategory}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>

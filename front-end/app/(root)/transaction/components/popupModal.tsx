@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import type React from "react"
@@ -40,11 +41,7 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
       setSelectedColor(categoryInfo.color)
     }
   }, [category])
-  const [isButtonDisabled, setButtonDisabled] = useState(false);
-  const disableButton = (p0: number) => {
-    setButtonDisabled(true);
-    // alert("Button has been disabled!");
-};
+  const [] = useState(false);
   return (
     <div>
       {/* Button to Open Modal */}
@@ -70,7 +67,7 @@ const PopupModal: React.FC<CategoryModalProps> = ({ category, setCategory, type 
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="text-gray bg-transparent hover:bg-gray hover:text-gray-900 rounded-lg text-sm h-8 w-8 inline-flex justify-center items-center"
+                className="text-gray bg-transparent  hover:text-black rounded-lg text-sm h-8 w-8 inline-flex justify-center items-center"
               >
                 <svg className="w-3 h-3" viewBox="0 0 14 14" fill="none">
                   <path
@@ -124,8 +121,7 @@ const ExpenseModal: React.FC<{ category: number; setCategory: (n: number) => voi
 const IncomeModal: React.FC<{ category: number; setCategory: (n: number) => void }> = (props) => (
   <PopupModal {...props} type="Income" />
 )
-const DisabledButton: React.FC<DisabledButtonProps> = ({ onClick, label, className }) => {
-  const [isDisabled, setIsDisabled] = useState(false)
+const DisabledButton: React.FC<DisabledButtonProps> = ({ label }) => {
   // const handleClick = () => {
   //   if (!isDisabled) {
   //     setIsDisabled(true)} }

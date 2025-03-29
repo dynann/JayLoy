@@ -7,10 +7,11 @@ import { LoadingState } from "@/components/LoadingState";
 import { ErrorState } from "@/components/ErrorState";
 import NavBar from "@/layouts/NavBar";
 import { Icon } from "@iconify/react";
+import { Transaction } from "@/type/transaction";
 
 export default function HomePage() {
   const { fetchWithToken, loading, setLoading, error } = useAuthFetch();
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currentDate, setCurrentDate] = useState("");
 
   // Get today's date in YYYY-MM-DD format
@@ -45,7 +46,7 @@ export default function HomePage() {
 
     // Only fetch once when the component mounts
     fetchTransactions();
-  }, []); // Empty dependency array ensures it only runs once
+  }); // Empty dependency array ensures it only runs once
 
   // Calculate total income and expense
   const { totalIncome, totalExpense } = transactions.reduce(
@@ -71,8 +72,9 @@ export default function HomePage() {
         title="Money Tracker"
         income={totalIncome}
         expense={totalExpense}
-        date={currentDate}
-      />
+        date={currentDate} onDateChange={function (): void {
+          throw new Error("Function not implemented.");
+        } }      />
 
       {/* Transaction List */}
       <div className="p-4">
@@ -89,7 +91,7 @@ export default function HomePage() {
                   key={index}
                   transaction={{
                     ...transaction,
-                    formattedAmount:
+                    amount:
                       transaction.type === "EXPENSE"
                         ? `- ${transaction.amount}`
                         : `+ ${transaction.amount}`,
