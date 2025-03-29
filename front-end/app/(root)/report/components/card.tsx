@@ -8,22 +8,22 @@ interface cardProps {
 const AccountCard: React.FC<cardProps> = ({ value }) => {
   return (
     <div className="relative w-full h-full min-h-[200px] overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary/90 to-primary/80">
-      {/* Animated Particles */}
+      {/* animated particles */}
       <div className="absolute inset-0">
-        {/* Larger particles */}
+        {/* large particles */}
         <div className="absolute w-4 h-4 bg-white/20 rounded-full animate-float1 top-1/4 left-1/4"></div>
         <div className="absolute w-5 h-5 bg-white/20 rounded-full animate-float2 top-1/3 right-1/4"></div>
         <div className="absolute w-4 h-4 bg-white/20 rounded-full animate-float3 bottom-1/4 left-1/3"></div>
         <div className="absolute w-5 h-5 bg-white/20 rounded-full animate-float4 bottom-1/3 right-1/3"></div>
         
-        {/* Smaller particles */}
+        {/* small particles */}
         <div className="absolute w-3 h-3 bg-white/15 rounded-full animate-float1 top-1/2 left-1/2"></div>
         <div className="absolute w-2 h-2 bg-white/15 rounded-full animate-float2 top-2/3 left-1/4"></div>
         <div className="absolute w-3 h-3 bg-white/15 rounded-full animate-float3 top-1/3 right-1/3"></div>
         <div className="absolute w-2 h-2 bg-white/15 rounded-full animate-float4 bottom-1/2 right-1/2"></div>
       </div>
 
-      {/* Content */}
+      {/* contents */}
       <div className="relative z-10 h-full flex flex-col justify-center px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
