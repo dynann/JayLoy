@@ -44,8 +44,8 @@ const Page: React.FC = () => {
     }
   };
 
-const [totalBalance, setTotalBalance] = useState(null); 
-const [error, setError] = useState(null);
+const [totalBalance, setTotalBalance] = useState<0 | null>(null); 
+const [error, setError] = useState<string | null>(null);
 const year = dayjs().year();
 
 const fetchYearlyReport = async (e) => {
