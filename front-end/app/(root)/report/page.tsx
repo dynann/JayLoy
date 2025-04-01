@@ -50,7 +50,7 @@ const Page: React.FC = () => {
   const year = dayjs().year();
   const fetchYearlyReport = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    const data = await fetchData(${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year});
+    const data = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`);
     if (data) {
       setReportData(data);
     } else {
@@ -59,11 +59,10 @@ const Page: React.FC = () => {
   };
   useEffect(() => {
     fetchYearlyReport();
-  }, []); // Added dependency array for clarity
-  // Fetch Balance
+  }, []);
   useEffect(() => {
     const fetchBalance = async () => {
-      const balanceData = await fetchData(${process.env.NEXT_PUBLIC_API_URL}/accounts/balance);
+      const balanceData = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`);
       if (balanceData) {
         setTotalBalance(balanceData.amount);
       } else {
@@ -71,7 +70,7 @@ const Page: React.FC = () => {
       }
     };
     fetchBalance();
-  }, []);  // Empty dependency array means run only once on mount // Added dependency array for clarity
+  }, []);  
 
   const currentYear = dayjs().year();
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
