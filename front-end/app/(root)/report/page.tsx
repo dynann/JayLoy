@@ -44,37 +44,36 @@ const Page: React.FC = () => {
     }
   };
 
-  // Yearly reports
-  const [totalBalance, setTotalBalance] = useState<0 | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const year = dayjs().year();
+const [totalBalance, setTotalBalance] = useState(null); 
+const [error, setError] = useState(null);
+const year = dayjs().year();
 
-  const fetchYearlyReport = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const data = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`);
-    if (data) {
-      setReportData(data);
+const fetchYearlyReport = async (e) => {
+  e?.preventDefault();
+  const data = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`);
+  if (data) {
+    setReportData(data);
+  } else {
+    setError("Failed to fetch the report");
+  }
+};
+
+useEffect(() => {
+  fetchYearlyReport();
+}, []); // Empty dependency array means run only once on mount
+
+// Fetch Balance
+useEffect(() => {
+  const fetchBalance = async () => {
+    const balanceData = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`);
+    if (balanceData) {
+      setTotalBalance(balanceData.amount);
     } else {
-      setError("Failed to fetch the report");
+      setError("Failed to fetch the balance");
     }
   };
-
-  useEffect(() => {
-    fetchYearlyReport();
-  }); // Added dependency array for clarity
-
-  // Fetch Balance
-  useEffect(() => {
-    const fetchBalance = async () => {
-      const balanceData = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`);
-      if (balanceData) {
-        setTotalBalance(balanceData.amount);
-      } else {
-        setError("Failed to fetch the balance");
-      }
-    };
-    fetchBalance();
-  }); // Added dependency array for clarity
+  fetchBalance();
+}, []); // Empty dependency array means run only once on mount // Added dependency array for clarity
 
   const currentYear = dayjs().year();
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
