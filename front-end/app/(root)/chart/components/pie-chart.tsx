@@ -37,14 +37,16 @@ export function PieChartDisplay({ chartData, totalAmount, activeView }: PieChart
     return colorMap[color] || colorMap.gray
   }, [])
 
-  // Add a small invisible segment if there's only one category
   const animatedData = useMemo(() => {
     if (chartData.length === 1) {
       return [
-        ...chartData,
+        {
+          ...chartData[0],
+          value: 100 
+        },
         {
           categoryID: "invisible",
-          value: 0.1,
+          value: 0,
           amount: 0,
           name: "",
         }
@@ -90,7 +92,7 @@ export function PieChartDisplay({ chartData, totalAmount, activeView }: PieChart
           </PieChart>
         </ResponsiveContainer>
 
-        {/* Total Amount */}
+        {/* total amount */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
           <p className="text-sm text-gray-500 font-medium">Total</p>
           <p className={`text-2xl font-bold ${activeView === "income" ? "text-primary" : "text-red"}`}>

@@ -20,7 +20,7 @@ const NavBar: React.FC = () => {
   }
 
   const isActive = (path: string) => {
-    return pathname === path ? "text-primary" : "text-gray-500"
+    return pathname === path ? "text-primary border-b-4 border-primary" : "text-gray-500"
   }
 
   return (
@@ -37,7 +37,7 @@ const NavBar: React.FC = () => {
           <button
             type="button"
             onClick={() => handleNavigation("/", "Home")}
-            className={`inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-variant dark:hover:bg-variant group ${isActive('/')}`}
+            className={`inline-flex flex-col items-center justify-center px-5 group ${isActive('/')}`}
           >
             <Icon icon="lucide:house" width="24" height="24" />
             <span className="sr-only">Home</span>
@@ -47,7 +47,7 @@ const NavBar: React.FC = () => {
           <button
             type="button"
             onClick={() => handleNavigation("/chart", "Charts")}
-            className={`inline-flex flex-col items-center justify-center px-5 hover:bg-variant dark:hover:bg-variant group ${isActive('/chart')}`}
+            className={`inline-flex flex-col items-center justify-center px-5 group ${isActive('/chart')}`}
           >
             <Icon icon="gg:chart" width="24" height="24" />
             <span className="sr-only">Chart</span>
@@ -69,7 +69,7 @@ const NavBar: React.FC = () => {
           <button
             type="button"
             onClick={() => handleNavigation("/report", "Reports")}
-            className={`inline-flex flex-col items-center justify-center px-5 hover:bg-variant dark:hover:bg-variant group ${isActive('/report')}`}
+            className={`inline-flex flex-col items-center justify-center px-5 group ${isActive('/report')}`}
           >
             <Icon icon="mi:document" width="24" height="24" />
             <span className="sr-only">Report</span>
@@ -79,7 +79,7 @@ const NavBar: React.FC = () => {
           <button
             type="button"
             onClick={() => handleNavigation("/profile", "Profile")}
-            className={`inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-variant dark:hover:bg-variant group ${isActive('/profile')}`}
+            className={`inline-flex flex-col items-center justify-center px-5 group ${isActive('/profile')}`}
           >
             <Icon icon="iconamoon:profile-duotone" width="24" height="24" />
             <span className="sr-only">Profile</span>
