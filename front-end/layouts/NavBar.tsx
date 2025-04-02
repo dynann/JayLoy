@@ -29,10 +29,9 @@ const NavBar: React.FC = () => {
         return 2
       case '/report':
         return 3
-      case '/profile':
-        return 4
       default:
-        return 0
+        // Check if the pathname starts with '/profile' to handle profile and its child pages
+        return pathname.startsWith('/profile') ? 4 : 0
     }
   }
 
