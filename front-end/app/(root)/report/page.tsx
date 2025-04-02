@@ -44,11 +44,10 @@ const Page: React.FC = () => {
     }
   };
 
-  // Yearly reports
+// Yearly reports
   const [totalBalance, setTotalBalance] = useState<0 | null>(null);
   const [error, setError] = useState<string | null>(null);
   const year = dayjs().year();
-
   const fetchYearlyReport = async (e?: React.FormEvent) => {
     e?.preventDefault();
     const data = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/yearlyreport?year=${year}`);
@@ -58,12 +57,9 @@ const Page: React.FC = () => {
       setError("Failed to fetch the report");
     }
   };
-
   useEffect(() => {
     fetchYearlyReport();
-  }); // Added dependency array for clarity
-
-  // Fetch Balance
+  }, []);
   useEffect(() => {
     const fetchBalance = async () => {
       const balanceData = await fetchData(`${process.env.NEXT_PUBLIC_API_URL}/accounts/balance`);
@@ -74,7 +70,7 @@ const Page: React.FC = () => {
       }
     };
     fetchBalance();
-  }); // Added dependency array for clarity
+  }, []);  
 
   const currentYear = dayjs().year();
   const total_expense = reportData ? reportData.total_expense / 100 : 0;
